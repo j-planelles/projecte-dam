@@ -7,43 +7,43 @@ import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 
 export default function CommunityTab() {
-  return (
-    <HomeTabsScreen>
-      <Text variant="headlineLarge">Ultra Community</Text>
+	return (
+		<HomeTabsScreen>
+			<Text variant="headlineLarge">Ultra Community</Text>
 
-      <View className="flex-1 flex-row items-center">
-        <Link href="/community/template-search" asChild>
-          <Button
-            icon={({ color }) => <SearchIcon color={color} />}
-            mode="contained"
-            onPress={() => console.log("Pressed")}
-            className="flex-1"
-          >
-            Search
-          </Button>
-        </Link>
+			<View className="flex-1 flex-row items-center">
+				<Link href="/community/template-search" asChild>
+					<Button
+						icon={({ color }) => <SearchIcon color={color} />}
+						mode="contained"
+						onPress={() => console.log("Pressed")}
+						className="flex-1"
+					>
+						Search
+					</Button>
+				</Link>
 
-        <IconButton
-          icon={({ color }) => <QRCodeScannerIcon color={color} />}
-          mode="contained"
-          onPress={() => console.log("Pressed")}
-        />
-      </View>
+				<IconButton
+					icon={({ color }) => <QRCodeScannerIcon color={color} />}
+					mode="contained"
+					onPress={() => console.log("Pressed")}
+				/>
+			</View>
 
-      <FeaturedTemplatesList />
-    </HomeTabsScreen>
-  );
+			<FeaturedTemplatesList />
+		</HomeTabsScreen>
+	);
 }
 
 const FeaturedTemplatesList = () => {
-  const router = useRouter();
-  return (
-    <>
-      <Text className="flex-1 text-lg font-bold">Featured</Text>
+	const router = useRouter();
+	return (
+		<>
+			<Text className="flex-1 text-lg font-bold">Featured</Text>
 
-      <WorkoutCard
-        onPress={() => router.push(`/community/template-view/antoino`)}
-      />
-    </>
-  );
+			<WorkoutCard
+				onPress={() => router.push(`/community/template-view/antoino`)}
+			/>
+		</>
+	);
 };
