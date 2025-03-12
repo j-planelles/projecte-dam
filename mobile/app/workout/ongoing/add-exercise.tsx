@@ -10,29 +10,8 @@ import {
 } from "react-native-paper";
 import { FilterIcon } from "../../../components/Icons";
 import { useState } from "react";
+import { SAMPLE_EXERCISES } from "../../../lib/sampleData";
 
-const SAMPLE_EXERCISES: exercise[] = [
-  { uuid: "123e4567-e89b-12d3-a456-426614174000", name: "Bench Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174001", name: "Squats" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174002", name: "Lunges" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174003", name: "Deadlifts" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174004", name: "Bicep Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174005", name: "Tricep Dips" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174006", name: "Shoulder Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174007", name: "Leg Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174008", name: "Chest Fly" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174009", name: "Lat Pulldowns" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174010", name: "Rowing Exercise" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174011", name: "Shoulder Rotations" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174012", name: "Wrist Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174013", name: "Calf Raises" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174014", name: "Russian Twists" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174015", name: "Leg Extensions" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174016", name: "Leg Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174017", name: "Chest Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174018", name: "Seated Row" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174019", name: "Face Pulls" },
-];
 export default function OngoingWorkoutAddExercisePage() {
   const theme = useTheme();
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);

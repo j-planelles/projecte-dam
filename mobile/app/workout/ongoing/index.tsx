@@ -14,28 +14,8 @@ import {
 import { CheckIcon, CloseIcon, DumbellIcon, MoreVerticalIcon, TimerIcon } from "../../../components/Icons";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
 
-const SAMPLE_WORKOUT: workout = {
-  uuid: "c1be768f-4455-4b1d-ac6c-2ddf82e2a137",
-  title: "Afternoon Workout",
-  timestamp: 1697001600,
-  duration: 90,
-  gym: "Planet Fitness",
-  creator: "John Doe",
-  description: "",
-  exercises: [
-    {
-      exercise: {
-        name: "Bench Press",
-      },
-      sets: [
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-      ],
-    },
-  ],
-};
 
 export default function OngoingWorkoutPage() {
   const theme = useTheme();
@@ -80,7 +60,7 @@ export default function OngoingWorkoutPage() {
         </Menu>
       </Header>
 
-      <WorkoutEditor workout={SAMPLE_WORKOUT} editable={true} />
+      <WorkoutEditor workout={SAMPLE_WORKOUTS[0]} editable={true} />
       <Portal>
         <TimerDialog
           visible={timerDialogVisible}
