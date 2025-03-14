@@ -11,6 +11,7 @@ export default function ExerciseEditPage() {
   const router = useRouter();
 
   const [exerciseName, setExerciseName] = useState("");
+  const [exerciseDescription, setExerciseDescription] = useState("");
 
   return (
     <>
@@ -38,6 +39,14 @@ export default function ExerciseEditPage() {
           label="Body Part"
           elements={["Chest", "Arms", "Back"]}
           mode="outlined"
+        />
+
+        <TextInput
+          mode="outlined"
+          label="Description"
+          value={exerciseDescription}
+          onChangeText={setExerciseDescription}
+          multiline
         />
       </View>
     </>
