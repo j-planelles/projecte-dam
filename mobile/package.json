@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
+    "@biomejs/biome": "1.9.4",
     "@types/react": "~18.3.18",
     "typescript": "^5.8.2"
   },
