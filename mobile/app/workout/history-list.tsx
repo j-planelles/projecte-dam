@@ -7,24 +7,24 @@ import Header from "../../components/ui/Header";
 import { SAMPLE_WORKOUTS } from "../../lib/sampleData";
 
 export default function TemplatesListPage() {
-  const router = useRouter();
+	const router = useRouter();
 
-  return (
-    <View className="flex-1">
-      <Header title="Workout History" />
-      <FlatList
-        className="p-2"
-        data={SAMPLE_WORKOUTS}
-        keyExtractor={(item) => item.uuid}
-        renderItem={({ item }) => (
-          <WorkoutCard
-            workout={item}
-            className="mb-2"
-            showDescription
-            onPress={() => router.push(`/workout/workout-view/${item.uuid}`)}
-          />
-        )}
-      />
-    </View>
-  );
+	return (
+		<View className="flex-1">
+			<Header title="Workout History" />
+			<FlatList
+				className="p-2"
+				data={SAMPLE_WORKOUTS}
+				keyExtractor={(item) => item.uuid}
+				renderItem={({ item }) => (
+					<WorkoutCard
+						workout={item}
+						className="mb-2"
+						showDescription
+						onPress={() => router.push(`/workout/workout-view/${item.uuid}`)}
+					/>
+				)}
+			/>
+		</View>
+	);
 }
