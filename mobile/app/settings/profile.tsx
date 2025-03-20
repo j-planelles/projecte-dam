@@ -3,10 +3,11 @@ import { ScrollView, View } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import { LogOutIcon, PersonRemoveIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function ProfileSettingsPage() {
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Your profile" />
 			<ScrollView>
 				<View className="pt-4 gap-4">
@@ -76,6 +77,6 @@ export default function ProfileSettingsPage() {
 					</View>
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }

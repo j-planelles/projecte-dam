@@ -7,6 +7,7 @@ import { useUserRegistrationStore } from "../../store/registration-store";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 const MOCK_LIKES = [
 	"CrossFit",
@@ -80,7 +81,7 @@ export default function RegisterLikesPage() {
 	};
 
 	return (
-		<View className="h-full">
+		<ThemedView className="h-full">
 			<Header title="Choose your likes" />
 
 			<ScrollView>
@@ -119,6 +120,6 @@ export default function RegisterLikesPage() {
 					Next
 				</Button>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

@@ -1,18 +1,19 @@
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
-import Header from "../../../components/ui/Header";
-import WorkoutEditor from "../../../components/pages/WorkoutEditor";
 import {
-	Button,
 	Appbar,
+	Button,
 	Dialog,
+	Divider,
+	Menu,
 	Portal,
+	ProgressBar,
+	SegmentedButtons,
 	Text,
 	useTheme,
-	Menu,
-	Divider,
-	SegmentedButtons,
-	ProgressBar,
 } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
 	CheckIcon,
 	CloseIcon,
@@ -20,15 +21,15 @@ import {
 	MoreVerticalIcon,
 	TimerIcon,
 } from "../../../components/Icons";
-import { useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import WorkoutEditor from "../../../components/pages/WorkoutEditor";
+import Header from "../../../components/ui/Header";
 import {
 	useRestCountdown,
 	useRestCountdownControl,
 	useRestCountdownDisplay,
 } from "../../../store/rest-timer-context";
-import { useRouter } from "expo-router";
 import { useWorkoutStore } from "../../../store/workout-store";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function OngoingWorkoutPage() {
 	const [timerDialogVisible, setTimerDialogVisible] = useState<boolean>(false);
@@ -36,7 +37,7 @@ export default function OngoingWorkoutPage() {
 		useState<boolean>(false);
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<HeaderComponent
 				setTimerDialogVisible={setTimerDialogVisible}
 				setCancelWorkoutDialogVisible={setCancelWorkoutDialogVisible}
@@ -50,7 +51,7 @@ export default function OngoingWorkoutPage() {
 				visible={cancelWorkoutDialogVisible}
 				setVisible={setCancelWorkoutDialogVisible}
 			/>
-		</View>
+		</ThemedView>
 	);
 }
 

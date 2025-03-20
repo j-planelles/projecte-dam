@@ -20,6 +20,7 @@ import { SaveIcon, TrashCanIcon } from "../../../components/Icons";
 import { ExternalChoiceBox } from "../../../components/ui/ChoiceBox";
 import Header from "../../../components/ui/Header";
 import { useExerciseStore } from "../../../store/exercise-store";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 const exerciseTypes = {
 	barbell: "Barbell",
@@ -152,7 +153,7 @@ export default function ExerciseEditPage() {
 		useState<boolean>(false);
 
 	return (
-		<>
+		<ThemedView>
 			<Header
 				title={
 					params.uuid === undefined ? "Create exercise" : "Modify exercise"
@@ -288,6 +289,6 @@ export default function ExerciseEditPage() {
 					</Dialog>
 				</Portal>
 			</View>
-		</>
+		</ThemedView>
 	);
 }

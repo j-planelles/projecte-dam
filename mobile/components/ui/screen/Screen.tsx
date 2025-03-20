@@ -1,4 +1,5 @@
 import { ScrollView, View } from "react-native";
+import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Screen({ children }: { children?: React.ReactNode }) {
@@ -20,5 +21,22 @@ export function BasicScreen({ children }: { children?: React.ReactNode }) {
 }
 
 export function BasicView({ children }: { children?: React.ReactNode }) {
-	return <View className="gap-4 p-4">{children}</View>;
+	const theme = useTheme();
+
+	return (
+		<View
+			className="gap-4 px-4"
+			style={{ backgroundColor: theme.colors.background }}
+		>
+			{children}
+		</View>
+	);
+}
+
+export function ThemedView({ children, className }: { children?: React.ReactNode, className?: string }) {
+	const theme = useTheme();
+
+	return (
+		<View style={{ backgroundColor: theme.colors.background }} className={`flex-1 ${className}`}>{children}</View>
+	);
 }

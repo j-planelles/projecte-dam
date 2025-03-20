@@ -14,6 +14,7 @@ import Header from "../../../components/ui/Header";
 import { useExerciseStore } from "../../../store/exercise-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { useRouter } from "expo-router";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function OngoingWorkoutAddExercisePage() {
 	const theme = useTheme();
@@ -53,7 +54,7 @@ export default function OngoingWorkoutAddExercisePage() {
 	};
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Add exercise">
 				<Appbar.Action icon={({ color }) => <FilterIcon color={color} />} />
 			</Header>
@@ -117,7 +118,7 @@ export default function OngoingWorkoutAddExercisePage() {
 					</Button>
 				</View>
 			)}
-		</View>
+		</ThemedView>
 	);
 }
 

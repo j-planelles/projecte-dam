@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useUserRegistrationStore } from "../../store/registration-store";
 import Header from "../../components/ui/Header";
 import { StatusBar } from "expo-status-bar";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 type GymListType = {
 	id: number;
@@ -128,7 +129,7 @@ export default function RegisterGymPage() {
 	);
 
 	return (
-		<View className="h-full">
+		<ThemedView className="h-full">
 			<Header title="Select your usual gym" />
 
 			<FlatList
@@ -166,6 +167,6 @@ export default function RegisterGymPage() {
 					</Pressable>
 				</Link>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

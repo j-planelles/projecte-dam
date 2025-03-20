@@ -5,12 +5,13 @@ import { EditIcon, SaveIcon, SearchIcon } from "../../../components/Icons";
 import { useState } from "react";
 import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
 import WorkoutViewer from "../../../components/pages/WorkoutViewer";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function ViewTemplatePage() {
 	const [editable, setEditable] = useState<boolean>(false);
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="View Template">
 				<Appbar.Action
 					icon={({ color }) =>
@@ -25,6 +26,6 @@ export default function ViewTemplatePage() {
 				location={false}
 				creator={false}
 			/>
-		</View>
+		</ThemedView>
 	);
 }

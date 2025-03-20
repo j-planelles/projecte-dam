@@ -7,6 +7,7 @@ import { SAMPLE_EXERCISES } from "../../lib/sampleData";
 import { useExerciseStore } from "../../store/exercise-store";
 import { useShallow } from "zustand/react/shallow";
 import { useMemo } from "react";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function ExerciseListPage() {
 	const router = useRouter();
@@ -29,7 +30,7 @@ export default function ExerciseListPage() {
 	);
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Manage Exercises">
 				<Appbar.Action
 					icon={({ color }) => <AddIcon color={color} />}
@@ -50,7 +51,7 @@ export default function ExerciseListPage() {
 				)}
 				ListEmptyComponent={<ExerciseListEmptyComponent />}
 			/>
-		</View>
+		</ThemedView>
 	);
 }
 

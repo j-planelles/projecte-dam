@@ -14,7 +14,7 @@ export default function WorkoutViewer({
 }) {
 	return (
 		<ScrollView>
-			<View className="pt-4 gap-2">
+			<View className="gap-2">
 				<WorkoutInformation
 					workout={workout}
 					timestamp={timestamp}

@@ -3,12 +3,13 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 import { Avatar, Button, Text } from "react-native-paper";
 import { PersonRemoveIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function ProfileSettingsPage() {
 	const TRAINER_AWKNOLEDGED = false;
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Manage your trainer" />
 			<ScrollView>
 				<View className="pt-4 gap-4">
@@ -45,7 +46,7 @@ export default function ProfileSettingsPage() {
 					</View>
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }
 

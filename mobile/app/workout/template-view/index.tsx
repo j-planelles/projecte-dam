@@ -5,10 +5,11 @@ import Header from "../../../components/ui/Header";
 import { EditIcon, SaveIcon, SearchIcon } from "../../../components/Icons";
 import { useState } from "react";
 import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function CreateTemplatePage() {
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Create Template">
 				<Appbar.Action
 					icon={({ color }) => <SaveIcon color={color} />}
@@ -23,6 +24,6 @@ export default function CreateTemplatePage() {
 			{/*   creator={false} */}
 			{/*   completable={false} */}
 			{/* /> */}
-		</View>
+		</ThemedView>
 	);
 }

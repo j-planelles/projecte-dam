@@ -9,6 +9,7 @@ import {
 } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { useUserRegistrationStore } from "../../../store/registration-store";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 const MOCK_LIKES = [
 	"CrossFit",
@@ -69,7 +70,7 @@ export default function TrainerOnboardingLikesPage() {
 	};
 
 	return (
-		<View className="h-full">
+		<ThemedView className="h-full">
 			<Header title="Review your interests" />
 
 			<ScrollView>
@@ -111,6 +112,6 @@ export default function TrainerOnboardingLikesPage() {
 					Next
 				</Button>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

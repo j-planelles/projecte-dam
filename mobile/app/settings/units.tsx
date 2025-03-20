@@ -3,13 +3,14 @@ import { ScrollView, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import ChoiceBox from "../../components/ui/ChoiceBox";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 const WEIGHT_UNITS = ["Metric (kg)", "Imperal (lbs)"];
 const DISTANCE_UNITS = ["Metric (m)", "Imperal (ft)"];
 
 export default function UnitsSettingsPage() {
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Your profile" />
 			<ScrollView>
 				<View className="pt-4 gap-4">
@@ -37,6 +38,6 @@ export default function UnitsSettingsPage() {
 					</View>
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }

@@ -5,6 +5,7 @@ import { NavigateNextIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { useState } from "react";
 import { SAMPLE_TRAINERS } from "../../../lib/sampleData";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function TrainerOnboardingListPage() {
 	const router = useRouter();
@@ -17,7 +18,7 @@ export default function TrainerOnboardingListPage() {
 	};
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Choose your trainer" />
 
 			<FlatList
@@ -57,7 +58,7 @@ export default function TrainerOnboardingListPage() {
 					Next
 				</Button>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }
 

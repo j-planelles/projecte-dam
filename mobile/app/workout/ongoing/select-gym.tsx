@@ -4,6 +4,7 @@ import { Appbar, Button, List, Searchbar, useTheme } from "react-native-paper";
 import { FilterIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { SAMPLE_GYMS } from "../../../lib/sampleData";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function OngoingWorkoutSelectGymPage() {
 	const theme = useTheme();
@@ -11,7 +12,7 @@ export default function OngoingWorkoutSelectGymPage() {
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Change gym" />
 			<View className="px-4 py-2">
 				<Searchbar
@@ -48,6 +49,6 @@ export default function OngoingWorkoutSelectGymPage() {
 			<View className="px-4 py-2 gap-2">
 				<Button mode="contained">Save</Button>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

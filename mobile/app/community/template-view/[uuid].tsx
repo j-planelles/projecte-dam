@@ -4,12 +4,13 @@ import { Button } from "react-native-paper";
 import WorkoutViewer from "../../../components/pages/WorkoutViewer";
 import Header from "../../../components/ui/Header";
 import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function ViewCommunityTemplatePage() {
 	const router = useRouter();
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="View Community Template" />
 			<WorkoutViewer
 				workout={SAMPLE_WORKOUTS[0]}
@@ -25,6 +26,6 @@ export default function ViewCommunityTemplatePage() {
 					Save template
 				</Button>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

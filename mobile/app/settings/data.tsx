@@ -2,10 +2,11 @@ import React from "react";
 import { ScrollView, View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function DataSettingsPage() {
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Import/Export data" />
 			<ScrollView>
 				<View className="pt-4 gap-4">
@@ -25,6 +26,6 @@ export default function DataSettingsPage() {
 					</View>
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }

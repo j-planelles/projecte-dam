@@ -4,6 +4,7 @@ import { Searchbar, Text, useTheme } from "react-native-paper";
 import { PersonIcon, SendIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { SAMPLE_MESSAGES } from "../../lib/sampleData";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function TrainerChatPage() {
 	const flatListRef = useRef<null | FlatList>(null);
@@ -26,7 +27,7 @@ export default function TrainerChatPage() {
 	}, [flatListRef]);
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Trainer Chat" />
 			<View className="flex-1">
 				<FlatList
@@ -51,7 +52,7 @@ export default function TrainerChatPage() {
 					/>
 				</View>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }
 

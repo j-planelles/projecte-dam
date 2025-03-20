@@ -7,13 +7,14 @@ import { FlatList } from "react-native";
 import WorkoutCard from "../../components/ui/WorkoutCard";
 import Header from "../../components/ui/Header";
 import { SAMPLE_WORKOUTS } from "../../lib/sampleData";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function CommunityTemplateSearchPage() {
 	const router = useRouter();
 	const [searchTerm, setSearchTerm] = useState("");
 
 	return (
-		<View>
+		<ThemedView>
 			<Header title="Search Templates" />
 			<View className="gap-4 px-4 pt-4">
 				<Searchbar
@@ -40,6 +41,6 @@ export default function CommunityTemplateSearchPage() {
 					)}
 				/>
 			</View>
-		</View>
+		</ThemedView>
 	);
 }

@@ -4,6 +4,7 @@ import { DumbellIcon, TimerIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { useState } from "react";
 import ChoiceBox from "../../components/ui/ChoiceBox";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 const THEME_SWITCH_ITEMS = ["Use device default", "Light", "Dark"];
 
@@ -13,7 +14,7 @@ export default function SettingsPage() {
 		useState<boolean>(false);
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="General" />
 			<ScrollView>
 				<View>
@@ -69,6 +70,6 @@ export default function SettingsPage() {
 					/>
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }

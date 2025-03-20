@@ -9,12 +9,13 @@ import {
 	SettingsIcon,
 } from "../../components/Icons";
 import { useRouter } from "expo-router";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function SettingsPage() {
 	const router = useRouter();
 
 	return (
-		<View>
+		<ThemedView>
 			<Header title="Settings" />
 			<ScrollView>
 				<View className="">
@@ -83,7 +84,7 @@ export default function SettingsPage() {
 					<ApplicationVersionFooter />
 				</View>
 			</ScrollView>
-		</View>
+		</ThemedView>
 	);
 }
 const ApplicationVersionFooter = () => {

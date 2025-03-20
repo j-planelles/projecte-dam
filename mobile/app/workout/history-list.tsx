@@ -1,5 +1,5 @@
 import { FlatList, View } from "react-native";
-import Screen, { BasicScreen } from "../../components/ui/screen/Screen";
+import Screen, { BasicScreen, ThemedView } from "../../components/ui/screen/Screen";
 import WorkoutCard from "../../components/ui/WorkoutCard";
 import { Stack, useRouter } from "expo-router";
 import { TouchableRipple } from "react-native-paper";
@@ -10,7 +10,7 @@ export default function TemplatesListPage() {
 	const router = useRouter();
 
 	return (
-		<View className="flex-1">
+		<ThemedView className="flex-1">
 			<Header title="Workout History" />
 			<FlatList
 				className="p-2"
@@ -25,6 +25,6 @@ export default function TemplatesListPage() {
 					/>
 				)}
 			/>
-		</View>
+		</ThemedView>
 	);
 }
