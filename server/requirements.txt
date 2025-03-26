@@ -1,0 +1,12 @@
+fastapi==0.115.12
+python-multipart
+pyjwt
+bcrypt
+passlib[bcrypt]
+uvicorn
+gunicorn
+sqlmodel
+pydantic
+sqlalchemy
+psycopg[binary]
+python-decouple

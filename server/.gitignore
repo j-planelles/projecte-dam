@@ -1,0 +1,22 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE specific files
+*.swp
+*.swo
+.DS_Store
+
+# Environment variables
+.env
+
+# Docker
+.dockerignore
