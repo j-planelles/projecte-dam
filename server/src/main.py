@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from time import sleep
 
 from db import engine
 from fastapi import FastAPI
@@ -10,6 +11,8 @@ from sqlmodel import SQLModel
 # Aquesta funció gestiona la creació de la base de dades abans de que s'inicialitzi FastAPI
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    print("Waiting for database to initialize...")
+    sleep(2)
     SQLModel.metadata.create_all(engine)
     yield
 
