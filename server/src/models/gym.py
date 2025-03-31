@@ -1,9 +1,9 @@
-from uuid import UUID as UUID_TYPE, uuid4
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-
-from sqlmodel import Column, Field, Relationship
+from uuid import UUID as UUID_TYPE
+from uuid import uuid4
 
 from schemas.gym_schema import GymSchema
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlmodel import Column, Field, Relationship
 
 
 class GymModel(GymSchema, table=True):
@@ -17,7 +17,7 @@ class GymModel(GymSchema, table=True):
             nullable=False,
         )
     )
-    owner: "GymOwnerModel" = Relationship()
+    owner: "GymOwnerModel" = Relationship(back_populates="gyms")
 
 
 from models.users import GymOwnerModel
