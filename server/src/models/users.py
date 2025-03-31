@@ -1,17 +1,47 @@
 from uuid import UUID as UUID_TYPE
+from uuid import uuid4
 
-from schemas.types.uuid import uuid_field
-from sqlmodel import SQLModel
-
-
-class UserSchema(SQLModel):
-    username: str
-    email: str | None = None
-    full_name: str | None = None
+from schemas.user_schema import UserSchema
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlmodel import Column, Field, Relationship, SQLModel, String
 
 
-class UserInDB(UserSchema, table=True):
-    __tablename__ = "users" # pyright: ignore[]
-    uuid: UUID_TYPE = uuid_field
+class UserModel(UserSchema, table=True):
+    __tablename__ = "users"  # pyright: ignore[]
+    uuid: UUID_TYPE = Field(
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            primary_key=True,
+            default=uuid4,
+            index=True,
+            nullable=False,
+        )
+    )
     hashed_password: str
-    disabled: bool | None = None
+    is_disabled: bool = Field(default=False)
+
+
+class TrainerModel(SQLModel, table=True):
+    __tablename__ = "trainer"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+
+
+class GymOwnerModel(SQLModel, table=True):
+    __tablename__ = "gym_owner"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+
+    gyms: list["GymModel"] = Relationship(back_populates="owner")
+
+
+class AdminModel(SQLModel, table=True):
+    __tablename__ = "admin"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+
+
+from models.gym import GymModel

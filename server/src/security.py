@@ -6,7 +6,7 @@ from db import get_session, session_generator
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from models.users import UserInDB, UserSchema
+from models.users import UserModel, UserSchema
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlmodel import Session, select
@@ -38,14 +38,14 @@ def get_password_hash(password):
 
 def get_user_by_username(username: str):
     with session_generator as session:
-        query = select(UserInDB).where(UserInDB.username == username)
+        query = select(UserModel).where(UserModel.username == username)
         item = session.exec(query).first()
         return item
 
 
 def get_user_by_uuid(uuid: str):
     with session_generator as session:
-        query = select(UserInDB).where(UserInDB.uuid == uuid)
+        query = select(UserModel).where(UserModel.uuid == uuid)
         item = session.exec(query).first()
         return item
 
@@ -88,7 +88,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 async def get_current_active_user(
-    current_user: UserInDB = Depends(get_current_user),
+    current_user: UserModel = Depends(get_current_user),
 ):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -119,7 +119,7 @@ async def create_user(
     user: UserSchema,
     password: str,  # TODO: Fer hasing al client
     session: Session = Depends(get_session),
-) -> UserInDB:
+) -> UserModel:
     user_in_db = get_user_by_username(user.username)
     if user_in_db:
         raise HTTPException(
@@ -127,7 +127,7 @@ async def create_user(
             detail="Username already taken",
         )
 
-    new_user = UserInDB(
+    new_user = UserModel(
         **user.model_dump(), hashed_password=get_password_hash(password=password)
     )
 
