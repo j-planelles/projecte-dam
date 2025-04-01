@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from schemas.user_schema import UserSchema
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlmodel import Column, Field, Relationship, SQLModel, String
+from sqlmodel import Column, Field, Relationship, SQLModel
 
 
 class UserModel(UserSchema, table=True):
@@ -19,6 +19,8 @@ class UserModel(UserSchema, table=True):
     )
     hashed_password: str
     is_disabled: bool = Field(default=False)
+
+    regular_gym: "GymModel | None" = Relationship()
 
 
 class TrainerModel(SQLModel, table=True):
