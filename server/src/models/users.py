@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
+from schemas.config_schema import MobileAppConfigSchema
 from schemas.user_schema import UserSchema
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlmodel import Column, Field, Relationship, SQLModel
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
 
 class UserModel(UserSchema, table=True):
@@ -19,14 +20,10 @@ class UserModel(UserSchema, table=True):
         )
     )
     hashed_password: str
-    is_disabled: bool = Field(default=False)
 
     trainer: Optional["TrainerModel"] = Relationship()
 
-    regular_gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
-    regular_gym: Optional["GymModel"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[UserModel.regular_gym_id]"}
-    )
+    config: "UserConfig" = Relationship(back_populates="user")
 
 
 class TrainerModel(SQLModel, table=True):
@@ -55,6 +52,20 @@ class AdminModel(SQLModel, table=True):
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
 
     user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+
+
+class UserConfig(SQLModel, table=True):
+    __tablename__ = "user_config"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(back_populates="config")
+
+    is_disabled: bool = Field(default=False)
+
+    mobile_app_config: "MobileAppConfigSchema" = Field(sa_column=Column(JSON))
+    user_likes: List[str] = Field(default=[], sa_column=Column(JSON))
+
+    regular_gym: Optional["GymModel"] = Relationship()
 
 
 from models.gym import GymModel
