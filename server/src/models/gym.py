@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
@@ -17,7 +18,12 @@ class GymModel(GymSchema, table=True):
             nullable=False,
         )
     )
-    owner: "GymOwnerModel" = Relationship(back_populates="gyms")
+
+    owner_uuid: UUID_TYPE = Field(foreign_key="gym_owner.user_uuid")
+    owner: "GymOwnerModel" = Relationship(
+        back_populates="gyms",
+        sa_relationship_kwargs={"foreign_keys": "[GymModel.owner_uuid]"},
+    )
 
 
 from models.users import GymOwnerModel

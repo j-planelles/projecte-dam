@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
@@ -20,14 +21,19 @@ class UserModel(UserSchema, table=True):
     hashed_password: str
     is_disabled: bool = Field(default=False)
 
-    regular_gym: "GymModel | None" = Relationship()
+    trainer: Optional["TrainerModel"] = Relationship()
+
+    regular_gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
+    regular_gym: Optional["GymModel"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[UserModel.regular_gym_id]"}
+    )
 
 
 class TrainerModel(SQLModel, table=True):
     __tablename__ = "trainer"  # pyright: ignore[]
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
 
-    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+    user: "UserModel" = Relationship(sa_relationship_kwargs={"uselist": False})
 
 
 class GymOwnerModel(SQLModel, table=True):
@@ -36,7 +42,10 @@ class GymOwnerModel(SQLModel, table=True):
 
     user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
 
-    gyms: list["GymModel"] = Relationship(back_populates="owner")
+    gyms: list["GymModel"] = Relationship(
+        back_populates="owner",
+        sa_relationship_kwargs={"foreign_keys": "[GymModel.owner_uuid]"},
+    )
 
 
 class AdminModel(SQLModel, table=True):
@@ -47,3 +56,7 @@ class AdminModel(SQLModel, table=True):
 
 
 from models.gym import GymModel
+
+user = UserModel(
+    username="j-pnaelles", full_name="Jordi", uuid=uuid4(), hashed_password=""
+)
