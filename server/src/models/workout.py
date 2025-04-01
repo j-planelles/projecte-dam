@@ -36,6 +36,8 @@ class WorkoutContentModel(WorkoutTemplateSchema, table=True):
 
     entries: list["WorkoutEntryModel"] = Relationship()
 
+    gym: "GymModel | None" = Relationship()
+
 
 class WorkoutInstanceModel(WorkoutInstanceSchema, table=True):
     __tablename__ = "workout_instance"  # pyright: ignore[]
@@ -81,4 +83,5 @@ class WorkoutSetModel(SQLModel, table=True):
     )
 
 
+from models.gym import GymModel
 from models.exercise import ExerciseModel

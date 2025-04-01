@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import List
-from uuid import uuid4
 
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 
 from schemas.exercise_schema import ExerciseInputSchema
-from schemas.types.enums import BodyPart, ExerciseType, WeightUnit
+from schemas.gym_schema import GymSchema
+from schemas.types.enums import WeightUnit
 
 
 class WorkoutTemplateSchema(SQLModel):
@@ -43,3 +43,5 @@ class WorkoutSchema(BaseModel):
     duration: datetime
 
     entries: list[WorkoutEntrySchema]
+
+    gym: GymSchema | None = None
