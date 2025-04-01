@@ -33,7 +33,9 @@ class TrainerModel(SQLModel, table=True):
     __tablename__ = "trainer"  # pyright: ignore[]
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
 
-    user: "UserModel" = Relationship(sa_relationship_kwargs={"uselist": False})
+    user: "UserModel" = Relationship(
+        sa_relationship_kwargs={"uselist": False, "overlaps": "trainer"}
+    )
 
 
 class GymOwnerModel(SQLModel, table=True):
@@ -56,7 +58,3 @@ class AdminModel(SQLModel, table=True):
 
 
 from models.gym import GymModel
-
-user = UserModel(
-    username="j-pnaelles", full_name="Jordi", uuid=uuid4(), hashed_password=""
-)
