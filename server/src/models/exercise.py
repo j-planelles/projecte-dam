@@ -1,11 +1,12 @@
 from uuid import UUID as UUID_TYPE
+import sqlalchemy as sa
 from uuid import uuid4
 
-import sqlalchemy as sa
 from schemas.exercise_schema import DefaultExerciseSchema, ExerciseSchema
-from schemas.types.enums import BodyPart, ExerciseType
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Column, Enum, Field
+
+from schemas.types.enums import BodyPart, ExerciseType
 
 
 class ExerciseModel(ExerciseSchema, table=True):

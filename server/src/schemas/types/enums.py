@@ -1,39 +1,39 @@
-from enum import auto, StrEnum
+from enum import Enum
 
 
-class ExerciseType(StrEnum):
-    barbell = auto()
-    dumbell = auto()
-    machine = auto()
-    other = auto()
-    bodyweight = auto()
-    assisted_bodyweight = auto()
-    reps_only = auto()
-    cardio = auto()
-    duration = auto()
-    countdown = auto()
+class ExerciseType(Enum):
+    BARBELL = "barbell"
+    DUMBELL = "dumbell"
+    MACHINE = "machine"
+    OTHER = "other"
+    BODYWEIGHT = "bodyweight"
+    ASSISTED_BODYWEIGHT = "assisted-bodyweight"
+    REPS_ONLY = "reps-only"
+    CARDIO = "cardio"
+    DURATION = "duration"
+    COUNTDOWN = "countdown"
 
 
-class BodyPart(StrEnum):
-    none = auto()
-    arms = auto()
-    back = auto()
-    shoulders = auto()
-    cardio = auto()
-    chest = auto()
-    core = auto()
-    full_body = auto()
-    legs = auto()
-    olympic = auto()
-    other = auto()
+class BodyPart(Enum):
+    NONE = "none"
+    ARMS = "arms"
+    BACK = "back"
+    SHOULDERS = "shoulders"
+    CARDIO = "cardio"
+    CHEST = "chest"
+    CORE = "core"
+    FULL_BODY = "full-body"
+    LEGS = "legs"
+    OLYMPIC = "olympic"
+    OTHER = "other"
 
 
-class SetType(StrEnum):
-    normal = auto()
-    dropset = auto()
-    failture = auto()
+class SetType(Enum):
+    NORMAL = "normal"
+    DROPSET = "dropset"
+    FAILTURE = "failture"
 
 
-class WeightUnit(StrEnum):
-    metric = auto()
-    imperial = auto()
+class WeightUnit(Enum):
+    METRIC = "metric"
+    IMPERIAL = "imperial"

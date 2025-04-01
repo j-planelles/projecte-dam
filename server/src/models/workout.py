@@ -3,7 +3,10 @@ from uuid import uuid4
 
 import sqlalchemy as sa
 from schemas.types.enums import WeightUnit
-from schemas.workout_schema import WorkoutInstanceSchema, WorkoutTemplateSchema
+from schemas.workout_schema import (
+    WorkoutInstanceSchema,
+    WorkoutTemplateSchema,
+)
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import (
     Column,
@@ -50,12 +53,13 @@ class WorkoutEntryModel(SQLModel, table=True):
 
     rest_countdown_duration: int | None = None
     note: str | None = None
-    type: WeightUnit | None = Field(
-        sa_column=sa.Column(Enum(WeightUnit), nullable=False), default=None
+
+    weight_unit: WeightUnit | None = Field(
+        sa_column=Column(Enum(WeightUnit), nullable=True), default=None
     )
     exercise: "ExerciseModel" = Relationship(sa_relationship_kwargs={"uselist": False})
 
-    sets: list["WorkoutSetModel"] = Relationship()
+    sets: list["WorkoutSetModel"] = Relationship(back_populates="entry")
 
 
 class WorkoutSetModel(SQLModel, table=True):
@@ -66,6 +70,8 @@ class WorkoutSetModel(SQLModel, table=True):
 
     reps: int | None = None
     weight: float | None = None
+
+    entry: "WorkoutEntryModel" = Relationship(back_populates="sets")
 
     __table_args__ = (
         ForeignKeyConstraint(
