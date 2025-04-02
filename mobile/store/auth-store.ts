@@ -1,7 +1,9 @@
 import { create } from "zustand";
+import { api, createApiClient } from "../lib/apiClient";
 
 type AuthStoreType = {
 	serverIp: string;
+	apiClient: typeof api;
 	setServerIp: (serverIp: string) => void;
 
 	username: string;
@@ -15,8 +17,10 @@ type AuthStoreType = {
 };
 
 export const useAuthStore = create<AuthStoreType>((set) => ({
-	serverIp: "https://ultra.com",
-	setServerIp: (serverIp: string) => set({ serverIp: serverIp }),
+	serverIp: "http://192.168.131.234:8002",
+	apiClient: api,
+	setServerIp: (serverIp: string) =>
+		set({ serverIp: serverIp, apiClient: createApiClient(serverIp) }),
 	username: "j.planelles",
 	setUsername: (username: string) => set({ username: username }),
 	passwordHash: "",

@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, HelperText, TextInput } from "react-native-paper";
 import { z } from "zod";
 import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
@@ -10,6 +10,7 @@ import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import { useShallow } from "zustand/react/shallow";
 import { useEffect } from "react";
+import { AxiosError } from "axios";
 
 const schema = z.object({
 	username: z.string(),
@@ -20,6 +21,7 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingLoginPage() {
 	const router = useRouter();
+	const apiClient = useAuthStore((store) => store.apiClient);
 	const {
 		control,
 		handleSubmit,
@@ -46,12 +48,29 @@ export default function LandingLoginPage() {
 		setValue("username", storeUsername);
 	}, [storeUsername]);
 
-	const submitHandler = ({ username, password }: FormSchemaType) => {
-		setUsername(username);
-		hashPassword(password);
-		setToken(username); // Temporal solution
+	const submitHandler = async ({ username, password }: FormSchemaType) => {
+		try {
+			setUsername(username);
+			hashPassword(password);
 
-		router.push("/");
+			const response = await apiClient.post("/auth/token", {
+				username: username,
+				password: password,
+			});
+			setToken(response.access_token);
+
+			router.push("/");
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				setError("root", {
+					type: "manual",
+					message:
+						error?.response?.status === 401
+							? "Invalid username and password"
+							: "Internal server error. Please try again later.",
+				});
+			}
+		}
 	};
 
 	return (
@@ -105,6 +124,10 @@ export default function LandingLoginPage() {
 					<Text className="font-bold text-red-500">
 						{errors.password.message}
 					</Text>
+				)}
+
+				{errors.root && (
+					<Text className="font-bold text-red-500">{errors.root.message}</Text>
 				)}
 
 				<Button
