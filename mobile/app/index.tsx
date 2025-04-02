@@ -41,9 +41,9 @@ const Redirector = () => {
 
 	useEffect(() => {
 		if (token === null) {
-			router.replace("/landing/server");
+			router.push("/landing/server");
 		}
-	}, []);
+	}, [token]);
 
 	return token === null ? null : <TabBarWrapper />;
 };

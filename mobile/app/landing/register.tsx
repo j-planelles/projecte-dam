@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
@@ -26,6 +27,7 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterPage() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const apiClient = useAuthStore((store) => store.apiClient);
 	const {
 		control,
@@ -57,6 +59,8 @@ export default function LandingRegisterPage() {
 			});
 			setToken(response.access_token);
 			console.log(response.access_token);
+
+			queryClient.invalidateQueries({ queryKey: ["user"] });
 
 			router.push("/landing/register-profile");
 		} catch (error) {

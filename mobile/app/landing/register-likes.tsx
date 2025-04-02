@@ -2,10 +2,8 @@ import { Link, Stack, useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Button, Chip, MD3LightTheme } from "react-native-paper";
 import { AddIcon, CheckIcon, NavigateNextIcon } from "../../components/Icons";
-import { useEffect, useMemo, useState } from "react";
 import { useUserRegistrationStore } from "../../store/registration-store";
 import { useShallow } from "zustand/react/shallow";
-import { useAuthStore } from "../../store/auth-store";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 
@@ -44,23 +42,14 @@ const MOCK_LIKES = [
 export default function RegisterLikesPage() {
 	const router = useRouter();
 
-	const { likes, addLike, removeLike, username } = useUserRegistrationStore(
+	const { likes, addLike, removeLike } = useUserRegistrationStore(
 		useShallow((state) => ({
 			likes: state.likes,
 			addLike: state.addLike,
 			removeLike: state.removeLike,
-			username: state.username, // Temporal solution
 		})),
 	);
 	const navigationDisabled = likes.length < 1;
-
-	// Temporal solution
-	const { setUsername, setToken } = useAuthStore(
-		useShallow((state) => ({
-			setUsername: state.setUsername,
-			setToken: state.setToken,
-		})),
-	);
 
 	const checkClickHandler = (checkIndex: number) => {
 		if (likes.includes(checkIndex)) {
@@ -73,11 +62,7 @@ export default function RegisterLikesPage() {
 	const handleSubmit = () => {
 		console.log(likes.map((likeIndex) => MOCK_LIKES[likeIndex]));
 
-		// Temporal solution
-		setToken(username);
-		setUsername(username);
-
-		router.replace("/");
+		router.dismissAll();
 	};
 
 	return (

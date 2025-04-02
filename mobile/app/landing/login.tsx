@@ -1,16 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
-import { Button, HelperText, TextInput } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { useShallow } from "zustand/react/shallow";
 import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
-import { useShallow } from "zustand/react/shallow";
-import { useEffect } from "react";
-import { AxiosError } from "axios";
 
 const schema = z.object({
 	username: z.string(),
@@ -21,6 +22,7 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingLoginPage() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const apiClient = useAuthStore((store) => store.apiClient);
 	const {
 		control,
@@ -59,7 +61,9 @@ export default function LandingLoginPage() {
 			});
 			setToken(response.access_token);
 
-			router.push("/");
+			queryClient.invalidateQueries({ queryKey: ["user"] });
+
+			router.dismissAll();
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				setError("root", {

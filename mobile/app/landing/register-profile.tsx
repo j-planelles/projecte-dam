@@ -8,7 +8,6 @@ import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { NavigateNextIcon } from "../../components/Icons";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
-import { useUserRegistrationStore } from "../../store/registration-store";
 import { useAuthStore } from "../../store/auth-store";
 
 const schema = z.object({
@@ -31,13 +30,6 @@ export default function LandingRegisterProfilePage() {
 		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
-	const { setName, setBiography } = useUserRegistrationStore(
-		useShallow((state) => ({
-			setName: state.setName,
-			setBiography: state.setBiography,
-		})),
-	);
-
 	const submitHandler = async ({ name, bio }: FormSchemaType) => {
 		try {
 			const result = await apiClient.post(

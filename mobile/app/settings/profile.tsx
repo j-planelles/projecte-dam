@@ -1,16 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView, View } from "react-native";
-import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import {
+	Button,
+	HelperText,
+	Text,
+	TextInput,
+	Dialog,
+	Portal,
+} from "react-native-paper";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { LogOutIcon, PersonRemoveIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 import { useAuthStore } from "../../store/auth-store";
+import { useRouter } from "expo-router";
 
 export default function ProfileSettingsPage() {
 	return (
@@ -211,23 +219,47 @@ function AboutYouPart() {
 }
 
 function DangerZone() {
+	const router = useRouter();
+	const setToken = useAuthStore((store) => store.setToken);
+
+	const [visible, setVisible] = useState<boolean>(false);
+	const logOutHandler = () => {
+		setVisible(false);
+		setToken(null);
+		router.dismissAll();
+	};
+
 	return (
-		<View className="mx-4 gap-2">
-			<Text variant="titleSmall" className="pb-2">
-				Danger zone
-			</Text>
-			<Button
-				mode="outlined"
-				icon={({ color }) => <LogOutIcon color={color} />}
-			>
-				Log Out
-			</Button>
-			<Button
-				mode="outlined"
-				icon={({ color }) => <PersonRemoveIcon color={color} />}
-			>
-				Delete Account
-			</Button>
-		</View>
+		<>
+			<View className="mx-4 gap-2">
+				<Text variant="titleSmall" className="pb-2">
+					Danger zone
+				</Text>
+				<Button
+					mode="outlined"
+					icon={({ color }) => <LogOutIcon color={color} />}
+					onPress={() => setVisible(true)}
+				>
+					Log Out
+				</Button>
+				<Button
+					mode="outlined"
+					icon={({ color }) => <PersonRemoveIcon color={color} />}
+				>
+					Delete Account
+				</Button>
+			</View>
+			<Portal>
+				<Dialog visible={visible} onDismiss={() => setVisible(false)}>
+					<Dialog.Content>
+						<Text variant="bodyMedium">Do you wish to log out?</Text>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={() => setVisible(false)}>No</Button>
+						<Button onPress={logOutHandler}>Yes</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+		</>
 	);
 }
