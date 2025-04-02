@@ -9,6 +9,7 @@ import { NavigateNextIcon } from "../../components/Icons";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
 import { useUserRegistrationStore } from "../../store/registration-store";
+import { useAuthStore } from "../../store/auth-store";
 
 const schema = z.object({
 	name: z.string(),
@@ -18,9 +19,16 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterProfilePage() {
 	const router = useRouter();
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
 	const {
 		control,
 		handleSubmit,
+		setError,
 		formState: { errors, isSubmitting },
 	} = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 	const { setName, setBiography } = useUserRegistrationStore(
@@ -30,11 +38,23 @@ export default function LandingRegisterProfilePage() {
 		})),
 	);
 
-	const submitHandler = ({ name, bio }: FormSchemaType) => {
-		setName(name);
-		bio !== undefined && setBiography(bio);
+	const submitHandler = async ({ name, bio }: FormSchemaType) => {
+		try {
+			const result = await apiClient.post(
+				"/auth/profile",
+				{
+					biography: bio,
+					full_name: name,
+				},
+				{ headers: { Authorization: `Bearer ${token}` } },
+			);
 
-		router.push("/landing/register-gym");
+			console.log(result);
+
+			router.push("/landing/register-gym");
+		} catch {
+			setError("root", { type: "manual", message: "Something went wrong." });
+		}
 	};
 
 	return (
@@ -83,6 +103,10 @@ export default function LandingRegisterProfilePage() {
 				/>
 				{errors.bio && (
 					<Text className="font-bold text-red-500">{errors.bio.message}</Text>
+				)}
+
+				{errors.root && (
+					<Text className="font-bold text-red-500">{errors.root.message}</Text>
 				)}
 
 				<Button

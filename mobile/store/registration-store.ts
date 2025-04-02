@@ -1,10 +1,6 @@
 import { create } from "zustand";
 
 type UserRegistrationStoreType = {
-	name: string;
-	setName: (name: string) => void;
-	biography: string;
-	setBiography: (biography: string) => void;
 	usualGymID: number | null;
 	setUsualGymID: (usualGymID: number | null) => void;
 	likes: number[];
@@ -14,10 +10,6 @@ type UserRegistrationStoreType = {
 
 export const useUserRegistrationStore = create<UserRegistrationStoreType>(
 	(set) => ({
-		name: "",
-		setName: (name: string) => set({ name }),
-		biography: "",
-		setBiography: (biography: string) => set({ biography }),
 		usualGymID: null,
 		setUsualGymID: (usualGymID: number | null) => set({ usualGymID }),
 		likes: [],
