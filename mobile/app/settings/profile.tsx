@@ -1,9 +1,16 @@
-import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import React, { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { ScrollView, View } from "react-native";
-import { Button, Text, TextInput } from "react-native-paper";
+import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import { z } from "zod";
+import { useShallow } from "zustand/react/shallow";
 import { LogOutIcon, PersonRemoveIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
+import { useAuthStore } from "../../store/auth-store";
 
 export default function ProfileSettingsPage() {
 	return (
@@ -11,72 +18,216 @@ export default function ProfileSettingsPage() {
 			<Header title="Your profile" />
 			<ScrollView>
 				<View className="pt-4 gap-4">
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall">User data</Text>
-						<TextInput
-							label="Username"
-							placeholder="j.planelles"
-							mode="outlined"
-							autoCorrect={false}
-							autoCapitalize="none"
-						/>
-						<TextInput
-							mode="outlined"
-							label="Name"
-							placeholder="Jordi Planelles"
-						/>
-						<TextInput
-							mode="outlined"
-							label="Biography"
-							multiline
-							placeholder="Femboy by day, gym bro by night 🏋️♂️🌈🇹🇷"
-						/>
-						<Button mode="outlined">Update user data</Button>
-					</View>
+					<UserDataForm />
 
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall">Change Password</Text>
-						<TextInput label="Password" mode="outlined" secureTextEntry />
-						<TextInput
-							label="Repeat Password"
-							mode="outlined"
-							secureTextEntry
-						/>
-						<Button mode="outlined">Change password</Button>
-					</View>
+					<ChangePasswordForm />
 
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall">About you</Text>
-						<Text>
-							We use your likes to better pair you with a personal trainer.{" "}
-						</Text>
-						<Button mode="outlined">Review my likes</Button>
-						<Text>
-							Your usual gym will be used to set the location field in new
-							workouts.
-						</Text>
-						<Button mode="outlined">Change my usual gym</Button>
-					</View>
+					<AboutYouPart />
 
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall" className="pb-2">
-							Danger zone
-						</Text>
-						<Button
-							mode="outlined"
-							icon={({ color }) => <LogOutIcon color={color} />}
-						>
-							Log Out
-						</Button>
-						<Button
-							mode="outlined"
-							icon={({ color }) => <PersonRemoveIcon color={color} />}
-						>
-							Delete Account
-						</Button>
-					</View>
+					<DangerZone />
 				</View>
 			</ScrollView>
 		</ThemedView>
+	);
+}
+
+const userDataSchema = z.object({
+	username: z.string(),
+	name: z.string(),
+	bio: z.string().optional(),
+});
+
+type FormSchemaType = z.infer<typeof userDataSchema>;
+
+function UserDataForm() {
+	const queryClient = useQueryClient();
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
+	const { data, isSuccess, isLoading, error } = useQuery({
+		queryKey: ["user", "/auth/profile"],
+		queryFn: async () =>
+			await apiClient.get("/auth/profile", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+	});
+
+	useEffect(() => {
+		if (data && isSuccess) {
+			setValue("username", data.username);
+			setValue("name", data.full_name);
+			setValue("bio", data?.biography || "");
+		}
+	}, [data, isSuccess]);
+
+	const submitHandler = async ({ username, name, bio }: FormSchemaType) => {
+		try {
+			await apiClient.post(
+				"/auth/profile",
+				{
+					username: username !== data?.username ? username : undefined,
+					full_name: name,
+					biography: bio,
+				},
+				{ headers: { Authorization: `Bearer ${token}` } },
+			);
+
+			queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				if (error?.response?.status === 409) {
+					setError("username", {
+						type: "manual",
+						message: "Username already taken.",
+					});
+				} else {
+					setError("root", {
+						type: "manual",
+						message: "Something went wrong.",
+					});
+				}
+			}
+		}
+	};
+
+	const {
+		control,
+		handleSubmit,
+		setError,
+		setValue,
+		formState: { errors, isSubmitting },
+	} = useForm<FormSchemaType>({ resolver: zodResolver(userDataSchema) });
+	return (
+		<View className="mx-4 gap-2">
+			<Text variant="titleSmall">User data</Text>
+
+			<Controller
+				control={control}
+				name="username"
+				rules={{ required: true }}
+				render={({ field: { onChange, onBlur, value } }) => (
+					<TextInput
+						label="Username"
+						placeholder="j.planelles"
+						mode="outlined"
+						autoCorrect={false}
+						autoCapitalize="none"
+						error={errors.username !== undefined}
+						value={value}
+						onChangeText={onChange}
+						onBlur={onBlur}
+						disabled={isLoading || isSubmitting}
+					/>
+				)}
+			/>
+
+			{errors.username && (
+				<HelperText type="error">{errors.username.message}</HelperText>
+			)}
+
+			<Controller
+				control={control}
+				name="name"
+				rules={{ required: true }}
+				render={({ field: { onChange, onBlur, value } }) => (
+					<TextInput
+						mode="outlined"
+						label="Name"
+						placeholder="Jordi Planelles"
+						error={errors.name !== undefined}
+						value={value}
+						onChangeText={onChange}
+						onBlur={onBlur}
+						disabled={isLoading || isSubmitting}
+					/>
+				)}
+			/>
+
+			{errors.name && (
+				<HelperText type="error">{errors.name.message}</HelperText>
+			)}
+
+			<Controller
+				control={control}
+				name="bio"
+				rules={{ required: true }}
+				render={({ field: { onChange, onBlur, value } }) => (
+					<TextInput
+						mode="outlined"
+						label="Biography"
+						multiline
+						placeholder="Femboy by day, gym bro by night 🏋♂🌈🇹"
+						error={errors.bio !== undefined}
+						value={value}
+						onChangeText={onChange}
+						onBlur={onBlur}
+						disabled={isLoading || isSubmitting}
+					/>
+				)}
+			/>
+
+			{errors.bio && <HelperText type="error">{errors.bio.message}</HelperText>}
+
+			<Button
+				mode="outlined"
+				disabled={isLoading}
+				loading={isSubmitting || isLoading}
+				onPress={handleSubmit(submitHandler)}
+			>
+				Update user data
+			</Button>
+		</View>
+	);
+}
+
+function ChangePasswordForm() {
+	return (
+		<View className="mx-4 gap-2">
+			<Text variant="titleSmall">Change Password</Text>
+			<TextInput label="Password" mode="outlined" secureTextEntry />
+			<TextInput label="Repeat Password" mode="outlined" secureTextEntry />
+			<Button mode="outlined">Change password</Button>
+		</View>
+	);
+}
+
+function AboutYouPart() {
+	return (
+		<View className="mx-4 gap-2">
+			<Text variant="titleSmall">About you</Text>
+			<Text>
+				We use your likes to better pair you with a personal trainer.{" "}
+			</Text>
+			<Button mode="outlined">Review my likes</Button>
+			<Text>
+				Your usual gym will be used to set the location field in new workouts.
+			</Text>
+			<Button mode="outlined">Change my usual gym</Button>
+		</View>
+	);
+}
+
+function DangerZone() {
+	return (
+		<View className="mx-4 gap-2">
+			<Text variant="titleSmall" className="pb-2">
+				Danger zone
+			</Text>
+			<Button
+				mode="outlined"
+				icon={({ color }) => <LogOutIcon color={color} />}
+			>
+				Log Out
+			</Button>
+			<Button
+				mode="outlined"
+				icon={({ color }) => <PersonRemoveIcon color={color} />}
+			>
+				Delete Account
+			</Button>
+		</View>
 	);
 }
