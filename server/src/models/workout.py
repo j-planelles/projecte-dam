@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
@@ -36,7 +37,10 @@ class WorkoutContentModel(WorkoutTemplateSchema, table=True):
 
     entries: list["WorkoutEntryModel"] = Relationship()
 
-    gym: "GymModel | None" = Relationship()
+    gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
+    gym: Optional["GymModel"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[WorkoutContentModel.gym_id]"}
+    )
 
 
 class WorkoutInstanceModel(WorkoutInstanceSchema, table=True):
@@ -59,7 +63,10 @@ class WorkoutEntryModel(SQLModel, table=True):
     weight_unit: WeightUnit | None = Field(
         sa_column=Column(Enum(WeightUnit), nullable=True), default=None
     )
-    exercise: "ExerciseModel" = Relationship(sa_relationship_kwargs={"uselist": False})
+    exercise_uuid: UUID_TYPE = Field(foreign_key="exercise.uuid")
+    exercise: "ExerciseModel" = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[WorkoutEntryModel.exercise_uuid]"}
+    )
 
     sets: list["WorkoutSetModel"] = Relationship(back_populates="entry")
 
