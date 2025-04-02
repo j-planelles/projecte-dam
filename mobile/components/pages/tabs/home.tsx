@@ -1,9 +1,12 @@
 import { Paint, useFont } from "@shopify/react-native-skia";
 import { Link, useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { Avatar, Button, MD3LightTheme } from "react-native-paper";
 import { Bar, CartesianChart } from "victory-native";
+import { useShallow } from "zustand/react/shallow";
 import roboto from "../../../assets/fonts/Roboto-Regular.ttf";
+import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
+import { useAuthStore } from "../../../store/auth-store";
 import {
 	CalendarIcon,
 	CloseIcon,
@@ -14,7 +17,7 @@ import CompactChip from "../../ui/CompactChip";
 import InfoCard from "../../ui/InfoCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 import WorkoutCard from "../../ui/WorkoutCard";
-import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
+import { useQuery } from "@tanstack/react-query";
 
 export default function HomePage() {
 	return (
@@ -50,16 +53,46 @@ export default function HomePage() {
 }
 
 const ProfilePictureHeader = () => {
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["user", "/auth/profile"],
+		queryFn: async () =>
+			await apiClient.get("/auth/profile", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+	});
 	return (
-		<View className="flex-1 flex-row items-center gap-4">
-			<Avatar.Text size={48} label="J" />
-			<View className="flex-1">
-				<Text className="text-xl font-bold">Jordi Planelles Pérez</Text>
-				<View className="flex-row gap-2">
-					<CompactChip>100 workouts</CompactChip>
-					<CompactChip>3 this week</CompactChip>
+		<View className="flex-1 flex-row items-center gap-4 min-h-20">
+			{error && (
+				<View className="flex-1">
+					<Text>Failed to load user data.</Text>
 				</View>
-			</View>
+			)}
+			{isLoading && (
+				<View className="flex-1">
+					<ActivityIndicator size="large" />
+				</View>
+			)}
+			{data && (
+				<>
+					<Avatar.Text
+						size={52}
+						label={data ? data?.full_name.charAt(0).toUpperCase() : ""}
+					/>
+					<View className="flex-1 gap-1">
+						<Text className="text-xl font-bold">{data?.full_name}</Text>
+						<View className="flex-row gap-2">
+							<CompactChip>100 workouts</CompactChip>
+							<CompactChip>3 this week</CompactChip>
+						</View>
+					</View>
+				</>
+			)}
 			<Link asChild href="/settings/">
 				<Pressable>
 					<SettingsIcon />

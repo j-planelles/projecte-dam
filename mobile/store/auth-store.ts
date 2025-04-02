@@ -21,7 +21,7 @@ export const useAuthStore = create<AuthStoreType>((set) => ({
 	apiClient: api,
 	setServerIp: (serverIp: string) =>
 		set({ serverIp: serverIp, apiClient: createApiClient(serverIp) }),
-	username: "j.planelles",
+	username: "",
 	setUsername: (username: string) => set({ username: username }),
 	passwordHash: "",
 	setPasswordHash: (passwordHash: string) =>

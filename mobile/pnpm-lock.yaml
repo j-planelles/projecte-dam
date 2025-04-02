@@ -14,6 +14,9 @@ importers:
       '@shopify/react-native-skia':
         specifier: 1.5.0
         version: 1.5.0(react-native-reanimated@3.16.2(@babel/core@7.26.10)(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1))(react-native@0.76.7(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-query':
+        specifier: ^5.71.3
+        version: 5.71.3(react@18.3.1)
       '@zodios/core':
         specifier: ^10.9.6
         version: 10.9.6(axios@1.8.4)(zod@3.24.2)
@@ -1223,6 +1226,14 @@ packages:
 
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
+
+  '@tanstack/query-core@5.71.3':
+    resolution: {integrity: sha512-SW7PXYpKiQCZU5pPOXG2UiHX1oSAxLyxoJiYbQ3aLYiABJW0UnfBZ9PVnO/x4ZCIVK30wfDn0h6Mrsr10q922Q==}
+
+  '@tanstack/react-query@5.71.3':
+    resolution: {integrity: sha512-4GZxKqiMX+CH4CxXiUBNipbqzk2V5jUU8Z4d6J+lSDu8OejcLtjx1hEDJzabFZHwd+ZHCsYLAJmM54kCS1/ekA==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -5894,6 +5905,13 @@ snapshots:
       '@sinonjs/commons': 3.0.1
 
   '@standard-schema/utils@0.3.0': {}
+
+  '@tanstack/query-core@5.71.3': {}
+
+  '@tanstack/react-query@5.71.3(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.71.3
+      react: 18.3.1
 
   '@types/babel__core@7.20.5':
     dependencies:
