@@ -1,11 +1,6 @@
 import { create } from "zustand";
 
 type UserRegistrationStoreType = {
-	username: string;
-	setUsername: (username: string) => void;
-	passwordHash: string;
-	setPasswordHash: (passwordHash: string) => void;
-	hashPassword: (password: string) => void;
 	name: string;
 	setName: (name: string) => void;
 	biography: string;
@@ -19,13 +14,6 @@ type UserRegistrationStoreType = {
 
 export const useUserRegistrationStore = create<UserRegistrationStoreType>(
 	(set) => ({
-		username: "",
-		setUsername: (username: string) => set({ username }),
-		passwordHash: "",
-		setPasswordHash: (passwordHash: string) => set({ passwordHash }),
-		hashPassword: (password: string) => {
-			set({ passwordHash: password }); // TODO: Implement hashing
-		},
 		name: "",
 		setName: (name: string) => set({ name }),
 		biography: "",

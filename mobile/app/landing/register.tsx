@@ -1,14 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
-import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
-import { monocromePaperTheme } from "../../lib/paperThemes";
-import { useUserRegistrationStore } from "../../store/registration-store";
 import { useShallow } from "zustand/react/shallow";
+import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { monocromePaperTheme } from "../../lib/paperThemes";
+import { useAuthStore } from "../../store/auth-store";
 
 const schema = z
 	.object({
@@ -25,6 +26,7 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterPage() {
 	const router = useRouter();
+	const apiClient = useAuthStore((store) => store.apiClient);
 	const {
 		control,
 		handleSubmit,
@@ -32,20 +34,46 @@ export default function LandingRegisterPage() {
 		formState: { errors, isSubmitting },
 	} = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-	const { setUsername, hashPassword } = useUserRegistrationStore(
+	const { setUsername, hashPassword, setToken } = useAuthStore(
 		useShallow((state) => ({
 			setUsername: state.setUsername,
 			hashPassword: state.hashPassword,
+			setToken: state.setToken,
 		})),
 	);
 
-	const submitHandler = ({ username, password }: FormSchemaType) => {
-		setUsername(username);
-		hashPassword(password);
+	const submitHandler = async ({ username, password }: FormSchemaType) => {
+		try {
+			setUsername(username);
+			hashPassword(password);
 
-		// TODO: Check if username is already taken
+			await apiClient.post("/auth/register", undefined, {
+				queries: { username: username, password: password },
+			});
 
-		router.push("/landing/register-profile");
+			const response = await apiClient.post("/auth/token", {
+				username: username,
+				password: password,
+			});
+			setToken(response.access_token);
+			console.log(response.access_token);
+
+			router.push("/landing/register-profile");
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				if (error?.response?.status === 409) {
+					setError("username", {
+						type: "manual",
+						message: "Username already taken.",
+					});
+				} else {
+					setError("root", {
+						type: "manual",
+						message: "Something went wrong.",
+					});
+				}
+			}
+		}
 	};
 
 	return (
