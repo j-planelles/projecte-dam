@@ -19,6 +19,11 @@ class UserModel(UserSchema, table=True):
             nullable=False,
         )
     )
+
+    username: str = Field(unique=True, default="")
+    full_name: str = ""
+    biography: str | None = None
+
     hashed_password: str
 
     trainer: Optional["TrainerModel"] = Relationship()

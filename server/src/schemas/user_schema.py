@@ -1,7 +1,7 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel
 
 
 class UserSchema(SQLModel):
-    username: str = Field(unique=True)
-    full_name: str
+    username: str | None = None
+    full_name: str | None = None
     biography: str | None = None
