@@ -6,6 +6,7 @@ import { useUserRegistrationStore } from "../../store/registration-store";
 import { useShallow } from "zustand/react/shallow";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MOCK_LIKES = [
 	"CrossFit",
@@ -41,6 +42,7 @@ const MOCK_LIKES = [
 
 export default function RegisterLikesPage() {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const { likes, addLike, removeLike } = useUserRegistrationStore(
 		useShallow((state) => ({
@@ -61,6 +63,8 @@ export default function RegisterLikesPage() {
 
 	const handleSubmit = () => {
 		console.log(likes.map((likeIndex) => MOCK_LIKES[likeIndex]));
+		
+		queryClient.invalidateQueries({queryKey: ["user"]});
 
 		router.dismissAll();
 	};

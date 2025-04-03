@@ -11,7 +11,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "^4.1.3",
 		"@shopify/react-native-skia": "1.5.0",
-		"@tanstack/react-query": "^5.71.3",
+		"@tanstack/react-query": "^5.71.5",
 		"@zodios/core": "^10.9.6",
 		"axios": "^1.8.4",
 		"expo": "~52.0.42",
