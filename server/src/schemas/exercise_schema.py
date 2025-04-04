@@ -13,17 +13,20 @@ class DefaultExerciseSchema(SQLModel):
 
 class ExerciseSchema(DefaultExerciseSchema):
     uuid: UUID_TYPE
-    userNote: str | None = None
-    isDisabled: bool = Field(default=False)
-    deafult_exercise_uuid: UUID_TYPE | None = Field(
+    user_note: str | None = None
+    is_disabled: bool = Field(default=False)
+    default_exercise_uuid: UUID_TYPE | None = Field(
         foreign_key="default_exercise.uuid", default=None
     )
+    body_part: BodyPart
+    type: ExerciseType
 
 
 class ExerciseInputSchema(BaseModel):
     uuid: UUID_TYPE | None = None
-    userNote: str | None = None
+    user_note: str | None = None
     name: str
     description: str | None = None
-    bodyPart: BodyPart
+    body_part: BodyPart
     type: ExerciseType
+    default_exercise_uuid: UUID_TYPE | None = None

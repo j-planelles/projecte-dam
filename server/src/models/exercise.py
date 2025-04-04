@@ -1,12 +1,13 @@
 from uuid import UUID as UUID_TYPE
-import sqlalchemy as sa
 from uuid import uuid4
 
+import sqlalchemy as sa
 from schemas.exercise_schema import DefaultExerciseSchema, ExerciseSchema
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlmodel import Column, Enum, Field
-
 from schemas.types.enums import BodyPart, ExerciseType
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlmodel import Column, Enum, Field, Relationship
+
+from models.users import UserModel
 
 
 class ExerciseModel(ExerciseSchema, table=True):
@@ -20,8 +21,10 @@ class ExerciseModel(ExerciseSchema, table=True):
             nullable=False,
         )
     )
-    bodyPart: BodyPart = Field(sa_column=sa.Column(Enum(BodyPart), nullable=False))
+    body_part: BodyPart = Field(sa_column=sa.Column(Enum(BodyPart), nullable=False))
     type: ExerciseType = Field(sa_column=sa.Column(Enum(ExerciseType), nullable=False))
+
+    creator_uuid: UUID_TYPE = Field(foreign_key="users.uuid")
 
 
 class DefaultExerciseModel(DefaultExerciseSchema, table=True):
@@ -35,5 +38,5 @@ class DefaultExerciseModel(DefaultExerciseSchema, table=True):
             nullable=False,
         )
     )
-    bodyPart: BodyPart = Field(sa_column=sa.Column(Enum(BodyPart), nullable=False))
+    body_part: BodyPart = Field(sa_column=sa.Column(Enum(BodyPart), nullable=False))
     type: ExerciseType = Field(sa_column=sa.Column(Enum(ExerciseType), nullable=False))
