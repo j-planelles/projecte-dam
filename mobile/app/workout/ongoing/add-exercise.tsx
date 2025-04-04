@@ -1,20 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import {
 	Appbar,
 	Button,
 	Chip,
+	HelperText,
 	List,
 	Searchbar,
 	Text,
 	useTheme,
 } from "react-native-paper";
+import { v4 as uuidv4 } from "uuid";
+import { useShallow } from "zustand/react/shallow";
 import { DumbellIcon, FilterIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
-import { useExerciseStore } from "../../../store/exercise-store";
-import { useWorkoutStore } from "../../../store/workout-store";
-import { useRouter } from "expo-router";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
 export default function OngoingWorkoutAddExercisePage() {
 	const theme = useTheme();
@@ -22,35 +27,131 @@ export default function OngoingWorkoutAddExercisePage() {
 
 	const addExercises = useWorkoutStore((state) => state.addExercises);
 
-	const exercises = useExerciseStore((state) => state.exercises);
-	const sortedExercises = useMemo(
-		() =>
-			(JSON.parse(JSON.stringify(exercises)) as exercise[]).sort((a, b) => {
-				const nameA = a.name;
-				const nameB = b.name;
-
-				if (nameA < nameB) {
-					return -1;
-				}
-				if (nameA > nameB) {
-					return 1;
-				}
-				return 0;
-			}),
-		[exercises],
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
 	);
 
+	const userExercisesQuery = useQuery({
+		queryKey: ["user", "/user/exercises"],
+		queryFn: async () =>
+			await apiClient.get("/user/exercises", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+	});
+	const defaultExercisesQuery = useQuery({
+		queryKey: ["user", "/default-exercises"],
+		queryFn: async () =>
+			await apiClient.get("/default-exercises", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+		staleTime: 2 * 60 * 60 * 1000, // 2 hores
+	});
+
+	const sortedExercises = useMemo(() => {
+		const defaultExercisesFilter: string[] = [];
+		const userExercises: exerciseList[] =
+			userExercisesQuery.isSuccess && Array.isArray(userExercisesQuery.data)
+				? userExercisesQuery.data.map((item) => {
+						if (item.default_exercise_uuid) {
+							defaultExercisesFilter.push(item.default_exercise_uuid);
+						}
+
+						return {
+							uuid: item.uuid,
+							name: item.name,
+							description: item.description,
+							type: item.type,
+							bodyPart: item.body_part,
+							userNote: item.user_note,
+							isDefault: false,
+							default_exercise_uuid: item.default_exercise_uuid,
+						} as exerciseList;
+					})
+				: [];
+		const defaultExercises: exerciseList[] =
+			defaultExercisesQuery.isSuccess &&
+			Array.isArray(defaultExercisesQuery.data)
+				? defaultExercisesQuery.data
+						.map(
+							(item) =>
+								({
+									uuid: item.uuid,
+									name: item.name,
+									description: item.description,
+									type: item.type,
+									bodyPart: item.body_part,
+									isDefault: true,
+								}) as exerciseList,
+						)
+						.filter((item) => defaultExercisesFilter.indexOf(item.uuid) === -1)
+				: [];
+		return [...userExercises, ...defaultExercises].sort((a, b) =>
+			a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+		);
+	}, [
+		defaultExercisesQuery.data,
+		defaultExercisesQuery.isSuccess,
+		userExercisesQuery.data,
+		userExercisesQuery.isSuccess,
+	]);
+
 	const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [globalError, setGlobalError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>("");
 
-	const addExerciseHandler = () => {
-		const exercisesToAdd: workoutExercise[] = exercises
-			.filter((item) => selectedExercises.includes(item.uuid))
-			.map((item) => ({ exercise: item, sets: [] }));
+	const disableControls =
+		isLoading ||
+		userExercisesQuery.isLoading ||
+		defaultExercisesQuery.isLoading;
 
-		addExercises(exercisesToAdd);
+	const addExerciseHandler = async () => {
+		setIsLoading(true);
+		setGlobalError(null);
+		try {
+			const userExercisesToAdd = sortedExercises.filter(
+				(item) => selectedExercises.includes(item.uuid) && !item.isDefault,
+			);
 
-		router.back();
+			const defaultExercisesToAdd = sortedExercises.filter(
+				(item) => selectedExercises.includes(item.uuid) && item.isDefault,
+			);
+
+			for (const exercise of defaultExercisesToAdd) {
+				await apiClient.post(
+					"/user/exercises",
+					{
+						uuid: uuidv4(),
+						name: exercise.name,
+						description: exercise.description,
+						type: exercise.type,
+						body_part: exercise.bodyPart,
+						default_exercise_uuid: exercise.uuid,
+					},
+					{
+						headers: { Authorization: `Bearer ${token}` },
+					},
+				);
+
+				userExercisesToAdd.push(exercise);
+			}
+
+			const exercisesToAdd: workoutExercise[] = userExercisesToAdd.map(
+				(item) => ({ exercise: item, sets: [] }),
+			);
+
+			addExercises(exercisesToAdd);
+
+			router.back();
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				setGlobalError(error.message);
+			}
+		}
+		setIsLoading(false);
 	};
 
 	return (
@@ -70,7 +171,7 @@ export default function OngoingWorkoutAddExercisePage() {
 			<FlatList
 				data={sortedExercises}
 				keyExtractor={(item) =>
-					item.uuid ? item.uuid : Math.random().toString()
+					`${item.isDefault ? "default" : "user"}-${item.uuid}`
 				}
 				renderItem={({ item }) => (
 					<List.Item
@@ -105,13 +206,20 @@ export default function OngoingWorkoutAddExercisePage() {
 				<View className="px-4 py-2 gap-2">
 					<View className="flex-row gap-2 flex-wrap">
 						{selectedExercises.map((exerciseId) => {
-							const exercise = exercises.filter(
+							const exercise = sortedExercises.filter(
 								(item) => item.uuid === exerciseId,
 							)[0];
 							return <Chip key={exerciseId}>{exercise.name}</Chip>;
 						})}
 					</View>
-					<Button mode="contained" onPress={addExerciseHandler}>
+					{globalError !== null && (
+						<HelperText type="error">{globalError}</HelperText>
+					)}
+					<Button
+						mode="contained"
+						onPress={addExerciseHandler}
+						disabled={disableControls}
+					>
 						{selectedExercises.length > 1
 							? `Add ${selectedExercises.length} exercises`
 							: "Add exercise"}

@@ -17,7 +17,7 @@ type AuthStoreType = {
 };
 
 export const useAuthStore = create<AuthStoreType>((set) => ({
-	serverIp: "http://192.168.131.234:8002",
+	serverIp: "http://10.7.0.8:8002",
 	apiClient: api,
 	setServerIp: (serverIp: string) =>
 		set({ serverIp: serverIp, apiClient: createApiClient(serverIp) }),

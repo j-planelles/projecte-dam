@@ -26,7 +26,13 @@ type exercise = {
 		| "legs"
 		| "olympic"
 		| "other";
+	userNote?: string;
 	description?: string;
+};
+
+type exerciseList = exercise & {
+	isDefault: boolean;
+	default_exercise_uuid: string;
 };
 
 type exerciseSet = {
