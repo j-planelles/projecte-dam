@@ -8,9 +8,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - PORT=8002
-      - DATABASE_URL=postgresql+psycopg://time-user:time-pw@postgres:5432/timescaledb
     env_file:
       - .env
     ports:
@@ -33,19 +30,19 @@ services:
     image: postgres:17
     env_file:
       - .env
-    # volumes:
-    # - postgres_data:/var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  # adminer:
-  #   image: adminer:latest
-  #   container_name: adminer_web
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - postgres
-  #   environment:
-  #     ADMINER_DEFAULT_SERVER: postgres
+  adminer:
+    image: adminer:latest
+    container_name: adminer_web
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
 
 volumes:
   postgres_data:
