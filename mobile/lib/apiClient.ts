@@ -101,6 +101,77 @@ const ExerciseSchema = z
     type: ExerciseType,
   })
   .passthrough();
+const WorkoutInstanceSchema = z
+  .object({ timestamp_start: z.number().int(), duration: z.number().int() })
+  .passthrough();
+const WeightUnit = z.enum(["metric", "imperial"]);
+const ExerciseInputSchema = z
+  .object({
+    uuid: z.union([z.string(), z.null()]).optional(),
+    user_note: z.union([z.string(), z.null()]).optional(),
+    name: z.string(),
+    description: z.union([z.string(), z.null()]).optional(),
+    body_part: BodyPart,
+    type: ExerciseType,
+    default_exercise_uuid: z.union([z.string(), z.null()]).optional(),
+  })
+  .passthrough();
+const WorkoutSetSchema = z
+  .object({
+    reps: z.union([z.number(), z.null()]).optional(),
+    weight: z.number(),
+  })
+  .passthrough();
+const WorkoutEntrySchema_Output = z
+  .object({
+    rest_countdown_duration: z.union([z.number(), z.null()]).optional(),
+    note: z.union([z.string(), z.null()]).optional(),
+    weight_unit: z.union([WeightUnit, z.null()]).optional(),
+    exercise: ExerciseInputSchema,
+    sets: z.array(WorkoutSetSchema),
+  })
+  .passthrough();
+const GymSchema = z
+  .object({
+    uuid: z.string().uuid(),
+    name: z.string(),
+    description: z.string(),
+    address: z.string(),
+  })
+  .passthrough();
+const WorkoutContentSchema_Output = z
+  .object({
+    uuid: z.union([z.string(), z.null()]).optional(),
+    name: z.string(),
+    description: z.union([z.string(), z.null()]).optional(),
+    isPublic: z.boolean().optional().default(false),
+    instance: z.union([WorkoutInstanceSchema, z.null()]).optional(),
+    entries: z.array(WorkoutEntrySchema_Output),
+    gym_id: z.union([z.string(), z.null()]).optional(),
+    gym: z.union([GymSchema, z.null()]).optional(),
+  })
+  .passthrough();
+const WorkoutEntrySchema_Input = z
+  .object({
+    rest_countdown_duration: z.union([z.number(), z.null()]).optional(),
+    note: z.union([z.string(), z.null()]).optional(),
+    weight_unit: z.union([WeightUnit, z.null()]).optional(),
+    exercise: ExerciseInputSchema,
+    sets: z.array(WorkoutSetSchema),
+  })
+  .passthrough();
+const WorkoutContentSchema_Input = z
+  .object({
+    uuid: z.union([z.string(), z.null()]).optional(),
+    name: z.string(),
+    description: z.union([z.string(), z.null()]).optional(),
+    isPublic: z.boolean().optional().default(false),
+    instance: z.union([WorkoutInstanceSchema, z.null()]).optional(),
+    entries: z.array(WorkoutEntrySchema_Input),
+    gym_id: z.union([z.string(), z.null()]).optional(),
+    gym: z.union([GymSchema, z.null()]).optional(),
+  })
+  .passthrough();
 const HealthCheck = z
   .object({ name: z.string(), version: z.string() })
   .passthrough();
@@ -117,6 +188,15 @@ export const schemas = {
   DefaultExerciseModel,
   ExerciseModel,
   ExerciseSchema,
+  WorkoutInstanceSchema,
+  WeightUnit,
+  ExerciseInputSchema,
+  WorkoutSetSchema,
+  WorkoutEntrySchema_Output,
+  GymSchema,
+  WorkoutContentSchema_Output,
+  WorkoutEntrySchema_Input,
+  WorkoutContentSchema_Input,
   HealthCheck,
 };
 
@@ -334,6 +414,74 @@ const endpoints = makeApi([
       },
     ],
     response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/workouts",
+    alias: "Get_user_workouts_user_workouts_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "offset",
+        type: "Query",
+        schema: z.number().int().optional().default(0),
+      },
+      {
+        name: "limit",
+        type: "Query",
+        schema: z.number().int().optional().default(25),
+      },
+    ],
+    response: z.array(WorkoutContentSchema_Output),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/user/workouts",
+    alias: "Add_user_workout_to_history_user_workouts_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: WorkoutContentSchema_Input,
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/workouts/:workout_uuid",
+    alias: "Get_user_workouts_user_workouts__workout_uuid__get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "workout_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutContentSchema_Output,
     errors: [
       {
         status: 422,

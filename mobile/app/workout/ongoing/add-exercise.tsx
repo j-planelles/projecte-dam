@@ -121,10 +121,11 @@ export default function OngoingWorkoutAddExercisePage() {
 			);
 
 			for (const exercise of defaultExercisesToAdd) {
+				const exerciseUUID = uuidv4();
 				await apiClient.post(
 					"/user/exercises",
 					{
-						uuid: uuidv4(),
+						uuid: exerciseUUID,
 						name: exercise.name,
 						description: exercise.description,
 						type: exercise.type,
@@ -136,7 +137,7 @@ export default function OngoingWorkoutAddExercisePage() {
 					},
 				);
 
-				userExercisesToAdd.push(exercise);
+				userExercisesToAdd.push({ ...exercise, uuid: exerciseUUID });
 			}
 
 			const exercisesToAdd: workoutExercise[] = userExercisesToAdd.map(

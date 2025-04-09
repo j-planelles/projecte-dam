@@ -50,12 +50,12 @@ type workoutExercise = {
 };
 
 type workout = {
-	uuid: string;
+	uuid?: string;
 	title: string;
 	timestamp: number;
 	duration: number;
-	gym: string;
-	creator: string;
+	gym?: string;
+	creator?: string;
 	description: string;
 	exercises: workoutExercise[];
 };

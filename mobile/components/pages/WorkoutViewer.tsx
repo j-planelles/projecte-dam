@@ -39,8 +39,9 @@ const WorkoutInformation = ({
 	creator: boolean;
 }) => {
 	const timestampDate = new Date(workout.timestamp);
-	const durationDate = new Date(workout.duration);
-	const durationText = `${String(durationDate.getHours()).padStart(2, "0")}:${String(durationDate.getMinutes()).padStart(2, "0")}`;
+	const durationSeconds = Math.trunc(workout.duration % 60);
+	const durationMinutes = Math.trunc(workout.duration / 60);
+	const durationText = `${durationMinutes}:${String(durationSeconds).padStart(2, "0")}`;
 
 	return (
 		<View className="px-4 gap-2">
@@ -49,7 +50,9 @@ const WorkoutInformation = ({
 				{creator && <Text variant="titleSmall">by {workout.creator}</Text>}
 			</View>
 
-			<Text variant="bodyLarge">{workout.description}</Text>
+			{workout.description && (
+				<Text variant="bodyLarge">{workout.description}</Text>
+			)}
 
 			{timestamp && (
 				<Text variant="titleMedium">
@@ -57,7 +60,9 @@ const WorkoutInformation = ({
 				</Text>
 			)}
 
-			{location && <Text variant="titleMedium">{workout.gym}</Text>}
+			{location && workout.gym && (
+				<Text variant="titleMedium">{workout.gym}</Text>
+			)}
 		</View>
 	);
 };

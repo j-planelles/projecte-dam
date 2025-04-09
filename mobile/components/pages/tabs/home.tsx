@@ -44,10 +44,6 @@ export default function HomePage() {
 			<Text className="text-lg font-bold">History</Text>
 
 			<WorkoutsList />
-
-			<Link href="/workout/history-list" asChild>
-				<Button mode="text">View all</Button>
-			</Link>
 		</HomeTabsScreen>
 	);
 }
@@ -152,16 +148,76 @@ const WorkoutsChart = () => {
 
 const WorkoutsList = () => {
 	const router = useRouter();
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
+	const { data, isLoading, isSuccess, error } = useQuery({
+		queryKey: ["user", "/user/workouts"],
+		queryFn: async () =>
+			await apiClient.get("/user/workouts", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+	});
 
 	return (
 		<>
-			{SAMPLE_WORKOUTS.map((workout) => (
-				<WorkoutCard
-					key={workout.uuid}
-					workout={workout}
-					onPress={() => router.push(`/workout/workout-view/${workout.uuid}`)}
-				/>
-			))}
+			{isLoading && (
+				<View>
+					<ActivityIndicator size={"large"} />
+				</View>
+			)}
+			{error && (
+				<View>
+					<Text>{error.message}</Text>
+				</View>
+			)}
+			{isSuccess && (
+				<>
+					{data
+						.map(
+							(data) =>
+								({
+									uuid: data.uuid,
+									title: data.name,
+									description: data.description,
+									timestamp: data.instance?.timestamp_start || 0,
+									duration: data.instance?.duration || 0,
+									exercises: data.entries.map((entry) => ({
+										restCountdownDuration: entry.rest_countdown_duration,
+										weightUnit: entry.weight_unit,
+										exercise: {
+											uuid: entry.exercise.uuid,
+											name: entry.exercise.name,
+											description: entry.exercise.description,
+											userNote: entry.exercise.user_note,
+											bodyPart: entry.exercise.body_part,
+											type: entry.exercise.type,
+										},
+										sets: entry.sets.map((set) => ({
+											reps: set.reps,
+											weight: set.weight,
+										})),
+									})),
+								}) as workout,
+						)
+						.map((workout) => (
+							<WorkoutCard
+								key={workout.uuid}
+								workout={workout}
+								onPress={() =>
+									router.push(`/workout/workout-view/${workout.uuid}`)
+								}
+							/>
+						))}
+
+					<Link href="/workout/history-list" asChild>
+						<Button mode="text">View all</Button>
+					</Link>
+				</>
+			)}
 		</>
 	);
 };

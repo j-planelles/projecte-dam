@@ -9,7 +9,6 @@ import {
 	Menu,
 	Portal,
 	ProgressBar,
-	SegmentedButtons,
 	Text,
 	useTheme,
 } from "react-native-paper";
@@ -23,17 +22,18 @@ import {
 } from "../../../components/Icons";
 import WorkoutEditor from "../../../components/pages/WorkoutEditor";
 import Header from "../../../components/ui/Header";
+import { ThemedView } from "../../../components/ui/screen/Screen";
 import {
 	useRestCountdown,
 	useRestCountdownControl,
-	useRestCountdownDisplay,
 } from "../../../store/rest-timer-context";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function OngoingWorkoutPage() {
 	const [timerDialogVisible, setTimerDialogVisible] = useState<boolean>(false);
 	const [cancelWorkoutDialogVisible, setCancelWorkoutDialogVisible] =
+		useState<boolean>(false);
+	const [finishWorkoutDialogVisible, setFinishWorkoutDialogVisible] =
 		useState<boolean>(false);
 
 	return (
@@ -41,6 +41,7 @@ export default function OngoingWorkoutPage() {
 			<HeaderComponent
 				setTimerDialogVisible={setTimerDialogVisible}
 				setCancelWorkoutDialogVisible={setCancelWorkoutDialogVisible}
+				setFinishWorkoutDialogVisible={setFinishWorkoutDialogVisible}
 			/>
 			<WorkoutEditor />
 			<TimerDialog
@@ -51,6 +52,10 @@ export default function OngoingWorkoutPage() {
 				visible={cancelWorkoutDialogVisible}
 				setVisible={setCancelWorkoutDialogVisible}
 			/>
+			<FinishWorkoutDialog
+				visible={finishWorkoutDialogVisible}
+				setVisible={setFinishWorkoutDialogVisible}
+			/>
 		</ThemedView>
 	);
 }
@@ -58,9 +63,11 @@ export default function OngoingWorkoutPage() {
 const HeaderComponent = ({
 	setTimerDialogVisible,
 	setCancelWorkoutDialogVisible,
+	setFinishWorkoutDialogVisible,
 }: {
 	setTimerDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 	setCancelWorkoutDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
+	setFinishWorkoutDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const theme = useTheme();
 	const insets = useSafeAreaInsets();
@@ -96,7 +103,10 @@ const HeaderComponent = ({
 				statusBarHeight={insets.top}
 			>
 				<Menu.Item
-					onPress={() => {}}
+					onPress={() => {
+						setFinishWorkoutDialogVisible(true);
+						setMenuVisible(false);
+					}}
 					title="Finish workout"
 					leadingIcon={(props) => <CheckIcon {...props} />}
 				/>
@@ -229,13 +239,13 @@ const CancelWorkoutDialog = ({
 	setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
 	const cancelWorkout = useWorkoutStore((state) => state.cancelWorkout);
-  const router = useRouter()
+	const router = useRouter();
 
-  const cancelWorkoutHandler = () => {
-    cancelWorkout()
-    setVisible(false);
-    router.back()
-  }
+	const cancelWorkoutHandler = () => {
+		cancelWorkout();
+		setVisible(false);
+		router.back();
+	};
 
 	return (
 		<Portal>
@@ -243,6 +253,37 @@ const CancelWorkoutDialog = ({
 				<Dialog.Content>
 					<Text variant="bodyMedium">
 						Are you sure you want to cancel the current workout?
+					</Text>
+				</Dialog.Content>
+				<Dialog.Actions>
+					<Button onPress={() => setVisible(false)}>No</Button>
+					<Button onPress={cancelWorkoutHandler}>Yes</Button>
+				</Dialog.Actions>
+			</Dialog>
+		</Portal>
+	);
+};
+
+const FinishWorkoutDialog = ({
+	visible,
+	setVisible,
+}: {
+	visible: boolean;
+	setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+	const router = useRouter();
+
+	const cancelWorkoutHandler = () => {
+		setVisible(false);
+		router.replace("/workout/ongoing/finish");
+	};
+
+	return (
+		<Portal>
+			<Dialog visible={visible} onDismiss={() => setVisible(false)}>
+				<Dialog.Content>
+					<Text variant="bodyMedium">
+						Are you sure you want to finish the current workout?
 					</Text>
 				</Dialog.Content>
 				<Dialog.Actions>

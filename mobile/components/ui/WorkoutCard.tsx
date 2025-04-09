@@ -54,7 +54,7 @@ export default function WorkoutCard({
 						{showCreator && <Text>by {creator}</Text>}
 					</View>
 					{showTimestamp && <Text>{timestampText}</Text>}
-					{showDescription && <Text>{description}</Text>}
+					{showDescription && description && <Text>{description}</Text>}
 					<View>
 						{exercises.map((exercise, index) => (
 							<Text key={index}>{exercise}</Text>
@@ -68,8 +68,9 @@ export default function WorkoutCard({
 
 const parseTimestamp = (timestamp: number, duration: number, gym: string) => {
 	const timestampDate = new Date(timestamp);
-	const durationDate = new Date(duration);
-	const durationText = `${String(durationDate.getHours()).padStart(2, "0")}:${String(durationDate.getMinutes()).padStart(2, "0")}`;
+	const durationSeconds = Math.trunc(duration % 60);
+	const durationMinutes = Math.trunc(duration / 60);
+	const durationText = `${durationMinutes}:${String(durationSeconds).padStart(2, "0")}`;
 
 	return `${timestampDate.toLocaleString()} for ${durationText} @ ${gym}`;
 };
