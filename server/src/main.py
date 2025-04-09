@@ -6,6 +6,7 @@ from db import engine
 from fastapi import FastAPI
 from models.core import HealthCheck
 from routes.exercise_router import router as exercise_router
+from routes.workout_router import router as workout_router
 from security import router as security_router
 from sqlmodel import SQLModel
 
@@ -25,6 +26,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(security_router)
 app.include_router(exercise_router)
+app.include_router(workout_router)
 
 
 @app.get("/", response_model=HealthCheck, tags=["status"], description="Health check")

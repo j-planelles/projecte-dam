@@ -1,31 +1,19 @@
-from datetime import datetime
 from typing import List
+from uuid import UUID as UUID_TYPE
 
-from pydantic import BaseModel
-from sqlmodel import Field, SQLModel
+from sqlmodel import BigInteger, Column, Field, Numeric, SQLModel
 
 from schemas.exercise_schema import ExerciseInputSchema
 from schemas.gym_schema import GymSchema
 from schemas.types.enums import WeightUnit
 
 
-class WorkoutTemplateSchema(SQLModel):
-    name: str
-    description: str | None = None
-    isPublic: bool = Field(default=False)
-
-
-class WorkoutInstanceSchema(SQLModel):
-    timestamp_start: datetime
-    duration: datetime
-
-
-class WorkoutSetSchema(BaseModel):
+class WorkoutSetSchema(SQLModel):
     reps: int | None = None
     weight: float
 
 
-class WorkoutEntrySchema(BaseModel):
+class WorkoutEntrySchema(SQLModel):
     rest_countdown_duration: int | None = None
     note: str | None = None
     weight_unit: WeightUnit | None = None
@@ -34,14 +22,19 @@ class WorkoutEntrySchema(BaseModel):
     sets: List[WorkoutSetSchema]
 
 
-class WorkoutSchema(BaseModel):
+class WorkoutInstanceSchema(SQLModel):
+    timestamp_start: int = Field(sa_column=Column(BigInteger()))
+    duration: int
+
+
+class WorkoutContentSchema(SQLModel):
+    uuid: UUID_TYPE | None = None
     name: str
     description: str | None = None
-    isPublic: bool = False
+    isPublic: bool = Field(default=False)
 
-    timestamp_start: datetime
-    duration: datetime
-
+    instance: WorkoutInstanceSchema | None = None
     entries: list[WorkoutEntrySchema]
 
+    gym_id: UUID_TYPE | None = None
     gym: GymSchema | None = None

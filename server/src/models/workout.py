@@ -2,24 +2,23 @@ from typing import Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
-import sqlalchemy as sa
+from pydantic import ConfigDict
+
 from schemas.types.enums import WeightUnit
-from schemas.workout_schema import (
-    WorkoutInstanceSchema,
-    WorkoutTemplateSchema,
-)
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import (
+    BigInteger,
     Column,
     Enum,
     Field,
     ForeignKeyConstraint,
+    Numeric,
     Relationship,
     SQLModel,
 )
 
 
-class WorkoutContentModel(WorkoutTemplateSchema, table=True):
+class WorkoutContentModel(SQLModel, table=True):
     __tablename__ = "workout_content"  # pyright: ignore[]
     uuid: UUID_TYPE = Field(
         sa_column=Column(
@@ -30,6 +29,12 @@ class WorkoutContentModel(WorkoutTemplateSchema, table=True):
             nullable=False,
         )
     )
+
+    name: str
+    description: str | None = None
+    isPublic: bool = Field(default=False)
+
+    creator_uuid: UUID_TYPE = Field(foreign_key="users.uuid")
 
     instance: "WorkoutInstanceModel" = Relationship(
         sa_relationship_kwargs={"uselist": False}
@@ -43,11 +48,14 @@ class WorkoutContentModel(WorkoutTemplateSchema, table=True):
     )
 
 
-class WorkoutInstanceModel(WorkoutInstanceSchema, table=True):
+class WorkoutInstanceModel(SQLModel, table=True):
     __tablename__ = "workout_instance"  # pyright: ignore[]
+    # model_config = ConfigDict(arbitrary_types_allowed=True)  # pyright: ignore[]
     workout_uuid: UUID_TYPE = Field(
         foreign_key="workout_content.uuid", primary_key=True
     )
+    timestamp_start: int = Field(sa_column=Column(BigInteger()))
+    duration: int
 
 
 class WorkoutEntryModel(SQLModel, table=True):
@@ -90,5 +98,5 @@ class WorkoutSetModel(SQLModel, table=True):
     )
 
 
-from models.gym import GymModel
 from models.exercise import ExerciseModel
+from models.gym import GymModel
