@@ -34,6 +34,7 @@ async def get_user_templates(
         )
         .where(WorkoutInstanceModel.workout_uuid == None)
         .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+        .order_by(WorkoutContentModel.name)
     )
     templates = session.exec(query).all()
     return templates  # pyright: ignore[]
@@ -70,6 +71,7 @@ async def get_user_template(
 
 @router.post(
     "/user/templates",
+    response_model=WorkoutContentSchema,
     name="Create template",
     tags=["Templates"],
 )
@@ -108,7 +110,7 @@ async def add_user_workout(
                 workout_uuid=workout_entry.uuid,
                 entry_index=i,
                 index=j,
-                **input_set.model_dump(include={"reps", "weight"}),
+                **input_set.model_dump(include={"reps", "weight", "set_type"}),
             )
 
             session.add(w_set)
@@ -118,3 +120,6 @@ async def add_user_workout(
     session.add(workout_entry)
 
     session.commit()
+
+    session.refresh(workout_entry)
+    return workout_entry

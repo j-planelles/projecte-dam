@@ -107,7 +107,7 @@ async def add_user_workout(
                 workout_uuid=workout_entry.uuid,
                 entry_index=i,
                 index=j,
-                **input_set.model_dump(include={"reps", "weight"}),
+                **input_set.model_dump(include={"reps", "weight", "set_type"}),
             )
 
             session.add(w_set)

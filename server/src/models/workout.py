@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from pydantic import ConfigDict
 
-from schemas.types.enums import WeightUnit
+from schemas.types.enums import SetType, WeightUnit
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import (
     BigInteger,
@@ -87,6 +87,7 @@ class WorkoutSetModel(SQLModel, table=True):
 
     reps: int | None = None
     weight: float | None = None
+    set_type: SetType = Field(sa_column=Column(Enum(SetType)), default=SetType.NORMAL)
 
     entry: "WorkoutEntryModel" = Relationship(back_populates="sets")
 

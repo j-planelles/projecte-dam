@@ -1,16 +1,17 @@
 from typing import List
 from uuid import UUID as UUID_TYPE
 
-from sqlmodel import BigInteger, Column, Field, Numeric, SQLModel
+from sqlmodel import BigInteger, Column, Field, SQLModel
 
 from schemas.exercise_schema import ExerciseInputSchema
 from schemas.gym_schema import GymSchema
-from schemas.types.enums import WeightUnit
+from schemas.types.enums import SetType, WeightUnit
 
 
 class WorkoutSetSchema(SQLModel):
     reps: int | None = None
     weight: float
+    set_type: SetType
 
 
 class WorkoutEntrySchema(SQLModel):
