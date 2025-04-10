@@ -12,11 +12,19 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function WorkoutTab() {
 	const router = useRouter();
-	const startEmptyWorkout = useWorkoutStore((state) => state.startEmptyWorkout);
+	const { startEmptyWorkout, isOngoingWorkout } = useWorkoutStore(
+		useShallow((state) => ({
+			startEmptyWorkout: state.startEmptyWorkout,
+			isOngoingWorkout: state.isOngoingWorkout,
+		})),
+	);
 
 	const startEmptyWorkoutHandler = () => {
 		try {
-			startEmptyWorkout();
+			if (!isOngoingWorkout) {
+				startEmptyWorkout();
+			}
+
 			router.push("/workout/ongoing/");
 		} catch (error: any) {
 			if (error.message === "Ongoing workout") {
