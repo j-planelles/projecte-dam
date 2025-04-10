@@ -4,6 +4,7 @@ import { create } from "zustand";
 type WorkoutStoreType = {
 	isOngoingWorkout: boolean;
 	startEmptyWorkout: () => void;
+	startWorkout: (workout: workout) => void;
 	cancelWorkout: () => void;
 	setName: (name: string) => void;
 	setDescription: (description: string) => void;
@@ -61,6 +62,16 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
 			creator: "",
 			description: "",
 			exercises: [],
+			isOngoingWorkout: true,
+		}),
+	startWorkout: (workout: workout) =>
+		set({
+			...workout,
+			uuid: v4(),
+			timestamp: Date.now(),
+			duration: 0,
+			gym: "",
+			creator: "",
 			isOngoingWorkout: true,
 		}),
 	cancelWorkout: () => set({ isOngoingWorkout: false }),

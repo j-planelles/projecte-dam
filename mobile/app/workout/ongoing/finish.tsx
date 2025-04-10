@@ -66,6 +66,7 @@ export default function FinishWorkoutPage() {
 						sets: exercise.sets.map((set) => ({
 							reps: set.reps,
 							weight: set.weight,
+							set_type: set.type,
 						})),
 					})),
 				},

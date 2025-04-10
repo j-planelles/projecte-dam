@@ -114,7 +114,7 @@ const WorkoutSet = ({
 	return (
 		<View className="flex-1 flex-row items-center py-2 px-4">
 			<Text variant="titleMedium" className="w-12 px-4">
-				{index + 1}
+				{set.type === "normal" ? index + 1 : set.type === "dropset" ? "D" : "F"}
 			</Text>
 			<Text variant="bodyLarge" className="flex-1 px-2">
 				{set.weight} kg

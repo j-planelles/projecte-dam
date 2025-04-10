@@ -116,10 +116,12 @@ const ExerciseInputSchema = z
     default_exercise_uuid: z.union([z.string(), z.null()]).optional(),
   })
   .passthrough();
+const SetType = z.enum(["normal", "dropset", "failture"]);
 const WorkoutSetSchema = z
   .object({
     reps: z.union([z.number(), z.null()]).optional(),
     weight: z.number(),
+    set_type: SetType,
   })
   .passthrough();
 const WorkoutEntrySchema_Output = z
@@ -203,6 +205,7 @@ export const schemas = {
   WorkoutInstanceSchema,
   WeightUnit,
   ExerciseInputSchema,
+  SetType,
   WorkoutSetSchema,
   WorkoutEntrySchema_Output,
   GymSchema,
@@ -454,7 +457,7 @@ const endpoints = makeApi([
         schema: WorkoutTemplateSchema,
       },
     ],
-    response: z.unknown(),
+    response: WorkoutContentSchema_Output,
     errors: [
       {
         status: 422,

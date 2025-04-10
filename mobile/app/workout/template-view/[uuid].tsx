@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Appbar, Button, Text } from "react-native-paper";
+import { Appbar, Button, Text, HelperText } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { EditIcon, SaveIcon } from "../../../components/Icons";
 import WorkoutViewer from "../../../components/pages/WorkoutViewer";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
 import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
 export default function ViewTemplatePage() {
 	const { uuid } = useLocalSearchParams();
@@ -49,6 +50,7 @@ export default function ViewTemplatePage() {
 					sets: entry.sets.map((set) => ({
 						reps: set.reps,
 						weight: set.weight,
+						type: set.set_type,
 					})),
 				})),
 			}) as workout,
@@ -82,10 +84,40 @@ export default function ViewTemplatePage() {
 					/>
 
 					<View className="p-4">
-						<Button mode="contained">Start workout</Button>
+						<StartWorkoutButton workout={workout} />
 					</View>
 				</>
 			)}
 		</ThemedView>
 	);
 }
+
+const StartWorkoutButton = ({ workout }: { workout: workout }) => {
+	const router = useRouter();
+	const { startWorkout, isOngoingWorkout } = useWorkoutStore(
+		useShallow((state) => ({
+			startWorkout: state.startWorkout,
+			isOngoingWorkout: state.isOngoingWorkout,
+		})),
+	);
+
+	const startWorkoutHandler = () => {
+		startWorkout(workout);
+		router.replace("/workout/ongoing/");
+	};
+
+	return (
+		<>
+			{isOngoingWorkout && (
+				<HelperText type="info">A workout is already in progress.</HelperText>
+			)}
+			<Button
+				mode="contained"
+				disabled={isOngoingWorkout}
+				onPress={startWorkoutHandler}
+			>
+				Start workout
+			</Button>
+		</>
+	);
+};
