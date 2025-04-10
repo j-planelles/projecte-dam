@@ -172,6 +172,18 @@ const WorkoutContentSchema_Input = z
     gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
+const WorkoutTemplateSchema = z
+  .object({
+    uuid: z.union([z.string(), z.null()]).optional(),
+    name: z.string(),
+    description: z.union([z.string(), z.null()]).optional(),
+    isPublic: z.boolean().optional().default(false),
+    instance: z.null().optional(),
+    entries: z.array(WorkoutEntrySchema_Input),
+    gym_id: z.union([z.string(), z.null()]).optional(),
+    gym: z.union([GymSchema, z.null()]).optional(),
+  })
+  .passthrough();
 const HealthCheck = z
   .object({ name: z.string(), version: z.string() })
   .passthrough();
@@ -197,6 +209,7 @@ export const schemas = {
   WorkoutContentSchema_Output,
   WorkoutEntrySchema_Input,
   WorkoutContentSchema_Input,
+  WorkoutTemplateSchema,
   HealthCheck,
 };
 
@@ -414,6 +427,55 @@ const endpoints = makeApi([
       },
     ],
     response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/templates",
+    alias: "Get_user_templates_user_templates_get",
+    requestFormat: "json",
+    response: z.array(WorkoutContentSchema_Output),
+  },
+  {
+    method: "post",
+    path: "/user/templates",
+    alias: "Create_template_user_templates_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: WorkoutTemplateSchema,
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/templates/:template_uuid",
+    alias: "Get_user_template_user_templates__template_uuid__get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "template_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutContentSchema_Output,
     errors: [
       {
         status: 422,
