@@ -38,3 +38,7 @@ class WorkoutContentSchema(SQLModel):
 
     gym_id: UUID_TYPE | None = None
     gym: GymSchema | None = None
+
+
+class WorkoutTemplateSchema(WorkoutContentSchema):
+    instance: None = None
