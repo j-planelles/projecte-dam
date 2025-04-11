@@ -2,7 +2,6 @@ from typing import List, Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
-from schemas.config_schema import MobileAppConfigSchema
 from schemas.user_schema import UserSchema
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
@@ -26,7 +25,12 @@ class UserModel(UserSchema, table=True):
 
     hashed_password: str
 
-    trainer: Optional["TrainerModel"] = Relationship()
+    trainer_uuid: UUID_TYPE | None = Field(
+        foreign_key="trainer.user_uuid", default=None
+    )
+    trainer: Optional["TrainerModel"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[UserModel.trainer_uuid]"},
+    )
 
     config: "UserConfig" = Relationship(back_populates="user")
 
@@ -36,7 +40,11 @@ class TrainerModel(SQLModel, table=True):
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
 
     user: "UserModel" = Relationship(
-        sa_relationship_kwargs={"uselist": False, "overlaps": "trainer"}
+        sa_relationship_kwargs={
+            "uselist": False,
+            "overlaps": "trainer",
+            "foreign_keys": "[UserModel.trainer_uuid]",
+        }
     )
 
 

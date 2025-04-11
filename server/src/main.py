@@ -8,6 +8,7 @@ from models.core import HealthCheck
 from routes.exercise_router import router as exercise_router
 from routes.template_router import router as template_router
 from routes.workout_router import router as workout_router
+from routes.trainer_router import router as trainer_router
 from security import router as security_router
 from sqlmodel import SQLModel
 
@@ -29,6 +30,7 @@ app.include_router(security_router)
 app.include_router(exercise_router)
 app.include_router(workout_router)
 app.include_router(template_router)
+app.include_router(trainer_router)
 
 
 @app.get("/", response_model=HealthCheck, tags=["status"], description="Health check")

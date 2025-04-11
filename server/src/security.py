@@ -2,12 +2,12 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import jwt
-from config import OAUTH2_SECRET_KEY, OAUTH2_TOKEN_EXPIRE_MINUTES
+from sqlalchemy.orm import selectinload
 from db import get_session, session_generator
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from models.users import UserConfig, UserModel
+from models.users import TrainerModel, UserConfig, UserModel
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from schemas.config_schema import MobileAppConfigSchema
@@ -15,6 +15,7 @@ from schemas.user_schema import UserSchema
 from sqlmodel import Session, select
 
 ALGORITHM = "HS256"
+OAUTH2_SECRET_KEY = "jordiplanellesperez"
 
 
 class Token(BaseModel):
@@ -46,7 +47,7 @@ def get_user_by_username(username: str):
         return item
 
 
-def _get_user_by_uuid(uuid: str):
+def get_user_by_uuid(uuid: str):
     with session_generator as session:
         query = select(UserModel).where(UserModel.uuid == uuid)
         item = session.exec(query).first()
@@ -59,13 +60,8 @@ def _authenticate_user(username: str, password: str):
         return user
 
 
-def _create_access_token(data: dict, expires_delta: timedelta | None = None):
+def _create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, OAUTH2_SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -84,7 +80,7 @@ async def _get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(uuid=token_user_uuid)
     except InvalidTokenError:
         raise credentials_exception
-    user = _get_user_by_uuid(uuid=token_data.uuid)
+    user = get_user_by_uuid(uuid=token_data.uuid)
     if user is None:
         raise credentials_exception
     return user
@@ -108,6 +104,23 @@ async def get_current_active_user(
     return current_user
 
 
+async def get_trainer_user(
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+) -> UserModel:
+    query = select(TrainerModel).where(TrainerModel.user_uuid == current_user.uuid)
+    item = session.exec(query).first()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User is not a Trainer. Register first.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return current_user
+
+
 @router.post("/token", name="Get OAuth2 token", tags=["Authentication"])
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -120,10 +133,7 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=OAUTH2_TOKEN_EXPIRE_MINUTES)
-    access_token = _create_access_token(
-        data={"sub": str(user.uuid)}, expires_delta=access_token_expires
-    )
+    access_token = _create_access_token(data={"sub": str(user.uuid)})
     return Token(access_token=access_token, token_type="bearer")
 
 
@@ -192,4 +202,26 @@ async def disable_user(
 ):
     current_user_settings.is_disabled = True
     session.add(current_user_settings)
+    session.commit()
+
+
+@router.post(
+    "/register/trainer",
+    name="Register as a trainer",
+    tags=["Authentication", "Trainer"],
+)
+async def register_as_trainer(
+    session: Session = Depends(get_session),
+    current_user: UserModel = Depends(get_current_active_user),
+):
+    query = select(TrainerModel).where(TrainerModel.user_uuid == current_user.uuid)
+    trainer_in_db = session.exec(query).first()
+    if trainer_in_db:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User is already a trainer.",
+        )
+
+    new_trainer = TrainerModel(user_uuid=current_user.uuid)
+    session.add(new_trainer)
     session.commit()

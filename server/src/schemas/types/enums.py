@@ -37,3 +37,8 @@ class SetType(Enum):
 class WeightUnit(Enum):
     METRIC = "metric"
     IMPERIAL = "imperial"
+
+
+class TrainerRequestActions(Enum):
+    ACCEPT = "accept"
+    DENY = "deny"
