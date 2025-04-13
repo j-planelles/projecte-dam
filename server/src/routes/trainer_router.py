@@ -200,6 +200,7 @@ async def delete_recommendation(
 
 @router.get(
     "/user/trainer/search",
+    response_model=list[UserModel],
     name="Search for trainers",
     tags=["Trainer/User"],
 )
@@ -255,7 +256,7 @@ async def create_request(
 
 @router.get(
     "/user/trainer/status",
-    response_model=TrainerRequestSchema,
+    response_model=UserModel,
     name="Get request status",
     tags=["Trainer/User"],
 )
@@ -269,7 +270,8 @@ async def get_request_status(
         )
 
     query = (
-        select(TrainerRequestModel)
+        select(UserModel)
+        .join(TrainerRequestModel, UserModel.uuid == TrainerRequestModel.trainer_uuid)  # pyright: ignore[]
         .where(TrainerRequestModel.user_uuid == current_user.uuid)
         .where(TrainerRequestModel.is_processed == False)
     )
@@ -283,6 +285,7 @@ async def get_request_status(
 
 @router.get(
     "/user/trainer/info",
+    response_model=UserModel,
     name="Get trainer info",
     tags=["Trainer/User"],
 )
