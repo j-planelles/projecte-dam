@@ -359,3 +359,16 @@ export const ArrowUpIcon = ({
 		className={className}
 	/>
 );
+
+export const RefreshIcon = ({
+	size = 24,
+	color = "black",
+	className,
+}: IconProps) => (
+	<MaterialIcons
+		name="refresh"
+		size={size}
+		color={color}
+		className={className}
+	/>
+);

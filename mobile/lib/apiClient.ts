@@ -32,6 +32,7 @@ const UserModel = z
     biography: z.union([z.string(), z.null()]).optional(),
     uuid: z.string().uuid(),
     hashed_password: z.string(),
+    trainer_uuid: z.union([z.string(), z.null()]).optional(),
   })
   .passthrough();
 const UserSchema = z
@@ -186,6 +187,15 @@ const WorkoutTemplateSchema = z
     gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
+const TrainerModel = z.object({ user_uuid: z.string().uuid() }).passthrough();
+const TrainerRequestSchema = z
+  .object({
+    user: UserModel,
+    trainer: TrainerModel,
+    is_processed: z.boolean().optional().default(false),
+    created_at: z.string().datetime({ offset: true }),
+  })
+  .passthrough();
 const HealthCheck = z
   .object({ name: z.string(), version: z.string() })
   .passthrough();
@@ -213,6 +223,8 @@ export const schemas = {
   WorkoutEntrySchema_Input,
   WorkoutContentSchema_Input,
   WorkoutTemplateSchema,
+  TrainerModel,
+  TrainerRequestSchema,
   HealthCheck,
 };
 
@@ -288,6 +300,13 @@ const endpoints = makeApi([
   },
   {
     method: "post",
+    path: "/auth/register/trainer",
+    alias: "Register_as_a_trainer_auth_register_trainer_post",
+    requestFormat: "json",
+    response: z.unknown(),
+  },
+  {
+    method: "post",
     path: "/auth/token",
     alias: "Get_OAuth2_token_auth_token_post",
     requestFormat: "form-url",
@@ -327,6 +346,143 @@ const endpoints = makeApi([
       },
     ],
     response: DefaultExerciseModel,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/trainer/requests",
+    alias: "Get_requests_trainer_requests_get",
+    requestFormat: "json",
+    response: z.array(TrainerRequestSchema),
+  },
+  {
+    method: "post",
+    path: "/trainer/requests/:user_uuid",
+    alias: "Handle_request_trainer_requests__user_uuid__post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "action",
+        type: "Query",
+        schema: z.enum(["accept", "deny"]),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/trainer/users",
+    alias: "Get_paired_users_trainer_users_get",
+    requestFormat: "json",
+    response: z.unknown(),
+  },
+  {
+    method: "get",
+    path: "/trainer/users/:user_uuid/recommendation",
+    alias:
+      "Get_assigned_recommendations_trainer_users__user_uuid__recommendation_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.array(WorkoutContentSchema_Output),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/trainer/users/:user_uuid/recommendation",
+    alias:
+      "Create_recommendation_trainer_users__user_uuid__recommendation_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "workout_uuid",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/trainer/users/:user_uuid/recommendation",
+    alias:
+      "Create_recommendation_trainer_users__user_uuid__recommendation_delete",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "workout_uuid",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/trainer/users/:user_uuid/unpair",
+    alias: "Unpair_with_user_trainer_users__user_uuid__unpair_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
     errors: [
       {
         status: 422,
@@ -486,6 +642,90 @@ const endpoints = makeApi([
         schema: HTTPValidationError,
       },
     ],
+  },
+  {
+    method: "post",
+    path: "/user/trainer/cancel-request",
+    alias: "Cancel_trainer_request_user_trainer_cancel_request_post",
+    requestFormat: "json",
+    response: z.unknown(),
+  },
+  {
+    method: "get",
+    path: "/user/trainer/info",
+    alias: "Get_trainer_info_user_trainer_info_get",
+    requestFormat: "json",
+    response: UserModel,
+  },
+  {
+    method: "get",
+    path: "/user/trainer/recommendation",
+    alias: "Get_recommendations_user_trainer_recommendation_get",
+    requestFormat: "json",
+    response: z.array(WorkoutContentSchema_Output),
+  },
+  {
+    method: "get",
+    path: "/user/trainer/recommendation/:workout_uuid",
+    alias: "Get_recommendation_user_trainer_recommendation__workout_uuid__get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "workout_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutContentSchema_Output,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/user/trainer/request",
+    alias: "Create_a_request_user_trainer_request_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "trainer_uuid",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/trainer/search",
+    alias: "Search_for_trainers_user_trainer_search_get",
+    requestFormat: "json",
+    response: z.array(UserModel),
+  },
+  {
+    method: "get",
+    path: "/user/trainer/status",
+    alias: "Get_request_status_user_trainer_status_get",
+    requestFormat: "json",
+    response: UserModel,
+  },
+  {
+    method: "post",
+    path: "/user/trainer/unpair",
+    alias: "Unpair_with_trainer_user_trainer_unpair_post",
+    requestFormat: "json",
+    response: z.unknown(),
   },
   {
     method: "get",

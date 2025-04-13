@@ -5,7 +5,6 @@ import { Avatar, Button, MD3LightTheme } from "react-native-paper";
 import { Bar, CartesianChart } from "victory-native";
 import { useShallow } from "zustand/react/shallow";
 import roboto from "../../../assets/fonts/Roboto-Regular.ttf";
-import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
 import { useAuthStore } from "../../../store/auth-store";
 import {
 	CalendarIcon,
