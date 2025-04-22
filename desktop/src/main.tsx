@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
+import "./main.css";
 import RootLayout from "./routes/RootLayout";
 
 const router = createBrowserRouter([

@@ -86,7 +86,6 @@ function Layout() {
 				component="main"
 				sx={{
 					flexGrow: 1,
-					flex: "1 1 auto",
 					p: 3,
 					backgroundColor: "background.paper",
 					borderTopLeftRadius: "32px",
