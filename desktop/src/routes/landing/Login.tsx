@@ -8,7 +8,7 @@ export default function LoginPage() {
 	const submitHandler = (event: FormEvent) => {
 		event.preventDefault();
 
-		navigate("/app/dashboard");
+		navigate("/");
 	};
 
 	return (

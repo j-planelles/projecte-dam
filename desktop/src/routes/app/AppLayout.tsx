@@ -1,7 +1,8 @@
-import HomeIcon from "@mui/icons-material/Home";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
+import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import {
 	AppBar,
@@ -95,19 +96,33 @@ const TopBar = () => {
 			}}
 		>
 			<Toolbar>
+				<BackIcon />
 				<Typography
 					variant="h5"
 					noWrap
 					component="div"
 					className="flex-grow"
-					sx={{ fontWeight: "bold" }}
+					sx={{ fontWeight: "bold", marginLeft: 2 }}
 				>
 					Ultra Workout Manager
 				</Typography>
-
 				<MyAccountButton />
 			</Toolbar>
 		</AppBar>
+	);
+};
+
+const BackIcon = () => {
+	const navigate = useNavigate();
+
+	const handleBack = () => {
+		navigate(-1);
+	};
+
+	return (
+		<IconButton size="medium" color="inherit" onClick={handleBack}>
+			<ArrowBackIcon />
+		</IconButton>
 	);
 };
 
