@@ -11,6 +11,7 @@ from routes.workout_router import router as workout_router
 from routes.trainer_router import router as trainer_router
 from security import router as security_router
 from sqlmodel import SQLModel
+from fastapi.middleware.cors import CORSMiddleware
 
 
 # Aquesta funció gestiona la creació de la base de dades abans de que s'inicialitzi FastAPI
@@ -26,6 +27,16 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Fix CORS for Tauri app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # List of allowed origins
+    allow_credentials=True,  # Allow credentials (cookies, auth headers)
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
 app.include_router(security_router)
 app.include_router(exercise_router)
 app.include_router(workout_router)
