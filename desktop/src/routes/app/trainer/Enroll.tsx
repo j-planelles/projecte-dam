@@ -1,5 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Button, Container, Typography } from "@mui/material";
+import { useAuthStore } from "../../../store/auth-store";
+import { useNavigate } from "react-router";
 
 export default function TrainerEnrollPage() {
 	return (
@@ -41,14 +47,61 @@ export default function TrainerEnrollPage() {
 					Accept invitations from users eager to learn from you and grow your
 					influence!
 				</Typography>
-				<Button
-					variant="filled"
-					sx={{ marginTop: "16px" }}
-					startIcon={<PersonAddIcon />}
-				>
-					Enroll as a Trainer
-				</Button>
+				<EnrollButton />
 			</Container>
 		</>
 	);
 }
+
+const EnrollButton = () => {
+	const queryClient = useQueryClient();
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
+	const navigate = useNavigate();
+
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [queryError, setQueryError] = useState<string | null>(null);
+
+	const handleSubmit = async () => {
+		setIsLoading(true);
+		setQueryError(null);
+		try {
+			await apiClient.post("/auth/register/trainer", undefined, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
+			queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
+			navigate("/app/dashboard");
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
+			} else {
+				setQueryError(`${error?.message}`);
+				console.error(error.message);
+			}
+		}
+		setIsLoading(false);
+	};
+	return (
+		<>
+			<Button
+				variant="filled"
+				sx={{ marginTop: "16px" }}
+				startIcon={<PersonAddIcon />}
+				disabled={isLoading}
+				onClick={handleSubmit}
+			>
+				Enroll as a Trainer
+			</Button>
+			{queryError !== null && (
+				<Typography variant="body2" color="error" className="pt-2">
+					{queryError}
+				</Typography>
+			)}
+		</>
+	);
+};
