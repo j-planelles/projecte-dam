@@ -57,9 +57,9 @@ export default function NavigationBar({
 								<ListItemButton
 									component={Link}
 									to={item.path}
-									selected={currentPath === item.path}
+									selected={currentPath.startsWith(item.path)}
 									sx={
-										currentPath === item.path
+										currentPath.startsWith(item.path)
 											? {
 													backgroundColor: "action.selected",
 													"&:hover": {

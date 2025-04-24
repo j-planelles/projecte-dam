@@ -15,6 +15,7 @@ import LoginPage from "./routes/landing/Login";
 import ServerSelectionPage from "./routes/landing/ServerSelection";
 import TrainerUsersPage from "./routes/app/trainer/Users";
 import TrainerRequestsPage from "./routes/app/trainer/Requests";
+import TrainerViewUserPage from "./routes/app/trainer/ViewUser";
 
 const router = createBrowserRouter([
 	{
@@ -27,13 +28,55 @@ const router = createBrowserRouter([
 				element: <AppLayout />,
 				children: [
 					{ path: "dashboard", element: <DashboardPage /> },
-					{ path: "workouts", element: <WorkoutsPage /> },
-					{ path: "templates", element: <TemplatesPage /> },
+					{
+						path: "workouts",
+						children: [
+							{ index: true, element: <WorkoutsPage /> },
+							{ path: ":workout-uuid", element: <></> }, // TODO: View workout page
+						],
+					},
+					{
+						path: "templates",
+						children: [
+							{ index: true, element: <TemplatesPage /> },
+							{ path: "new", element: <></> }, // TODO: New template page
+							{
+								path: ":template-uuid",
+								children: [
+									{ index: true, element: <></> }, // TODO: View template page
+									{ path: "edit", element: <></> }, // TODO: Edit template page
+								],
+							},
+						],
+					},
+					{
+						path: "exercises",
+						children: [
+							{ index: true, element: <></> }, // TODO: Exercise list
+							{ path: "new", element: <></> }, // TODO: New exercise page
+							{
+								path: ":exercise-uuid",
+								children: [
+									{ index: true, element: <></> }, // TODO: View exercise page
+									{ path: "edit", element: <></> }, // TODO: Edit exercise page
+								],
+							},
+						],
+					},
 					{
 						path: "trainer",
 						children: [
 							{ path: "enroll", element: <TrainerEnrollPage /> },
-							{ path: "users", element: <TrainerUsersPage /> },
+							{
+								path: "users",
+								children: [
+									{ index: true, element: <TrainerUsersPage /> },
+									{
+										path: ":user-uuid",
+										element: <TrainerViewUserPage />,
+									},
+								],
+							},
 							{ path: "requests", element: <TrainerRequestsPage /> },
 						],
 					},

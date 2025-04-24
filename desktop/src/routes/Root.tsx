@@ -10,7 +10,7 @@ export function RootRedirector() {
 
 	useEffect(() => {
 		setTimeout(() => {
-			setIsLoggedIn(false);
+			setIsLoggedIn(true);
 			setIsLoading(false);
 		}, 100);
 	}, []);

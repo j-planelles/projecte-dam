@@ -4,6 +4,7 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import HistoryIcon from "@mui/icons-material/History";
 import {
 	AppBar,
 	Avatar,
@@ -30,11 +31,16 @@ const navItems: NavigationBarSection[] = [
 	{
 		title: "My workouts",
 		items: [
-			{ name: "Workouts", path: "/app/workouts", icon: <FitnessCenterIcon /> },
+			{ name: "Workouts", path: "/app/workouts", icon: <HistoryIcon /> },
 			{
 				name: "Templates",
 				path: "/app/templates",
 				icon: <AutoAwesomeMotionIcon />,
+			},
+			{
+				name: "Exercises",
+				path: "/app/exercises",
+				icon: <FitnessCenterIcon />,
 			},
 		],
 	},
@@ -153,30 +159,39 @@ const MyAccountButton = () => {
 					<Paper
 						elevation={3}
 						className="p-2 min-w-sm"
-						sx={{
-							backgroundColor: "background.default",
+						sx={(theme) => ({
+							backgroundColor:
+								theme.palette.mode === "dark"
+									? "background.paper"
+									: "background.default",
 							borderRadius: "20px",
 							overflow: "clip",
-						}}
+						})}
 					>
 						<Box
 							className="flex flex-row items-center gap-4 p-2"
-							sx={{
-								backgroundColor: "background.paper",
+							sx={(theme) => ({
+								backgroundColor:
+									theme.palette.mode === "dark"
+										? "background.default"
+										: "background.paper",
 								borderTopLeftRadius: "18px",
 								borderTopRightRadius: "18px",
-							}}
+							})}
 						>
 							<Avatar sx={{ backgroundColor: "primary.main" }}>J</Avatar>
 							<Typography variant="h6">Jordi Planelles</Typography>
 						</Box>
 						<Box
 							className="flex gap-4 p-2 mt-2"
-							sx={{
-								backgroundColor: "background.paper",
+							sx={(theme) => ({
+								backgroundColor:
+									theme.palette.mode === "dark"
+										? "background.default"
+										: "background.paper",
 								borderBottomLeftRadius: "18px",
 								borderBottomRightRadius: "18px",
-							}}
+							})}
 						>
 							<Button
 								variant="outlined"
