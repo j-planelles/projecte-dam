@@ -25,6 +25,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import WorkoutCard from "../../../components/WorkoutCard";
 import { SAMPLE_USERS, SAMPLE_WORKOUTS } from "../../../lib/sampleData";
+import WorkoutViewer from "../../../components/WorkoutViewer";
 
 export default function TrainerViewUserPage() {
 	return (
@@ -156,6 +157,10 @@ const WorkoutInfoModal = ({
 		onClose();
 	};
 
+	const workout = SAMPLE_WORKOUTS.filter(
+		(workout) => workout.uuid === workoutUUID,
+	)[0];
+
 	return (
 		<Dialog
 			open={workoutUUID !== null}
@@ -164,12 +169,11 @@ const WorkoutInfoModal = ({
 			fullWidth
 			scroll="paper"
 		>
-			<DialogTitle>Workout information</DialogTitle>
 			<DialogContent>
-				<DialogContentText>prova</DialogContentText>
+				{workout && <WorkoutViewer workout={workout} timestamp={false} />}
 			</DialogContent>
 			<DialogActions>
-				<Link to={`/app/template/${workoutUUID}`}>
+				<Link to={`/app/templates/${workoutUUID}/edit`}>
 					<Button startIcon={<EditIcon />}>Edit</Button>
 				</Link>
 				<Button onClick={unrecommendHandler} startIcon={<RemoveIcon />}>

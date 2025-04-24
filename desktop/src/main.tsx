@@ -7,15 +7,17 @@ import ErrorElement from "./routes/ErrorElement";
 import { RootRedirector } from "./routes/Root";
 import AppLayout from "./routes/app/AppLayout";
 import DashboardPage from "./routes/app/Dashboard";
-import TemplatesPage from "./routes/app/Templates";
-import WorkoutsPage from "./routes/app/Workouts";
+import TemplatesPage from "./routes/app/templates/Templates";
 import TrainerEnrollPage from "./routes/app/trainer/Enroll";
+import TrainerRequestsPage from "./routes/app/trainer/Requests";
+import TrainerUsersPage from "./routes/app/trainer/Users";
+import TrainerViewUserPage from "./routes/app/trainer/ViewUser";
+import ViewWorkoutPage from "./routes/app/workouts/ViewWorkout";
+import WorkoutsPage from "./routes/app/workouts/Workouts";
 import LandingLayout from "./routes/landing/LandingLayout";
 import LoginPage from "./routes/landing/Login";
 import ServerSelectionPage from "./routes/landing/ServerSelection";
-import TrainerUsersPage from "./routes/app/trainer/Users";
-import TrainerRequestsPage from "./routes/app/trainer/Requests";
-import TrainerViewUserPage from "./routes/app/trainer/ViewUser";
+import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
 
 const router = createBrowserRouter([
 	{
@@ -32,7 +34,7 @@ const router = createBrowserRouter([
 						path: "workouts",
 						children: [
 							{ index: true, element: <WorkoutsPage /> },
-							{ path: ":workout-uuid", element: <></> }, // TODO: View workout page
+							{ path: ":workout-uuid", element: <ViewWorkoutPage /> },
 						],
 					},
 					{
@@ -43,7 +45,7 @@ const router = createBrowserRouter([
 							{
 								path: ":template-uuid",
 								children: [
-									{ index: true, element: <></> }, // TODO: View template page
+									{ index: true, element: <ViewTemplatePage /> },
 									{ path: "edit", element: <></> }, // TODO: Edit template page
 								],
 							},
