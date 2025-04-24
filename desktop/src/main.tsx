@@ -18,6 +18,7 @@ import LandingLayout from "./routes/landing/LandingLayout";
 import LoginPage from "./routes/landing/Login";
 import ServerSelectionPage from "./routes/landing/ServerSelection";
 import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
+import ExerciseListPage from "./routes/app/exercises/ExerciseList";
 
 const router = createBrowserRouter([
 	{
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
 					{
 						path: "exercises",
 						children: [
-							{ index: true, element: <></> }, // TODO: Exercise list
+							{ index: true, element: <ExerciseListPage /> },
 							{ path: "new", element: <></> }, // TODO: New exercise page
 							{
 								path: ":exercise-uuid",

@@ -26,6 +26,7 @@ import { Link, useParams } from "react-router";
 import WorkoutCard from "../../../components/WorkoutCard";
 import { SAMPLE_USERS, SAMPLE_WORKOUTS } from "../../../lib/sampleData";
 import WorkoutViewer from "../../../components/WorkoutViewer";
+import SearchField from "../../../components/SearchField";
 
 export default function TrainerViewUserPage() {
 	return (
@@ -191,6 +192,8 @@ const WorkoutAddModal = ({
 	show,
 	onClose,
 }: { show: boolean; onClose: () => void }) => {
+	const [searchTerm, setSearchTerm] = useState<string>("");
+
 	const addHandler = () => {
 		onClose();
 	};
@@ -206,7 +209,22 @@ const WorkoutAddModal = ({
 			<DialogTitle>Add a template</DialogTitle>
 			<DialogContent>
 				<Box className="flex flex-1 flex-col gap-4">
-					{SAMPLE_WORKOUTS.map((workout) => (
+					<SearchField
+						value={searchTerm}
+						onValueChange={(event) => {
+							setSearchTerm(event.target.value);
+						}}
+						placeholder="Search templates"
+					/>
+
+					{SAMPLE_WORKOUTS.filter(
+						(workout) =>
+							!searchTerm ||
+							workout.title
+								.trim()
+								.toLowerCase()
+								.indexOf(searchTerm.trim().toLowerCase()) !== -1,
+					).map((workout) => (
 						<WorkoutCard
 							key={workout.uuid}
 							workout={workout}

@@ -716,3 +716,200 @@ export const SAMPLE_USERS: user[] = [
 			"Venezuelan voltage, gamer soul. 🇻⚡ Corazón fuerte, ànima gamer. Sempre ready. 👑🎮",
 	},
 ];
+
+const createExercise = (
+	name: string,
+	type: exercise["type"],
+	bodyPart: exercise["bodyPart"],
+	description?: string,
+	isDefault = true,
+): exerciseList => {
+	const id = uuidv4(); // Generate a real UUID
+	return {
+		uuid: id,
+		name,
+		type,
+		bodyPart,
+		description,
+		isDefault,
+		default_exercise_uuid: isDefault ? id : "", // Reference self if default
+	};
+};
+
+export const SAMPLE_EXERCISES: exerciseList[] = [
+	createExercise("Barbell Bench Press", "barbell", "chest"),
+	createExercise(
+		"Dumbbell Bench Press",
+		"dumbell",
+		"chest",
+		"Lie on a flat bench holding dumbbells, lower them towards your chest, and press back up.",
+	),
+	createExercise(
+		"Push-ups",
+		"bodyweight",
+		"chest",
+		"Start in a plank position, lower your chest towards the ground, and push back up.",
+	),
+	createExercise(
+		"Barbell Squat",
+		"barbell",
+		"legs",
+		"Place a barbell on your upper back, squat down until your thighs are parallel to the ground, and stand back up.",
+	),
+	createExercise(
+		"Dumbbell Lunges",
+		"dumbell",
+		"legs",
+		"Hold dumbbells at your sides, step forward with one leg, lower your hips until both knees are bent at 90 degrees, and return.",
+	),
+	createExercise(
+		"Leg Press",
+		"machine",
+		"legs",
+		"Sit in the leg press machine, place your feet on the platform, push the platform away, and control its return.",
+	),
+	createExercise(
+		"Deadlift",
+		"barbell",
+		"back", // Often considered full-body too
+		"Lift a loaded barbell off the floor until you are standing upright, keeping your back straight.",
+	),
+	createExercise(
+		"Pull-ups",
+		"bodyweight",
+		"back",
+		"Hang from a bar with an overhand grip, pull your body up until your chin is over the bar, and lower back down.",
+	),
+	createExercise(
+		"Assisted Pull-ups",
+		"assisted-bodyweight",
+		"back",
+		"Use a machine or band to assist in performing the pull-up motion.",
+	),
+	createExercise(
+		"Lat Pulldown",
+		"machine",
+		"back",
+		"Sit at the lat pulldown machine, grasp the bar, pull it down towards your chest, and control its return.",
+	),
+	createExercise(
+		"Barbell Rows",
+		"barbell",
+		"back",
+		"Bend over with a barbell, pull the bar towards your lower chest/upper abdomen, and lower it back down.",
+	),
+	createExercise(
+		"Overhead Press",
+		"barbell",
+		"shoulders",
+		"Stand or sit, press a barbell from your upper chest/shoulders overhead until arms are fully extended.",
+	),
+	createExercise(
+		"Dumbbell Lateral Raises",
+		"dumbell",
+		"shoulders",
+		"Stand holding dumbbells at your sides, raise them out to the sides until they reach shoulder height.",
+	),
+	createExercise(
+		"Shoulder Press Machine",
+		"machine",
+		"shoulders",
+		"Sit in the shoulder press machine, push the handles upward until arms are extended.",
+	),
+	createExercise(
+		"Barbell Bicep Curls",
+		"barbell",
+		"arms",
+		"Stand holding a barbell, curl it upwards towards your shoulders, keeping elbows tucked in.",
+	),
+	createExercise(
+		"Dumbbell Hammer Curls",
+		"dumbell",
+		"arms",
+		"Stand holding dumbbells with palms facing each other, curl them upwards.",
+	),
+	createExercise(
+		"Triceps Pushdowns",
+		"machine",
+		"arms",
+		"Use a cable machine with an attachment, push the attachment down until your arms are fully extended.",
+	),
+	createExercise(
+		"Dips",
+		"bodyweight",
+		"arms", // Also hits chest
+		"Support yourself on parallel bars, lower your body by bending your elbows, and push back up.",
+	),
+	createExercise(
+		"Plank",
+		"duration",
+		"core",
+		"Hold a push-up like position, resting on forearms or hands, keeping the body in a straight line.",
+	),
+	createExercise(
+		"Crunches",
+		"reps-only",
+		"core",
+		"Lie on your back, knees bent, lift your upper body towards your knees.",
+	),
+	createExercise(
+		"Russian Twists",
+		"reps-only",
+		"core",
+		"Sit on the floor, lean back slightly, twist your torso from side to side, optionally holding a weight.",
+	),
+	createExercise(
+		"Running",
+		"cardio",
+		"cardio",
+		"Run outdoors or on a treadmill at a sustained pace.",
+	),
+	createExercise(
+		"Cycling",
+		"cardio",
+		"cardio",
+		"Ride a stationary or outdoor bicycle.",
+	),
+	createExercise(
+		"Rowing",
+		"machine",
+		"cardio", // Also full-body
+		"Use a rowing machine, engaging legs, core, and back.",
+	),
+	createExercise(
+		"Burpees",
+		"bodyweight",
+		"full-body",
+		"A full body exercise involving a squat, push-up, and jump.",
+	),
+	createExercise(
+		"Kettlebell Swings",
+		"other",
+		"full-body", // Primarily targets posterior chain
+		"Swing a kettlebell from between your legs up to chest or eye level using hip thrust.",
+	),
+	createExercise(
+		"Clean and Jerk",
+		"barbell",
+		"olympic",
+		"An Olympic weightlifting movement involving lifting a barbell from the floor to overhead in two motions.",
+	),
+	createExercise(
+		"Snatch",
+		"barbell",
+		"olympic",
+		"An Olympic weightlifting movement involving lifting a barbell from the floor to overhead in one continuous motion.",
+	),
+	createExercise(
+		"Calf Raises",
+		"bodyweight", // Can also be machine or weighted
+		"legs",
+		"Stand with feet flat, raise your heels off the ground, pushing through the balls of your feet.",
+	),
+	createExercise(
+		"Wall Sit",
+		"duration",
+		"legs",
+		"Lean against a wall with knees bent at 90 degrees, as if sitting in a chair.",
+	),
+];
