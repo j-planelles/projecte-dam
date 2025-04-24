@@ -1,15 +1,43 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import type { FormEvent } from "react";
+import { useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { useShallow } from "zustand/react/shallow";
+import { useAuthStore } from "../../store/auth-store";
+
+const schema = z.object({
+	ip: z.string().url(),
+});
+
+type FormSchemaType = z.infer<typeof schema>;
 
 export default function ServerSelectionPage() {
 	const navigate = useNavigate();
+	const { serverIp, setServerIp } = useAuthStore(
+		useShallow((state) => ({
+			serverIp: state.serverIp,
+			setServerIp: state.setServerIp,
+		})),
+	);
+	const {
+		control,
+		handleSubmit,
+		setValue,
+		setError,
+		formState: { errors, isSubmitting },
+	} = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-	const submitHandler = (event: FormEvent) => {
-		event.preventDefault();
+	const submitHandler = ({ ip }: FormSchemaType) => {
+		setServerIp(ip);
 
 		navigate("/landing/login");
 	};
+
+	useEffect(() => {
+		setValue("ip", serverIp);
+	}, [serverIp]);
 
 	return (
 		<Paper
@@ -29,29 +57,49 @@ export default function ServerSelectionPage() {
 				Choose a server
 			</Typography>
 			<Box
-				component="form"
 				sx={{
-					mt: 1, // Margin top for spacing below the title
-					width: "100%", // Ensure form takes full width of the Paper
+					mt: 1,
+					width: "100%",
 				}}
-				noValidate // Disable browser validation if using custom
-				onSubmit={submitHandler}
 			>
-				<TextField
-					margin="normal"
-					required
-					fullWidth
-					id="ip"
-					label="Server IP"
+				<Controller
+					control={control}
 					name="ip"
-					placeholder="https://ultra.jplanelles.cat"
-					autoFocus
+					rules={{ required: true }}
+					render={({ field: { onChange, onBlur, value } }) => (
+						<TextField
+							margin="normal"
+							required
+							fullWidth
+							label="Server IP"
+							placeholder="https://ultra.jplanelles.cat"
+							autoFocus
+							value={value}
+							onChange={onChange}
+							onBlur={onBlur}
+							error={!!errors.ip}
+						/>
+					)}
 				/>
+
+				{errors.ip && (
+					<Typography variant="body2" color="error">
+						{errors.ip.message}
+					</Typography>
+				)}
+
+				{errors.root && (
+					<Typography variant="body2" color="error">
+						{errors.root.message}
+					</Typography>
+				)}
+
 				<Button
-					type="submit"
 					fullWidth
 					variant="filled"
 					sx={{ mt: 2, mb: 2 }} // Margin top and bottom
+					onClick={handleSubmit(submitHandler)}
+					disabled={isSubmitting}
 				>
 					Connect
 				</Button>

@@ -1,29 +1,33 @@
 import { Box, CircularProgress, CssBaseline } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
 import ThemeManager from "../components/ThemeManager";
+import { useAuthStore } from "../store/auth-store";
+import { useShallow } from "zustand/react/shallow";
 
 export function RootRedirector() {
 	const navigate = useNavigate();
+	const { token } = useAuthStore(
+		useShallow((state) => ({ token: state.token })),
+	);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with your actual auth state
 
 	useEffect(() => {
 		setTimeout(() => {
-			setIsLoggedIn(true);
 			setIsLoading(false);
 		}, 100);
 	}, []);
 
 	useEffect(() => {
 		if (!isLoading) {
-			if (isLoggedIn) {
+			if (token) {
 				navigate("/app/dashboard");
 			} else {
 				navigate("/landing/server");
 			}
 		}
-	}, [isLoading, isLoggedIn, navigate]);
+	}, [isLoading, token, navigate]);
 
 	return (
 		<ThemeManager>
@@ -34,11 +38,15 @@ export function RootRedirector() {
 	);
 }
 
+const client = new QueryClient();
+
 export function RootLayout() {
 	return (
 		<>
-			<CssBaseline />
-			<Outlet />
+			<QueryClientProvider client={client}>
+				<CssBaseline />
+				<Outlet />
+			</QueryClientProvider>
 		</>
 	);
 }

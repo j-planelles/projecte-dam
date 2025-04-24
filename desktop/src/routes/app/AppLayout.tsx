@@ -1,3 +1,5 @@
+import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "@tanstack/react-query";
 import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -23,8 +25,9 @@ import NavigationBar, {
 	type NavigationBarSection,
 } from "../../components/NavigationBar";
 import ThemeManager from "../../components/ThemeManager";
+import { useAuthStore } from "../../store/auth-store";
 
-const navItems: NavigationBarSection[] = [
+const NAV_ITEMS: NavigationBarSection[] = [
 	{
 		items: [{ name: "Dashboard", path: "/app/dashboard", icon: <HomeIcon /> }],
 	},
@@ -44,10 +47,21 @@ const navItems: NavigationBarSection[] = [
 			},
 		],
 	},
+];
+
+const NAV_ITEMS_TRAINER_UNENROLLED: NavigationBarSection[] = [
 	{
 		title: "Personal Trainer",
 		items: [
 			{ name: "Enroll", path: "/app/trainer/enroll", icon: <GroupIcon /> },
+		],
+	},
+];
+
+const NAV_ITEMS_TRAINER_ENROLLED: NavigationBarSection[] = [
+	{
+		title: "Personal Trainer",
+		items: [
 			{ name: "Users", path: "/app/trainer/users", icon: <GroupIcon /> },
 			{
 				name: "Requests",
@@ -59,9 +73,31 @@ const navItems: NavigationBarSection[] = [
 ];
 
 export default function AppLayout() {
+	const { apiClient, token } = useAuthStore(
+		useShallow((state) => ({
+			apiClient: state.apiClient,
+			token: state.token,
+		})),
+	);
+	const { data: userData, isSuccess } = useQuery({
+		queryKey: ["user", "/auth/profile"],
+		queryFn: async () =>
+			await apiClient.get("/auth/profile", {
+				headers: { Authorization: `Bearer ${token}` },
+			}),
+		staleTime: 2 * 60 * 60 * 1000, // 2 hores
+	});
+
+	const navItems = [
+		...NAV_ITEMS,
+		...(isSuccess && userData?.is_trainer
+			? NAV_ITEMS_TRAINER_ENROLLED
+			: NAV_ITEMS_TRAINER_UNENROLLED),
+	];
+
 	return (
 		<ThemeManager>
-			<TopBar />
+			<TopBar username={userData?.username} />
 			<Box
 				sx={{
 					display: "flex",
@@ -70,7 +106,7 @@ export default function AppLayout() {
 					backgroundColor: "background.default",
 				}}
 			>
-				<NavigationBar items={navItems} />
+				{isSuccess && <NavigationBar items={navItems} />}
 
 				<Box
 					component="main"
@@ -93,7 +129,7 @@ export default function AppLayout() {
 	);
 }
 
-const TopBar = () => {
+const TopBar = ({ username }: { username?: string }) => {
 	return (
 		<AppBar
 			position="fixed"
@@ -112,7 +148,7 @@ const TopBar = () => {
 				>
 					Ultra Workout Manager
 				</Typography>
-				<MyAccountButton />
+				<MyAccountButton username={username} />
 			</Toolbar>
 		</AppBar>
 	);
@@ -132,20 +168,24 @@ const BackIcon = () => {
 	);
 };
 
-const MyAccountButton = () => {
+const MyAccountButton = ({ username = "User" }: { username?: string }) => {
 	const navigate = useNavigate();
+	const setToken = useAuthStore((state) => state.setToken);
 	const [isDialogShown, setIsDialogShown] = useState<boolean>(false);
 
 	const handleLogout = () => {
 		setIsDialogShown(false);
-		navigate("/landing/login");
+		setToken(null);
+		navigate("/landing/server");
 	};
 
 	return (
 		<>
 			<Tooltip title="My Account">
 				<IconButton onClick={() => setIsDialogShown(true)} sx={{ p: 0 }}>
-					<Avatar sx={{ backgroundColor: "primary.main" }}>J</Avatar>
+					<Avatar sx={{ backgroundColor: "primary.main" }}>
+						{username.charAt(0).toUpperCase()}
+					</Avatar>
 				</IconButton>
 			</Tooltip>
 			<Modal open={isDialogShown} onClose={() => setIsDialogShown(false)}>
@@ -179,8 +219,10 @@ const MyAccountButton = () => {
 								borderTopRightRadius: "18px",
 							})}
 						>
-							<Avatar sx={{ backgroundColor: "primary.main" }}>J</Avatar>
-							<Typography variant="h6">Jordi Planelles</Typography>
+							<Avatar sx={{ backgroundColor: "primary.main" }}>
+								{username.charAt(0).toUpperCase()}
+							</Avatar>
+							<Typography variant="h6">{username}</Typography>
 						</Box>
 						<Box
 							className="flex gap-4 p-2 mt-2"

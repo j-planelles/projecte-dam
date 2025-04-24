@@ -4,7 +4,7 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import "./main.css";
 import ErrorElement from "./routes/ErrorElement";
-import { RootRedirector } from "./routes/Root";
+import { RootLayout, RootRedirector } from "./routes/Root";
 import AppLayout from "./routes/app/AppLayout";
 import DashboardPage from "./routes/app/Dashboard";
 import TemplatesPage from "./routes/app/templates/Templates";
@@ -24,6 +24,7 @@ const router = createBrowserRouter([
 	{
 		path: "/",
 		errorElement: <ErrorElement />,
+		element: <RootLayout />,
 		children: [
 			{ index: true, element: <RootRedirector /> },
 			{
