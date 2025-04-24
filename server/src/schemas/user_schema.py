@@ -1,7 +1,13 @@
+from uuid import UUID
 from sqlmodel import SQLModel
 
 
 class UserSchema(SQLModel):
-    username: str | None = None
-    full_name: str | None = None
-    biography: str | None = None
+    uuid: UUID
+    username: str
+    full_name: str
+    biography: str
+
+
+class UserInfoSchema(UserSchema):
+    is_trainer: bool = False

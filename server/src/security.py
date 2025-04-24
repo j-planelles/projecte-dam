@@ -11,7 +11,7 @@ from models.users import TrainerModel, UserConfig, UserModel
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from schemas.config_schema import MobileAppConfigSchema
-from schemas.user_schema import UserSchema
+from schemas.user_schema import UserInfoSchema, UserSchema
 from sqlmodel import Session, select
 
 ALGORITHM = "HS256"
@@ -166,11 +166,23 @@ async def create_user(
     session.commit()
 
 
-@router.get("/profile", name="Get current user data", tags=["Authentication"])
+@router.get(
+    "/profile",
+    response_model=UserInfoSchema,
+    name="Get current user data",
+    tags=["Authentication"],
+)
 async def get_profile(
     current_user: UserModel = Depends(get_current_active_user),
-) -> UserModel:
-    return current_user
+    session: Session = Depends(get_session),
+) -> UserInfoSchema:
+    query = select(TrainerModel).where(TrainerModel.user_uuid == current_user.uuid)
+    item = session.exec(query).first()
+
+    is_trainer = item is not None
+    user = UserInfoSchema(**current_user.model_dump(), is_trainer=is_trainer)
+
+    return user
 
 
 @router.post("/profile", name="Update user profile data", tags=["Authentication"])
