@@ -1,6 +1,7 @@
 import { Box, ThemeProvider, Typography } from "@mui/material";
 import { createMaterialYouTheme } from "mui-create-material-you-theme";
 import { Outlet } from "react-router";
+import UltraLogoText from "../../assets/logo-text";
 
 const materialYouDark = createMaterialYouTheme("dark");
 
@@ -19,12 +20,21 @@ export default function LandingLayout() {
 					justifyContent: "center",
 				}}
 			>
+				<UltraLogo />
 				<Outlet />
 				<BackgroundImageCredit />
 			</Box>
 		</ThemeProvider>
 	);
 }
+
+const UltraLogo = () => {
+	return (
+		<div className="absolute top-0 left-0 w-screen flex justify-center">
+			<UltraLogoText fill="#FFF" className="w-auto h-8 mt-4" />
+		</div>
+	);
+};
 
 const BackgroundImageCredit = () => {
 	return (

@@ -18,14 +18,16 @@ import {
 	Toolbar,
 	Tooltip,
 	Typography,
+	useTheme,
 } from "@mui/material";
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import NavigationBar, {
 	type NavigationBarSection,
 } from "../../components/NavigationBar";
 import ThemeManager from "../../components/ThemeManager";
 import { useAuthStore } from "../../store/auth-store";
+import UltraLogoText from "../../assets/logo-text";
 
 const NAV_ITEMS: NavigationBarSection[] = [
 	{
@@ -130,6 +132,8 @@ export default function AppLayout() {
 }
 
 const TopBar = ({ username }: { username?: string }) => {
+	const theme = useTheme()
+
 	return (
 		<AppBar
 			position="fixed"
@@ -139,15 +143,9 @@ const TopBar = ({ username }: { username?: string }) => {
 		>
 			<Toolbar>
 				<BackIcon />
-				<Typography
-					variant="h5"
-					noWrap
-					component="div"
-					className="flex-grow"
-					sx={{ fontWeight: "bold", marginLeft: 2 }}
-				>
-					Ultra Workout Manager
-				</Typography>
+				<Box className="flex-grow justify-start ml-4">
+					<UltraLogoText className="w-auto h-6" fill={theme.palette.text.primary} />
+				</Box>
 				<MyAccountButton username={username} />
 			</Toolbar>
 		</AppBar>
