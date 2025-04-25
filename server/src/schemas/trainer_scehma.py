@@ -1,8 +1,6 @@
-from datetime import datetime
-from sqlmodel import SQLModel
-
 from models.users import TrainerModel, UserModel
 from models.workout import WorkoutContentModel
+from sqlmodel import SQLModel
 
 
 class TrainerRecommendationSchema(SQLModel):
@@ -16,4 +14,4 @@ class TrainerRequestSchema(SQLModel):
     trainer: TrainerModel
 
     is_processed: bool = False
-    created_at: datetime
+    created_at: int

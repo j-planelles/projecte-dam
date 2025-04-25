@@ -9,6 +9,7 @@ from models.users import TrainerModel, UserModel
 from models.workout import WorkoutContentModel
 from schemas.trainer_scehma import TrainerRequestSchema
 from schemas.types.enums import TrainerRequestActions
+from schemas.user_schema import UserSchema
 from schemas.workout_schema import WorkoutContentSchema
 from security import get_current_active_user, get_trainer_user, get_user_by_uuid
 from sqlmodel import Session, select
@@ -78,6 +79,7 @@ async def handle_requests(
 
 @router.get(
     "/trainer/users",
+    response_model=List[UserSchema],
     name="Get paired users",
     tags=["Trainer"],
 )
@@ -247,7 +249,7 @@ async def create_request(
     new_request = TrainerRequestModel(
         trainer_uuid=UUID(trainer_uuid),
         user_uuid=current_user.uuid,
-        created_at=datetime.now(),
+        created_at=datetime.now().timestamp(),
     )
 
     session.add(new_request)

@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import UUID as UUID_TYPE
 from sqlalchemy import func
 from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
@@ -54,7 +53,7 @@ class TrainerRequestModel(SQLModel, table=True):
             "foreign_keys": "[TrainerRequestModel.trainer_uuid]",
         }
     )
-    created_at: datetime = Field(primary_key=True)
+    created_at: int = Field(primary_key=True)
 
     is_processed: bool = False
 
