@@ -11,7 +11,7 @@ from models.users import TrainerModel, UserConfig, UserModel
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from schemas.config_schema import MobileAppConfigSchema
-from schemas.user_schema import UserInfoSchema, UserSchema
+from schemas.user_schema import UserInfoSchema, UserSchema, UserInputSchema
 from sqlmodel import Session, select
 
 ALGORITHM = "HS256"
@@ -187,7 +187,7 @@ async def get_profile(
 
 @router.post("/profile", name="Update user profile data", tags=["Authentication"])
 async def change_profile(
-    updated_fields: UserSchema,
+    updated_fields: UserInputSchema,
     current_user: UserModel = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ) -> UserSchema:
