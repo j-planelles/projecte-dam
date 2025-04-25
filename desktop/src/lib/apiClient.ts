@@ -411,7 +411,7 @@ const endpoints = makeApi([
     path: "/trainer/users",
     alias: "Get_paired_users_trainer_users_get",
     requestFormat: "json",
-    response: z.unknown(),
+    response: z.array(UserSchema),
   },
   {
     method: "get",
