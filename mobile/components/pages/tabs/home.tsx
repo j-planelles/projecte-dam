@@ -62,7 +62,7 @@ const ProfilePictureHeader = () => {
 			}),
 	});
 	return (
-		<View className="flex-1 flex-row items-center gap-4 min-h-20">
+		<View className="flex-1 flex-col min-h-20">
 			{error && (
 				<View className="flex-1">
 					<Text>Failed to load user data.</Text>
@@ -74,7 +74,7 @@ const ProfilePictureHeader = () => {
 				</View>
 			)}
 			{data && (
-				<>
+				<View className="flex-1 flex-row items-center gap-4">
 					<Avatar.Text
 						size={52}
 						label={data ? data?.full_name.charAt(0).toUpperCase() : ""}
@@ -86,13 +86,13 @@ const ProfilePictureHeader = () => {
 							<CompactChip>3 this week</CompactChip>
 						</View>
 					</View>
-				</>
+					<Link asChild href="/settings/">
+						<Pressable>
+							<SettingsIcon />
+						</Pressable>
+					</Link>
+				</View>
 			)}
-			<Link asChild href="/settings/">
-				<Pressable>
-					<SettingsIcon />
-				</Pressable>
-			</Link>
 		</View>
 	);
 };

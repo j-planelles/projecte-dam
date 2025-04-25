@@ -23,6 +23,7 @@ export default function TrainerTab() {
 			await apiClient.get("/user/trainer/status", {
 				headers: { Authorization: `Bearer ${token}` },
 			}),
+		retry: false
 	});
 	const infoQuery = useQuery({
 		queryKey: ["user", "trainer", "/user/trainer/info"],
@@ -30,6 +31,7 @@ export default function TrainerTab() {
 			await apiClient.get("/user/trainer/info", {
 				headers: { Authorization: `Bearer ${token}` },
 			}),
+		retry: false
 	});
 
 	const isLoading = infoQuery.isLoading || requestQuery.isLoading;

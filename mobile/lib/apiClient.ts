@@ -25,23 +25,30 @@ const HTTPValidationError = z
   .object({ detail: z.array(ValidationError) })
   .partial()
   .passthrough();
-const UserModel = z
+const UserInfoSchema = z
   .object({
-    username: z.string().optional().default(""),
-    full_name: z.string().optional().default(""),
-    biography: z.union([z.string(), z.null()]).optional(),
     uuid: z.string().uuid(),
-    hashed_password: z.string(),
-    trainer_uuid: z.union([z.string(), z.null()]).optional(),
+    username: z.string(),
+    full_name: z.string(),
+    biography: z.string(),
+    is_trainer: z.boolean().optional().default(false),
   })
   .passthrough();
-const UserSchema = z
+const UserInputSchema = z
   .object({
     username: z.union([z.string(), z.null()]),
     full_name: z.union([z.string(), z.null()]),
     biography: z.union([z.string(), z.null()]),
   })
   .partial()
+  .passthrough();
+const UserSchema = z
+  .object({
+    uuid: z.string().uuid(),
+    username: z.string(),
+    full_name: z.string(),
+    biography: z.string(),
+  })
   .passthrough();
 const BodyPart = z.enum([
   "none",
@@ -187,6 +194,16 @@ const WorkoutTemplateSchema = z
     gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
+const UserModel = z
+  .object({
+    uuid: z.string().uuid(),
+    username: z.string().optional().default(""),
+    full_name: z.string().optional().default(""),
+    biography: z.union([z.string(), z.null()]).optional(),
+    hashed_password: z.string(),
+    trainer_uuid: z.union([z.string(), z.null()]).optional(),
+  })
+  .passthrough();
 const TrainerModel = z.object({ user_uuid: z.string().uuid() }).passthrough();
 const TrainerRequestSchema = z
   .object({
@@ -205,7 +222,8 @@ export const schemas = {
   Token,
   ValidationError,
   HTTPValidationError,
-  UserModel,
+  UserInfoSchema,
+  UserInputSchema,
   UserSchema,
   BodyPart,
   ExerciseType,
@@ -223,6 +241,7 @@ export const schemas = {
   WorkoutEntrySchema_Input,
   WorkoutContentSchema_Input,
   WorkoutTemplateSchema,
+  UserModel,
   TrainerModel,
   TrainerRequestSchema,
   HealthCheck,
@@ -249,7 +268,7 @@ const endpoints = makeApi([
     path: "/auth/profile",
     alias: "Get_current_user_data_auth_profile_get",
     requestFormat: "json",
-    response: UserModel,
+    response: UserInfoSchema,
   },
   {
     method: "post",
@@ -260,7 +279,7 @@ const endpoints = makeApi([
       {
         name: "body",
         type: "Body",
-        schema: UserSchema,
+        schema: UserInputSchema,
       },
     ],
     response: UserSchema,

@@ -60,7 +60,7 @@ function UserDataForm() {
 		queryFn: async () =>
 			await apiClient.get("/auth/profile", {
 				headers: { Authorization: `Bearer ${token}` },
-			}),
+			})
 	});
 
 	useEffect(() => {
@@ -94,9 +94,14 @@ function UserDataForm() {
 				} else {
 					setError("root", {
 						type: "manual",
-						message: "Something went wrong.",
+						message: error.message,
 					});
 				}
+			} else {
+				setError("root", {
+					type: "manual",
+					message: (error as Error).message || "Something went wrong.",
+				});
 			}
 		}
 	};
@@ -106,7 +111,7 @@ function UserDataForm() {
 		handleSubmit,
 		setError,
 		setValue,
-		formState: { errors, isSubmitting },
+		formState: { errors, isSubmitting, isSubmitSuccessful },
 	} = useForm<FormSchemaType>({ resolver: zodResolver(userDataSchema) });
 	return (
 		<View className="mx-4 gap-2">
@@ -179,6 +184,10 @@ function UserDataForm() {
 
 			{errors.bio && <HelperText type="error">{errors.bio.message}</HelperText>}
 
+			{errors.root && <HelperText type="error">{errors.root.message}</HelperText>}
+
+			{error && <HelperText type="error">{error.message}</HelperText>}
+
 			<Button
 				mode="outlined"
 				disabled={isLoading}
@@ -187,6 +196,8 @@ function UserDataForm() {
 			>
 				Update user data
 			</Button>
+
+			{isSubmitSuccessful && <HelperText type="info">User data updated.</HelperText>}
 		</View>
 	);
 }
