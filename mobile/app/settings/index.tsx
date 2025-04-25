@@ -1,6 +1,6 @@
 import { ScrollView, View } from "react-native";
 import Header from "../../components/ui/Header";
-import { List, Text } from "react-native-paper";
+import { List, Text, useTheme } from "react-native-paper";
 import {
 	DumbellIcon,
 	ImportExportIcon,
@@ -10,6 +10,7 @@ import {
 } from "../../components/Icons";
 import { useRouter } from "expo-router";
 import { ThemedView } from "../../components/ui/screen/Screen";
+import UltraLogoText from "../../components/ui/logo-text";
 
 export default function SettingsPage() {
 	const router = useRouter();
@@ -88,17 +89,22 @@ export default function SettingsPage() {
 	);
 }
 const ApplicationVersionFooter = () => {
+	const theme = useTheme();
+
 	return (
-		<View className="items-center">
-			<Text variant="titleMedium" className="text-center">
-				Ultra Workout Manager
-			</Text>
-			<Text variant="bodyMedium" className="text-center">
-				Jordi Planelles Perez
-			</Text>
-			<Text variant="bodyMedium" className="text-center">
-				Projecte DAM Institut de Palamós
-			</Text>
+		<View className="items-center gap-2">
+			<UltraLogoText fill={theme.colors.onSurface} />
+			<View className="items-center">
+				<Text variant="titleMedium" className="text-center">
+					Ultra Workout Manager
+				</Text>
+				<Text variant="bodyMedium" className="text-center">
+					Jordi Planelles Perez
+				</Text>
+				<Text variant="bodyMedium" className="text-center">
+					Projecte DAM Institut de Palamós
+				</Text>
+			</View>
 		</View>
 	);
 };
