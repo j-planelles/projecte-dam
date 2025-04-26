@@ -1,0 +1,15 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 16476c8771a3eff30e0eb641dd4f885ce8f76b6c..9b7b60b616c7e935c0f1eb4b667315def9133b71 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -65,6 +65,10 @@ android {
+     }
+   }
+ 
++  kotlinOptions {
++    jvmTarget = '17' // Force JVM target 17 for AGP 8+
++  }
++
+   defaultConfig {
+     minSdkVersion safeExtGet("minSdkVersion", 21)
+     targetSdkVersion safeExtGet("targetSdkVersion", 31)

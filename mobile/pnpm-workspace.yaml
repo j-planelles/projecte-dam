@@ -1,2 +1,5 @@
 onlyBuiltDependencies:
   - '@biomejs/biome'
+
+patchedDependencies:
+  '@pchmn/expo-material3-theme': patches/@pchmn__expo-material3-theme.patch
