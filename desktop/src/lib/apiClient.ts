@@ -415,6 +415,27 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/trainer/users/:user_uuid/info",
+    alias: "Get_paired_users_trainer_users__user_uuid__info_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: UserSchema,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
     path: "/trainer/users/:user_uuid/recommendation",
     alias:
       "Get_assigned_recommendations_trainer_users__user_uuid__recommendation_get",
@@ -481,6 +502,28 @@ const endpoints = makeApi([
       },
     ],
     response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/trainer/users/:user_uuid/templates",
+    alias:
+      "Get_unrecommended_templates_trainer_users__user_uuid__templates_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.array(WorkoutContentSchema_Output),
     errors: [
       {
         status: 422,
