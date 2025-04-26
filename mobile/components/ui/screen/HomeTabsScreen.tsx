@@ -9,63 +9,63 @@ import { useTimer } from "../../../lib/hooks/useTimer";
 import { useEffect } from "react";
 
 export default function HomeTabsScreen({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	const insets = useSafeAreaInsets();
-	const ongoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
+  const insets = useSafeAreaInsets();
+  const ongoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
 
-	return (
-		<View className="flex-1" style={{ paddingTop: insets.top }}>
-			<ScrollView>
-				<BasicView>{children}</BasicView>
-			</ScrollView>
-			{ongoingWorkout && <OngoingWorkoutButton />}
-		</View>
-	);
+  return (
+    <View className="flex-1" style={{ paddingTop: insets.top }}>
+      <ScrollView>
+        <BasicView>{children}</BasicView>
+      </ScrollView>
+      {ongoingWorkout && <OngoingWorkoutButton />}
+    </View>
+  );
 }
 
 const OngoingWorkoutButton = () => {
-	const theme = useTheme();
+  const theme = useTheme();
 
-  const exerciseAmount = useWorkoutStore(state => state.exercises.length)
+  const exerciseAmount = useWorkoutStore((state) => state.exercises.length);
 
-	const startTime = useWorkoutStore((state) => state.timestamp);
-	const { formattedTime, start } = useTimer();
+  const startTime = useWorkoutStore((state) => state.timestamp);
+  const { formattedTime, start } = useTimer();
 
-	useEffect(() => {
-		start(startTime);
-	}, [start, startTime]);
+  useEffect(() => {
+    start(startTime);
+  }, [start, startTime]);
 
-	return (
-		<Link asChild href="/workout/ongoing/">
-			<TouchableRipple
-				rippleColor={theme.colors.primary}
-				style={{ backgroundColor: theme.colors.primaryContainer }}
-			>
-				<View className="p-4 flex-row items-center">
-					<View className="flex-1">
-						<Text
-							variant="titleLarge"
-							style={{ color: theme.colors.onSecondaryContainer }}
-						>
-							Ongoing Workout
-						</Text>
-						<Text
-							variant="titleMedium"
-							style={{ color: theme.colors.onSecondaryContainer }}
-						>
+  return (
+    <Link asChild href="/workout/ongoing/">
+      <TouchableRipple
+        rippleColor={theme.colors.primary}
+        style={{ backgroundColor: theme.colors.primaryContainer }}
+      >
+        <View className="p-4 flex-row items-center">
+          <View className="flex-1">
+            <Text
+              variant="titleLarge"
+              style={{ color: theme.colors.onSecondaryContainer }}
+            >
+              Ongoing Workout
+            </Text>
+            <Text
+              variant="titleMedium"
+              style={{ color: theme.colors.onSecondaryContainer }}
+            >
               {formattedTime} - {exerciseAmount} exercises
-						</Text>
-					</View>
+            </Text>
+          </View>
 
-					<ArrowForwardIcon
-						color={theme.colors.onSecondaryContainer}
-						size={32}
-					/>
-				</View>
-			</TouchableRipple>
-		</Link>
-	);
+          <ArrowForwardIcon
+            color={theme.colors.onSecondaryContainer}
+            size={32}
+          />
+        </View>
+      </TouchableRipple>
+    </Link>
+  );
 };

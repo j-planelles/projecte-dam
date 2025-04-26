@@ -12,28 +12,28 @@ import { customDarkTheme, customLightTheme } from "../lib/theme";
 const client = new QueryClient();
 
 export default function MainLayout() {
-	const colorScheme = useColorScheme();
-	const { theme } = useMaterial3Theme(); // TODO: Implement Material 3 Theme
+  const colorScheme = useColorScheme();
+  const { theme } = useMaterial3Theme(); // TODO: Implement Material 3 Theme
 
-	const paperTheme =
-		colorScheme === "dark" ? { ...customDarkTheme } : { ...customLightTheme };
+  const paperTheme =
+    colorScheme === "dark" ? { ...customDarkTheme } : { ...customLightTheme };
 
-	return (
-		<>
-			<StatusBar style="auto" />
-			<SafeAreaProvider>
-				<QueryClientProvider client={client}>
-					<RestCountdownProvider>
-						<PaperProvider theme={paperTheme}>
-							<Stack
-								screenOptions={{
-									headerShown: false,
-								}}
-							/>
-						</PaperProvider>
-					</RestCountdownProvider>
-				</QueryClientProvider>
-			</SafeAreaProvider>
-		</>
-	);
+  return (
+    <>
+      <StatusBar style="auto" />
+      <SafeAreaProvider>
+        <QueryClientProvider client={client}>
+          <RestCountdownProvider>
+            <PaperProvider theme={paperTheme}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                }}
+              />
+            </PaperProvider>
+          </RestCountdownProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </>
+  );
 }

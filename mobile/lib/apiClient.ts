@@ -210,7 +210,7 @@ const TrainerRequestSchema = z
     user: UserModel,
     trainer: TrainerModel,
     is_processed: z.boolean().optional().default(false),
-    created_at: z.string().datetime({ offset: true }),
+    created_at: z.number().int(),
   })
   .passthrough();
 const HealthCheck = z

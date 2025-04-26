@@ -5,27 +5,27 @@ import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function DataSettingsPage() {
-	return (
-		<ThemedView className="flex-1">
-			<Header title="Import/Export data" />
-			<ScrollView>
-				<View className="pt-4 gap-4">
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall">Import/Export Data from Ultra</Text>
-						<Text variant="bodyMedium">
-							Export data for use with the Ultra application.
-						</Text>
-						<Button mode="outlined">Export Ultra data</Button>
-						<Button mode="outlined">Import Ultra data</Button>
-					</View>
+  return (
+    <ThemedView className="flex-1">
+      <Header title="Import/Export data" />
+      <ScrollView>
+        <View className="pt-4 gap-4">
+          <View className="mx-4 gap-2">
+            <Text variant="titleSmall">Import/Export Data from Ultra</Text>
+            <Text variant="bodyMedium">
+              Export data for use with the Ultra application.
+            </Text>
+            <Button mode="outlined">Export Ultra data</Button>
+            <Button mode="outlined">Import Ultra data</Button>
+          </View>
 
-					<View className="mx-4 gap-2">
-						<Text variant="titleSmall">Import Strong Data</Text>
-						<Text variant="bodyMedium">Import data from the Strong app.</Text>
-						<Button mode="outlined">Import Strong data</Button>
-					</View>
-				</View>
-			</ScrollView>
-		</ThemedView>
-	);
+          <View className="mx-4 gap-2">
+            <Text variant="titleSmall">Import Strong Data</Text>
+            <Text variant="bodyMedium">Import data from the Strong app.</Text>
+            <Button mode="outlined">Import Strong data</Button>
+          </View>
+        </View>
+      </ScrollView>
+    </ThemedView>
+  );
 }

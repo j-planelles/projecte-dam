@@ -10,37 +10,37 @@ import { SAMPLE_WORKOUTS } from "../../lib/sampleData";
 import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function CommunityTemplateSearchPage() {
-	const router = useRouter();
-	const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
 
-	return (
-		<ThemedView>
-			<Header title="Search Templates" />
-			<View className="gap-4 px-4 pt-4">
-				<Searchbar
-					placeholder="Search"
-					value={searchTerm}
-					onChangeText={setSearchTerm}
-					className="flex-1"
-				/>
+  return (
+    <ThemedView>
+      <Header title="Search Templates" />
+      <View className="gap-4 px-4 pt-4">
+        <Searchbar
+          placeholder="Search"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          className="flex-1"
+        />
 
-				<FlatList
-					data={SAMPLE_WORKOUTS}
-					keyExtractor={(item) => item.uuid}
-					renderItem={({ item }) => (
-						<WorkoutCard
-							workout={item}
-							className="mb-2"
-							showDescription
-							showCreator
-							showTimestamp={false}
-							onPress={() =>
-								router.push(`/community/template-view/${item.uuid}`)
-							}
-						/>
-					)}
-				/>
-			</View>
-		</ThemedView>
-	);
+        <FlatList
+          data={SAMPLE_WORKOUTS}
+          keyExtractor={(item) => item.uuid}
+          renderItem={({ item }) => (
+            <WorkoutCard
+              workout={item}
+              className="mb-2"
+              showDescription
+              showCreator
+              showTimestamp={false}
+              onPress={() =>
+                router.push(`/community/template-view/${item.uuid}`)
+              }
+            />
+          )}
+        />
+      </View>
+    </ThemedView>
+  );
 }

@@ -8,22 +8,22 @@ import { SAMPLE_WORKOUTS } from "../../../lib/sampleData";
 import { ThemedView } from "../../../components/ui/screen/Screen";
 
 export default function CreateTemplatePage() {
-	return (
-		<ThemedView className="flex-1">
-			<Header title="Create Template">
-				<Appbar.Action
-					icon={({ color }) => <SaveIcon color={color} />}
-					onPress={() => {}}
-				/>
-			</Header>
-			{/* <WorkoutEditor */}
-			{/*   workout={SAMPLE_WORKOUTS[0]} */}
-			{/*   editable={true} */}
-			{/*   timestamp={false} */}
-			{/*   location={false} */}
-			{/*   creator={false} */}
-			{/*   completable={false} */}
-			{/* /> */}
-		</ThemedView>
-	);
+  return (
+    <ThemedView className="flex-1">
+      <Header title="Create Template">
+        <Appbar.Action
+          icon={({ color }) => <SaveIcon color={color} />}
+          onPress={() => {}}
+        />
+      </Header>
+      {/* <WorkoutEditor */}
+      {/*   workout={SAMPLE_WORKOUTS[0]} */}
+      {/*   editable={true} */}
+      {/*   timestamp={false} */}
+      {/*   location={false} */}
+      {/*   creator={false} */}
+      {/*   completable={false} */}
+      {/* /> */}
+    </ThemedView>
+  );
 }

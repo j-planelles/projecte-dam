@@ -4,7 +4,7 @@
  * @return {number} Weight in pounds
  */
 export function kgToLbs(kg: number) {
-	return kg * 2.20462;
+  return kg * 2.20462;
 }
 
 /**
@@ -13,7 +13,7 @@ export function kgToLbs(kg: number) {
  * @return {number} Weight in kilograms
  */
 export function lbsToKg(lbs: number) {
-	return lbs / 2.20462;
+  return lbs / 2.20462;
 }
 
 /**
@@ -22,7 +22,7 @@ export function lbsToKg(lbs: number) {
  * @return {number} Distance in kilometers
  */
 export function milesToKm(miles: number) {
-	return miles * 1.60934;
+  return miles * 1.60934;
 }
 
 /**
@@ -31,5 +31,5 @@ export function milesToKm(miles: number) {
  * @return {number} Distance in miles
  */
 export function kmToMiles(km: number) {
-	return km / 1.60934;
+  return km / 1.60934;
 }
