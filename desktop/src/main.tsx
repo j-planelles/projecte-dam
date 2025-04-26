@@ -21,87 +21,87 @@ import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
 import ExerciseListPage from "./routes/app/exercises/ExerciseList";
 
 const router = createBrowserRouter([
-	{
-		path: "/",
-		errorElement: <ErrorElement />,
-		element: <RootLayout />,
-		children: [
-			{ index: true, element: <RootRedirector /> },
-			{
-				path: "app",
-				element: <AppLayout />,
-				children: [
-					{ path: "dashboard", element: <DashboardPage /> },
-					{
-						path: "workouts",
-						children: [
-							{ index: true, element: <WorkoutsPage /> },
-							{ path: ":workout-uuid", element: <ViewWorkoutPage /> },
-						],
-					},
-					{
-						path: "templates",
-						children: [
-							{ index: true, element: <TemplatesPage /> },
-							{ path: "new", element: <></> }, // TODO: New template page
-							{
-								path: ":template-uuid",
-								children: [
-									{ index: true, element: <ViewTemplatePage /> },
-									{ path: "edit", element: <></> }, // TODO: Edit template page
-								],
-							},
-						],
-					},
-					{
-						path: "exercises",
-						children: [
-							{ index: true, element: <ExerciseListPage /> },
-							{ path: "new", element: <></> }, // TODO: New exercise page
-							{
-								path: ":exercise-uuid",
-								children: [
-									{ index: true, element: <></> }, // TODO: View exercise page
-									{ path: "edit", element: <></> }, // TODO: Edit exercise page
-								],
-							},
-						],
-					},
-					{
-						path: "trainer",
-						children: [
-							{ path: "enroll", element: <TrainerEnrollPage /> },
-							{
-								path: "users",
-								children: [
-									{ index: true, element: <TrainerUsersPage /> },
-									{
-										path: ":user-uuid",
-										element: <TrainerViewUserPage />,
-									},
-								],
-							},
-							{ path: "requests", element: <TrainerRequestsPage /> },
-						],
-					},
-				],
-				errorElement: <ErrorElement />,
-			},
-			{
-				path: "landing",
-				element: <LandingLayout />,
-				children: [
-					{ path: "server", element: <ServerSelectionPage /> },
-					{ path: "login", element: <LoginPage /> },
-				],
-			},
-		],
-	},
+  {
+    path: "/",
+    errorElement: <ErrorElement />,
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <RootRedirector /> },
+      {
+        path: "app",
+        element: <AppLayout />,
+        children: [
+          { path: "dashboard", element: <DashboardPage /> },
+          {
+            path: "workouts",
+            children: [
+              { index: true, element: <WorkoutsPage /> },
+              { path: ":workout-uuid", element: <ViewWorkoutPage /> },
+            ],
+          },
+          {
+            path: "templates",
+            children: [
+              { index: true, element: <TemplatesPage /> },
+              { path: "new", element: <></> }, // TODO: New template page
+              {
+                path: ":template-uuid",
+                children: [
+                  { index: true, element: <ViewTemplatePage /> },
+                  { path: "edit", element: <></> }, // TODO: Edit template page
+                ],
+              },
+            ],
+          },
+          {
+            path: "exercises",
+            children: [
+              { index: true, element: <ExerciseListPage /> },
+              { path: "new", element: <></> }, // TODO: New exercise page
+              {
+                path: ":exercise-uuid",
+                children: [
+                  { index: true, element: <></> }, // TODO: View exercise page
+                  { path: "edit", element: <></> }, // TODO: Edit exercise page
+                ],
+              },
+            ],
+          },
+          {
+            path: "trainer",
+            children: [
+              { path: "enroll", element: <TrainerEnrollPage /> },
+              {
+                path: "users",
+                children: [
+                  { index: true, element: <TrainerUsersPage /> },
+                  {
+                    path: ":user-uuid",
+                    element: <TrainerViewUserPage />,
+                  },
+                ],
+              },
+              { path: "requests", element: <TrainerRequestsPage /> },
+            ],
+          },
+        ],
+        errorElement: <ErrorElement />,
+      },
+      {
+        path: "landing",
+        element: <LandingLayout />,
+        children: [
+          { path: "server", element: <ServerSelectionPage /> },
+          { path: "login", element: <LoginPage /> },
+        ],
+      },
+    ],
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-	<>
-		<CssBaseline />
-		<RouterProvider router={router} />
-	</>,
+  <>
+    <CssBaseline />
+    <RouterProvider router={router} />
+  </>,
 );

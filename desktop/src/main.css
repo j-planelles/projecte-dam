@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @media (prefers-color-scheme: dark) {
-	#root {
-		color: #e4e2e6;
-		background-color: #131316;
-	}
+  #root {
+    color: #e4e2e6;
+    background-color: #131316;
+  }
 }

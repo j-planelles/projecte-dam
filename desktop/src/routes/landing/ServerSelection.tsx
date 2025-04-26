@@ -8,102 +8,102 @@ import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
 
 const schema = z.object({
-	ip: z.string().url(),
+  ip: z.string().url(),
 });
 
 type FormSchemaType = z.infer<typeof schema>;
 
 export default function ServerSelectionPage() {
-	const navigate = useNavigate();
-	const { serverIp, setServerIp } = useAuthStore(
-		useShallow((state) => ({
-			serverIp: state.serverIp,
-			setServerIp: state.setServerIp,
-		})),
-	);
-	const {
-		control,
-		handleSubmit,
-		setValue,
-		setError,
-		formState: { errors, isSubmitting },
-	} = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
+  const navigate = useNavigate();
+  const { serverIp, setServerIp } = useAuthStore(
+    useShallow((state) => ({
+      serverIp: state.serverIp,
+      setServerIp: state.setServerIp,
+    })),
+  );
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-	const submitHandler = ({ ip }: FormSchemaType) => {
-		setServerIp(ip);
+  const submitHandler = ({ ip }: FormSchemaType) => {
+    setServerIp(ip);
 
-		navigate("/landing/login");
-	};
+    navigate("/landing/login");
+  };
 
-	useEffect(() => {
-		setValue("ip", serverIp);
-	}, [serverIp]);
+  useEffect(() => {
+    setValue("ip", serverIp);
+  }, [serverIp]);
 
-	return (
-		<Paper
-			elevation={3}
-			sx={{
-				padding: 4,
-				display: "flex",
-				flexDirection: "column",
-				alignItems: "center",
-				width: "100%",
-				maxWidth: "400px",
-				borderRadius: 2,
-				backgroundColor: "background.paper",
-			}}
-		>
-			<Typography component="h1" variant="h5" gutterBottom>
-				Choose a server
-			</Typography>
-			<Box
-				sx={{
-					mt: 1,
-					width: "100%",
-				}}
-			>
-				<Controller
-					control={control}
-					name="ip"
-					rules={{ required: true }}
-					render={({ field: { onChange, onBlur, value } }) => (
-						<TextField
-							margin="normal"
-							required
-							fullWidth
-							label="Server IP"
-							placeholder="https://ultra.jplanelles.cat"
-							autoFocus
-							value={value}
-							onChange={onChange}
-							onBlur={onBlur}
-							error={!!errors.ip}
-						/>
-					)}
-				/>
+  return (
+    <Paper
+      elevation={3}
+      sx={{
+        padding: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        maxWidth: "400px",
+        borderRadius: 2,
+        backgroundColor: "background.paper",
+      }}
+    >
+      <Typography component="h1" variant="h5" gutterBottom>
+        Choose a server
+      </Typography>
+      <Box
+        sx={{
+          mt: 1,
+          width: "100%",
+        }}
+      >
+        <Controller
+          control={control}
+          name="ip"
+          rules={{ required: true }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Server IP"
+              placeholder="https://ultra.jplanelles.cat"
+              autoFocus
+              value={value}
+              onChange={onChange}
+              onBlur={onBlur}
+              error={!!errors.ip}
+            />
+          )}
+        />
 
-				{errors.ip && (
-					<Typography variant="body2" color="error">
-						{errors.ip.message}
-					</Typography>
-				)}
+        {errors.ip && (
+          <Typography variant="body2" color="error">
+            {errors.ip.message}
+          </Typography>
+        )}
 
-				{errors.root && (
-					<Typography variant="body2" color="error">
-						{errors.root.message}
-					</Typography>
-				)}
+        {errors.root && (
+          <Typography variant="body2" color="error">
+            {errors.root.message}
+          </Typography>
+        )}
 
-				<Button
-					fullWidth
-					variant="filled"
-					sx={{ mt: 2, mb: 2 }} // Margin top and bottom
-					onClick={handleSubmit(submitHandler)}
-					disabled={isSubmitting}
-				>
-					Connect
-				</Button>
-			</Box>
-		</Paper>
-	);
+        <Button
+          fullWidth
+          variant="filled"
+          sx={{ mt: 2, mb: 2 }} // Margin top and bottom
+          onClick={handleSubmit(submitHandler)}
+          disabled={isSubmitting}
+        >
+          Connect
+        </Button>
+      </Box>
+    </Paper>
+  );
 }
