@@ -6,7 +6,7 @@ from db import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from models.trainer import TrainerRecommendationModel, TrainerRequestModel
 from models.users import TrainerModel, UserModel
-from models.workout import WorkoutContentModel
+from models.workout import WorkoutContentModel, WorkoutInstanceModel
 from schemas.trainer_scehma import TrainerRequestSchema
 from schemas.types.enums import TrainerRequestActions
 from schemas.user_schema import UserSchema
@@ -91,6 +91,30 @@ async def get_paired_users(
     users = session.exec(query).all()
 
     return users
+
+
+@router.get(
+    "/trainer/users/{user_uuid}/info",
+    response_model=UserSchema,
+    name="Get paired users",
+    tags=["Trainer"],
+)
+async def get_paired_user_info(
+    user_uuid: str,
+    trainer_user: UserModel = Depends(get_trainer_user),
+    session: Session = Depends(get_session),
+):
+    query = (
+        select(UserModel)
+        .where(UserModel.uuid == user_uuid)
+        .where(UserModel.trainer_uuid == trainer_user.uuid)
+    )
+    user = session.exec(query).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    return user
 
 
 @router.post(
@@ -198,6 +222,37 @@ async def delete_recommendation(
 
     session.delete(recommendation)
     session.commit()
+
+
+@router.get(
+    "/trainer/users/{user_uuid}/templates",
+    response_model=list[WorkoutContentSchema],
+    name="Get unrecommended templates",
+    tags=["Trainer"],
+)
+async def get_unrecommended_templates(
+    user_uuid: str,
+    trainer_user: UserModel = Depends(get_trainer_user),
+    session: Session = Depends(get_session),
+):
+    query = (
+        select(WorkoutContentModel)
+        .outerjoin(
+            WorkoutInstanceModel,
+            WorkoutContentModel.uuid == WorkoutInstanceModel.workout_uuid,  # pyright: ignore[]
+        )
+        .outerjoin(
+            TrainerRecommendationModel,
+            WorkoutContentModel.uuid == TrainerRecommendationModel.workout_uuid,  # pyright: ignore[]
+        )
+        .where(WorkoutInstanceModel.workout_uuid == None)
+        .where(TrainerRecommendationModel.workout_uuid == None)
+        .where(WorkoutContentModel.creator_uuid == trainer_user.uuid)
+        .order_by(WorkoutContentModel.name)
+    )
+    results = session.exec(query).all()
+
+    return results
 
 
 @router.get(
