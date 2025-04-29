@@ -151,7 +151,11 @@ export default function ExerciseListPage() {
               .map((exercise) => (
                 <Link
                   key={exercise.uuid}
-                  to={`/app/exercises/${exercise.uuid}`}
+                  to={
+                    exercise.isDefault
+                      ? `/app/exercises/new?defaultExerciseUuid=${exercise.uuid}`
+                      : `/app/exercises/${exercise.uuid}`
+                  }
                 >
                   <ListItemButton>
                     <ListItemText

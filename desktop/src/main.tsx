@@ -19,6 +19,7 @@ import LoginPage from "./routes/landing/Login";
 import ServerSelectionPage from "./routes/landing/ServerSelection";
 import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
 import ExerciseListPage from "./routes/app/exercises/ExerciseList";
+import ExerciseEditPage from "./routes/app/exercises/ExerciseEditor";
 
 const router = createBrowserRouter([
   {
@@ -57,13 +58,10 @@ const router = createBrowserRouter([
             path: "exercises",
             children: [
               { index: true, element: <ExerciseListPage /> },
-              { path: "new", element: <></> }, // TODO: New exercise page
+              { path: "new", element: <ExerciseEditPage /> },
               {
                 path: ":exercise-uuid",
-                children: [
-                  { index: true, element: <></> }, // TODO: View exercise page
-                  { path: "edit", element: <></> }, // TODO: Edit exercise page
-                ],
+                children: [{ index: true, element: <ExerciseEditPage /> }],
               },
             ],
           },
