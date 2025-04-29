@@ -706,6 +706,27 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "delete",
+    path: "/user/templates/:template_uuid",
+    alias: "Delete_user_template_user_templates__template_uuid__delete",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "template_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
     method: "post",
     path: "/user/trainer/cancel-request",
     alias: "Cancel_trainer_request_user_trainer_cancel_request_post",
