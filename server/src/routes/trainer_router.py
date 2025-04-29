@@ -137,9 +137,19 @@ async def unpair_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
 
+    recommendations_query = (
+        select(TrainerRecommendationModel)
+        .where(TrainerRecommendationModel.user_uuid == user_uuid)
+        .where(TrainerRecommendationModel.trainer_uuid == trainer_user.uuid)
+    )
+    recommendations_results = session.exec(recommendations_query).all()
+
     user.trainer_uuid = None
 
     session.add(user)
+    for recommendation in recommendations_results:
+        session.delete(recommendation)
+
     session.commit()
 
 
@@ -408,9 +418,19 @@ async def unpair_with_trainer(
             status_code=404, detail="You have not registered for a trainer."
         )
 
+    recommendations_query = (
+        select(TrainerRecommendationModel)
+        .where(TrainerRecommendationModel.user_uuid == current_user.uuid)
+        .where(TrainerRecommendationModel.trainer_uuid == current_user.trainer_uuid)
+    )
+    recommendations_results = session.exec(recommendations_query).all()
+
     current_user.trainer_uuid = None
 
     session.add(current_user)
+    for recommendation in recommendations_results:
+        session.delete(recommendation)
+
     session.commit()
 
 

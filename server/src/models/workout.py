@@ -37,14 +37,18 @@ class WorkoutContentModel(SQLModel, table=True):
     creator_uuid: UUID_TYPE = Field(foreign_key="users.uuid")
 
     instance: "WorkoutInstanceModel" = Relationship(
-        sa_relationship_kwargs={"uselist": False}
+        sa_relationship_kwargs={"uselist": False, "cascade": "all"}
     )
 
-    entries: list["WorkoutEntryModel"] = Relationship()
+    entries: list["WorkoutEntryModel"] = Relationship(
+        sa_relationship_kwargs={"cascade": "all"}
+    )
 
     gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
     gym: Optional["GymModel"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[WorkoutContentModel.gym_id]"}
+        sa_relationship_kwargs={
+            "foreign_keys": "[WorkoutContentModel.gym_id]",
+        }
     )
 
 
@@ -73,10 +77,14 @@ class WorkoutEntryModel(SQLModel, table=True):
     )
     exercise_uuid: UUID_TYPE = Field(foreign_key="exercise.uuid")
     exercise: "ExerciseModel" = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[WorkoutEntryModel.exercise_uuid]"}
+        sa_relationship_kwargs={
+            "foreign_keys": "[WorkoutEntryModel.exercise_uuid]",
+        }
     )
 
-    sets: list["WorkoutSetModel"] = Relationship(back_populates="entry")
+    sets: list["WorkoutSetModel"] = Relationship(
+        back_populates="entry", sa_relationship_kwargs={"cascade": "all"}
+    )
 
 
 class WorkoutSetModel(SQLModel, table=True):
@@ -89,7 +97,9 @@ class WorkoutSetModel(SQLModel, table=True):
     weight: float | None = None
     set_type: SetType = Field(sa_column=Column(Enum(SetType)), default=SetType.NORMAL)
 
-    entry: "WorkoutEntryModel" = Relationship(back_populates="sets")
+    entry: "WorkoutEntryModel" = Relationship(
+        back_populates="sets", sa_relationship_kwargs={"cascade": "all"}
+    )
 
     __table_args__ = (
         ForeignKeyConstraint(

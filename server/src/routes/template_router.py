@@ -123,3 +123,32 @@ async def add_user_workout(
 
     session.refresh(workout_entry)
     return workout_entry
+
+
+@router.delete(
+    "/user/templates/{template_uuid}",
+    name="Delete user template",
+    tags=["Templates"],
+)
+async def delete_user_template(
+    template_uuid: str,
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    query = (
+        select(WorkoutContentModel)
+        .outerjoin(
+            WorkoutInstanceModel,
+            WorkoutContentModel.uuid == WorkoutInstanceModel.workout_uuid,  # pyright: ignore[]
+        )
+        .where(WorkoutInstanceModel.workout_uuid == None)
+        .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+        .where(WorkoutContentModel.uuid == template_uuid)
+    )
+    template = session.exec(query).first()
+
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    session.delete(template)
+    session.commit()
