@@ -1,3 +1,4 @@
+import DnsOutlinedIcon from "@mui/icons-material/DnsOutlined";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,7 +20,6 @@ type FormSchemaType = z.infer<typeof schema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const apiClient = useAuthStore((store) => store.apiClient);
   const {
     control,
     handleSubmit,
@@ -33,12 +33,16 @@ export default function LoginPage() {
     setUsername,
     hashPassword,
     setToken,
+    apiClient,
+    serverName,
   } = useAuthStore(
     useShallow((state) => ({
       username: state.username,
       setUsername: state.setUsername,
       hashPassword: state.hashPassword,
       setToken: state.setToken,
+      apiClient: state.apiClient,
+      serverName: state.serverName,
     })),
   );
 
@@ -91,6 +95,17 @@ export default function LoginPage() {
       <Typography component="h1" variant="h5" gutterBottom>
         Login to Ultra
       </Typography>
+
+      <Link to="/landing/server">
+        <Button
+          className="w-full"
+          sx={{ color: "onSurface.main" }}
+          startIcon={<DnsOutlinedIcon />}
+        >
+          Connecting to {serverName}
+        </Button>
+      </Link>
+
       <Box
         sx={{
           mt: 1, // Margin top for spacing below the title
@@ -113,14 +128,10 @@ export default function LoginPage() {
               onChange={onChange}
               onBlur={onBlur}
               error={!!errors.username}
+              helperText={errors.username?.message}
             />
           )}
         />
-        {errors.username && (
-          <Typography variant="body2" color="error">
-            {errors.username.message}
-          </Typography>
-        )}
 
         <Controller
           control={control}
@@ -137,14 +148,10 @@ export default function LoginPage() {
               onChange={onChange}
               onBlur={onBlur}
               error={!!errors.password}
+              helperText={errors.password?.message}
             />
           )}
         />
-        {errors.password && (
-          <Typography variant="body2" color="error">
-            {errors.password.message}
-          </Typography>
-        )}
 
         {errors.root && (
           <Typography variant="body2" color="error">

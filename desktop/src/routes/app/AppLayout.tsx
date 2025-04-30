@@ -178,7 +178,7 @@ const MyAccountButton = ({ username = "User" }: { username?: string }) => {
   const handleLogout = () => {
     setIsDialogShown(false);
     setToken(null);
-    navigate("/landing/server");
+    navigate("/");
   };
 
   return (

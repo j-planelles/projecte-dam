@@ -6,6 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
+import axios from "axios";
 
 const schema = z.object({
   ip: z.string().url(),
@@ -29,10 +30,19 @@ export default function ServerSelectionPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-  const submitHandler = ({ ip }: FormSchemaType) => {
-    setServerIp(ip);
+  const submitHandler = async ({ ip }: FormSchemaType) => {
+    try {
+      const response = await axios.get(`${ip}/`);
 
-    navigate("/landing/login");
+      setServerIp(ip, response.data.name);
+
+      navigate("/landing/login");
+    } catch (error: unknown) {
+      setError("root", {
+        type: "manual",
+        message: "Failed to connect to server.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -66,7 +76,7 @@ export default function ServerSelectionPage() {
           control={control}
           name="ip"
           rules={{ required: true }}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({ field }) => (
             <TextField
               margin="normal"
               required
@@ -74,19 +84,13 @@ export default function ServerSelectionPage() {
               label="Server IP"
               placeholder="https://ultra.jplanelles.cat"
               autoFocus
-              value={value}
-              onChange={onChange}
-              onBlur={onBlur}
+              {...field}
               error={!!errors.ip}
+              helperText={errors.ip?.message}
+              disabled={isSubmitting}
             />
           )}
         />
-
-        {errors.ip && (
-          <Typography variant="body2" color="error">
-            {errors.ip.message}
-          </Typography>
-        )}
 
         {errors.root && (
           <Typography variant="body2" color="error">

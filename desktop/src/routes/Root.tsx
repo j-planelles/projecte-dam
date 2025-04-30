@@ -5,13 +5,34 @@ import { Outlet, useNavigate } from "react-router";
 import ThemeManager from "../components/ThemeManager";
 import { useAuthStore } from "../store/auth-store";
 import { useShallow } from "zustand/react/shallow";
+import axios from "axios";
 
 export function RootRedirector() {
   const navigate = useNavigate();
-  const { token } = useAuthStore(
-    useShallow((state) => ({ token: state.token })),
+  const { token, serverIp, setServerIp } = useAuthStore(
+    useShallow((state) => ({
+      token: state.token,
+      serverIp: state.serverIp,
+      setServerIp: state.setServerIp,
+    })),
   );
   const [isLoading, setIsLoading] = useState(true);
+
+  const testServer = async () => {
+    try {
+      const response = await axios.get(`${serverIp}/`);
+
+      setServerIp(serverIp, response.data.name);
+
+      if (token) {
+        navigate("/app/dashboard");
+      } else {
+        navigate("/landing/login");
+      }
+    } catch (error: unknown) {
+      navigate("/landing/server");
+    }
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -21,11 +42,7 @@ export function RootRedirector() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (token) {
-        navigate("/app/dashboard");
-      } else {
-        navigate("/landing/server");
-      }
+      testServer();
     }
   }, [isLoading, token, navigate]);
 
