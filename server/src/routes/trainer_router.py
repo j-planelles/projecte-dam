@@ -13,6 +13,7 @@ from schemas.user_schema import UserSchema
 from schemas.workout_schema import WorkoutContentSchema
 from security import get_current_active_user, get_trainer_user, get_user_by_uuid
 from sqlmodel import Session, select
+from sqlalchemy import and_
 
 router = APIRouter()
 
@@ -253,7 +254,11 @@ async def get_unrecommended_templates(
         )
         .outerjoin(
             TrainerRecommendationModel,
-            WorkoutContentModel.uuid == TrainerRecommendationModel.workout_uuid,  # pyright: ignore[]
+            and_(
+                TrainerRecommendationModel.workout_uuid == WorkoutContentModel.uuid,  # pyright: ignore[]
+                TrainerRecommendationModel.user_uuid == user_uuid,  # pyright: ignore[]
+                TrainerRecommendationModel.trainer_uuid == trainer_user.uuid,  # pyright: ignore[]
+            ),
         )
         .where(WorkoutInstanceModel.workout_uuid == None)
         .where(TrainerRecommendationModel.workout_uuid == None)
