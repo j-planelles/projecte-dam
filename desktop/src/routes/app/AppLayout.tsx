@@ -123,6 +123,7 @@ export default function AppLayout() {
             marginRight: "16px",
             overflow: "scroll",
           }}
+          className="hide-scrollbar"
         >
           <Outlet />
         </Box>
