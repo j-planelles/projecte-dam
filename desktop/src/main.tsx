@@ -20,6 +20,7 @@ import ServerSelectionPage from "./routes/landing/ServerSelection";
 import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
 import ExerciseListPage from "./routes/app/exercises/ExerciseList";
 import ExerciseEditPage from "./routes/app/exercises/ExerciseEditor";
+import TemplateEditPage from "./routes/app/templates/EditTemplate";
 
 const router = createBrowserRouter([
   {
@@ -44,12 +45,12 @@ const router = createBrowserRouter([
             path: "templates",
             children: [
               { index: true, element: <TemplatesPage /> },
-              { path: "new", element: <></> }, // TODO: New template page
+              { path: "new", element: <TemplateEditPage/> },
               {
                 path: ":template-uuid",
                 children: [
                   { index: true, element: <ViewTemplatePage /> },
-                  { path: "edit", element: <></> }, // TODO: Edit template page
+                  { path: "edit", element: <TemplateEditPage/> },
                 ],
               },
             ],

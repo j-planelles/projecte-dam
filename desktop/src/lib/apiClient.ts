@@ -727,6 +727,32 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "put",
+    path: "/user/templates/:template_uuid",
+    alias: "Update_template_user_templates__template_uuid__put",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: WorkoutTemplateSchema,
+      },
+      {
+        name: "template_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutContentSchema_Output,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
     method: "post",
     path: "/user/trainer/cancel-request",
     alias: "Cancel_trainer_request_user_trainer_cancel_request_post",

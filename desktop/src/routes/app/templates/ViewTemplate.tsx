@@ -99,7 +99,7 @@ const ActionButtons = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
-      navigate(-1);
+      navigate("/app/templates");
     } catch (error: unknown) {
       setQueryError(
         "Failed to remove template. Please remove any recommendations first.",
