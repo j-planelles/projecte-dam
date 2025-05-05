@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Appbar, Button, Text, HelperText } from "react-native-paper";
+import { Appbar, Button, HelperText, Text } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
-import { EditIcon, SaveIcon } from "../../../components/Icons";
-import WorkoutViewer from "../../../components/pages/WorkoutViewer";
-import Header from "../../../components/ui/Header";
-import { ThemedView } from "../../../components/ui/screen/Screen";
-import { useAuthStore } from "../../../store/auth-store";
-import { useWorkoutStore } from "../../../store/workout-store";
+import { EditIcon } from "../../../../components/Icons";
+import WorkoutViewer from "../../../../components/pages/WorkoutViewer";
+import Header from "../../../../components/ui/Header";
+import { ThemedView } from "../../../../components/ui/screen/Screen";
+import { useAuthStore } from "../../../../store/auth-store";
+import { useWorkoutStore } from "../../../../store/workout-store";
 
 export default function ViewTemplatePage() {
   const { uuid } = useLocalSearchParams();
@@ -56,17 +56,10 @@ export default function ViewTemplatePage() {
       }) as workout,
     [data],
   );
-  const [editable, setEditable] = useState<boolean>(false);
-
   return (
     <ThemedView className="flex-1">
       <Header title="View Template">
-        <Appbar.Action
-          icon={({ color }) =>
-            editable ? <SaveIcon color={color} /> : <EditIcon color={color} />
-          }
-          onPress={() => setEditable((state) => !state)}
-        />
+        <EditWorkoutButton />
       </Header>
       {isLoading && (
         <View className="flex-1 justify-center">
@@ -109,7 +102,10 @@ const StartWorkoutButton = ({ workout }: { workout: workout }) => {
   return (
     <>
       {isOngoingWorkout && (
-        <HelperText type="info">A workout is already in progress.</HelperText>
+        <HelperText type="info">
+          A workout is already in progress. Stop it to start a new one or to
+          edit a template.
+        </HelperText>
       )}
       <Button
         mode="contained"
@@ -119,5 +115,19 @@ const StartWorkoutButton = ({ workout }: { workout: workout }) => {
         Start workout
       </Button>
     </>
+  );
+};
+
+const EditWorkoutButton = () => {
+  const { uuid } = useLocalSearchParams();
+  const isOngoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
+
+  return (
+    <Link asChild href={`/workout/template-view/${uuid}/edit`}>
+      <Appbar.Action
+        icon={({ color }) => <EditIcon color={color} />}
+        disabled={isOngoingWorkout}
+      />
+    </Link>
   );
 };

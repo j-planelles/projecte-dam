@@ -411,7 +411,28 @@ const endpoints = makeApi([
     path: "/trainer/users",
     alias: "Get_paired_users_trainer_users_get",
     requestFormat: "json",
-    response: z.unknown(),
+    response: z.array(UserSchema),
+  },
+  {
+    method: "get",
+    path: "/trainer/users/:user_uuid/info",
+    alias: "Get_paired_users_trainer_users__user_uuid__info_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: UserSchema,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
   },
   {
     method: "get",
@@ -481,6 +502,28 @@ const endpoints = makeApi([
       },
     ],
     response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/trainer/users/:user_uuid/templates",
+    alias:
+      "Get_unrecommended_templates_trainer_users__user_uuid__templates_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.array(WorkoutContentSchema_Output),
     errors: [
       {
         status: 422,
@@ -647,6 +690,53 @@ const endpoints = makeApi([
     alias: "Get_user_template_user_templates__template_uuid__get",
     requestFormat: "json",
     parameters: [
+      {
+        name: "template_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutContentSchema_Output,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "delete",
+    path: "/user/templates/:template_uuid",
+    alias: "Delete_user_template_user_templates__template_uuid__delete",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "template_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "put",
+    path: "/user/templates/:template_uuid",
+    alias: "Update_template_user_templates__template_uuid__put",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: WorkoutTemplateSchema,
+      },
       {
         name: "template_uuid",
         type: "Path",

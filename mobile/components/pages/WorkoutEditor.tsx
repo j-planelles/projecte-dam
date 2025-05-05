@@ -41,7 +41,10 @@ import {
 import { useTimer } from "../../lib/hooks/useTimer";
 import { useRestCountdownControl } from "../../store/rest-timer-context";
 
-export default function WorkoutEditor() {
+export default function WorkoutEditor({
+  showTimer = true,
+  showCheckboxes = true,
+}: { showTimer?: boolean; showCheckboxes?: boolean }) {
   const [weightUnitDialogShown, setWeightUnitDialogShown] =
     useState<boolean>(false);
   const [weightUnitDialogIndex, setWeightUnitDialogIndex] = useState<number>(0);
@@ -64,9 +67,10 @@ export default function WorkoutEditor() {
   return (
     <>
       <ScrollView>
-        <View className="gap-2">
-          <WorkoutInformation />
+        <View className="gap-2 pb-8">
+          <WorkoutInformation showTimer={showTimer} />
           <WorkoutExercises
+            showCheckboxes={showCheckboxes}
             showWeightUnitDialog={showWeightUnitDialogHandler}
             showRestCountdownDurationDialog={showRestCountdownDialogHandler}
           />
@@ -90,7 +94,7 @@ export default function WorkoutEditor() {
   );
 }
 
-const WorkoutInformation = () => {
+const WorkoutInformation = ({ showTimer }: { showTimer: boolean }) => {
   const { title, description, gym, setName, setDescription } = useWorkoutStore(
     useShallow((state) => ({
       title: state.title,
@@ -117,7 +121,7 @@ const WorkoutInformation = () => {
         mode="outlined"
       />
 
-      <WorkoutTimer />
+      {showTimer && <WorkoutTimer />}
 
       <Link asChild href="/workout/ongoing/select-gym">
         <Button mode="outlined" className="text-left">
@@ -140,9 +144,11 @@ const WorkoutTimer = () => {
 };
 
 const WorkoutExercises = ({
+  showCheckboxes,
   showWeightUnitDialog,
   showRestCountdownDurationDialog,
 }: {
+  showCheckboxes: boolean;
   showWeightUnitDialog: (exerciseIndex: number) => () => void;
   showRestCountdownDurationDialog: (exerciseIndex: number) => () => void;
 }) => {
@@ -161,6 +167,7 @@ const WorkoutExercises = ({
             showRestCountdownDurationDialog={showRestCountdownDurationDialog(
               item,
             )}
+            showCheckboxes={showCheckboxes}
           />
         ),
       )}
@@ -180,12 +187,14 @@ const WorkoutExercise = ({
   isLast = false,
   showWeightUnitDialog,
   showRestCountdownDurationDialog,
+  showCheckboxes,
 }: {
   index: number;
   isFirst: boolean;
   isLast: boolean;
   showWeightUnitDialog: () => void;
   showRestCountdownDurationDialog: () => void;
+  showCheckboxes: boolean;
 }) => {
   const theme = useTheme();
 
@@ -288,6 +297,7 @@ const WorkoutExercise = ({
           key={setIndex}
           index={setIndex}
           exerciseIndex={exerciseIndex}
+          showCheckboxes={showCheckboxes}
         />
       ))}
 
@@ -305,9 +315,11 @@ const WorkoutExercise = ({
 const WorkoutSet = ({
   index,
   exerciseIndex,
+  showCheckboxes,
 }: {
   index: number;
   exerciseIndex: number;
+  showCheckboxes: boolean;
 }) => {
   const theme = useTheme();
 
@@ -501,10 +513,12 @@ const WorkoutSet = ({
         onTextChange={updateSetRepsHandler}
       />
 
-      <Checkbox
-        status={completed ? "checked" : "unchecked"}
-        onPress={toggleSetCompletionHandler}
-      />
+      {showCheckboxes && (
+        <Checkbox
+          status={completed ? "checked" : "unchecked"}
+          onPress={toggleSetCompletionHandler}
+        />
+      )}
     </View>
   );
 };

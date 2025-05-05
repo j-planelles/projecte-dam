@@ -4,7 +4,9 @@ import { create } from "zustand";
 type WorkoutStoreType = {
   isOngoingWorkout: boolean;
   startEmptyWorkout: () => void;
+  loadEmptyWorkout: () => void;
   startWorkout: (workout: workout) => void;
+  loadWorkout: (workout: workout) => void;
   cancelWorkout: () => void;
   setName: (name: string) => void;
   setDescription: (description: string) => void;
@@ -64,6 +66,16 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       exercises: [],
       isOngoingWorkout: true,
     }),
+  loadEmptyWorkout: () =>
+    set({
+      uuid: v4(),
+      title: "New template",
+      gym: "",
+      creator: "",
+      description: "",
+      exercises: [],
+      isOngoingWorkout: false,
+    }),
   startWorkout: (workout: workout) =>
     set({
       ...workout,
@@ -73,6 +85,16 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       gym: "",
       creator: "",
       isOngoingWorkout: true,
+    }),
+  loadWorkout: (workout: workout) =>
+    set({
+      ...workout,
+      uuid: v4(),
+      timestamp: Date.now(),
+      duration: 0,
+      gym: "",
+      creator: "",
+      isOngoingWorkout: false,
     }),
   cancelWorkout: () => set({ isOngoingWorkout: false }),
   setName: (name: string) =>

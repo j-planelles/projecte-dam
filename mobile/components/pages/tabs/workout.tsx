@@ -1,48 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Button, Text, TouchableRipple } from "react-native-paper";
+import { Button, IconButton, Text } from "react-native-paper";
+import { useShallow } from "zustand/react/shallow";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 import { AddIcon, DumbellIcon } from "../../Icons";
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
-import { useWorkoutStore } from "../../../store/workout-store";
-import { useAuthStore } from "../../../store/auth-store";
-import { useQuery } from "@tanstack/react-query";
 
 export default function WorkoutTab() {
-  const router = useRouter();
-  const { startEmptyWorkout, isOngoingWorkout } = useWorkoutStore(
-    useShallow((state) => ({
-      startEmptyWorkout: state.startEmptyWorkout,
-      isOngoingWorkout: state.isOngoingWorkout,
-    })),
-  );
-
-  const startEmptyWorkoutHandler = () => {
-    try {
-      if (!isOngoingWorkout) {
-        startEmptyWorkout();
-      }
-
-      router.push("/workout/ongoing/");
-    } catch (error: any) {
-      if (error.message === "Ongoing workout") {
-        router.push("/workout/ongoing/");
-      }
-    }
-  };
   return (
     <HomeTabsScreen>
       <Text variant="headlineLarge">Workout</Text>
 
-      <Button
-        icon={({ color }) => <AddIcon color={color} />}
-        mode="contained"
-        onPress={startEmptyWorkoutHandler}
-      >
-        Start an empty workout
-      </Button>
+      <StartWorkoutButton />
+
       <Link href="/workout/exercise-list" asChild>
         <Button
           icon={({ color }) => <DumbellIcon color={color} />}
@@ -77,12 +51,7 @@ const TemplatesList = () => {
     <>
       <View className="flex-1 flex-row items-center">
         <Text className="flex-1 text-lg font-bold">Templates</Text>
-        <TouchableRipple
-          onPress={() => router.push("/workout/template-view/")}
-          className="p-2"
-        >
-          <AddIcon />
-        </TouchableRipple>
+        <CreateTemplateIcon />
       </View>
 
       {isLoading && (
@@ -135,5 +104,45 @@ const TemplatesList = () => {
             />
           ))}
     </>
+  );
+};
+
+const StartWorkoutButton = () => {
+  const router = useRouter();
+  const { startEmptyWorkout, isOngoingWorkout } = useWorkoutStore(
+    useShallow((state) => ({
+      startEmptyWorkout: state.startEmptyWorkout,
+      isOngoingWorkout: state.isOngoingWorkout,
+    })),
+  );
+
+  const workoutStartHandler = () => {
+    startEmptyWorkout();
+    router.push("/workout/ongoing/");
+  };
+
+  return (
+    <Button
+      icon={(props) => <AddIcon {...props} />}
+      mode="contained"
+      disabled={isOngoingWorkout}
+      onPress={workoutStartHandler}
+    >
+      Start an empty workout
+    </Button>
+  );
+};
+
+const CreateTemplateIcon = () => {
+  const isOngoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
+
+  return (
+    <Link asChild href="/workout/template-view/">
+      <IconButton
+        icon={(props) => <AddIcon {...props} />}
+        style={{ margin: 0 }}
+        disabled={isOngoingWorkout}
+      />
+    </Link>
   );
 };
