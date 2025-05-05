@@ -47,8 +47,6 @@ const Redirector = () => {
     );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [connectionTestSkipped, setConnectionTestSkipped] =
-    useState<boolean>(false);
 
   const testServer = async () => {
     setIsLoading(true);
@@ -69,16 +67,8 @@ const Redirector = () => {
         }
       }
     } catch (error: unknown) {
-      if (!connectionTestSkipped) {
-        router.replace("/landing/server");
-      }
+      router.replace("/landing/server");
     }
-  };
-
-  const skipConnectionTestHandler = () => {
-    setConnectionTest(true);
-    setConnectionTestSkipped(true);
-    router.replace("/landing/server");
   };
 
   useEffect(() => {
@@ -94,11 +84,11 @@ const Redirector = () => {
       <Text className="w-full text-center text-white">
         Attempting to connect to server...
       </Text>
-      <Pressable onPress={skipConnectionTestHandler} className="p-4">
-        <Text className="w-full text-center text-white underline">
-          Stuck? Choose a server
-        </Text>
-      </Pressable>
+      {/* <Pressable onPress={skipConnectionTestHandler} className="p-4"> */}
+      {/*   <Text className="w-full text-center text-white underline"> */}
+      {/*     Stuck? Choose a server */}
+      {/*   </Text> */}
+      {/* </Pressable> */}
     </View>
   ) : token === null ? null : (
     <TabBarWrapper />
