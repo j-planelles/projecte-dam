@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
-import { NavigateNextIcon } from "../../components/Icons";
-import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
+import { NavigateNextIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
-import { useEffect } from "react";
 
 const schema = z.object({
   ip: z.string().url(),
@@ -34,10 +35,19 @@ export default function LandingServerPage() {
     })),
   );
 
-  const submitHandler = ({ ip }: FormSchemaType) => {
-    setServerIp(ip);
+  const submitHandler = async ({ ip }: FormSchemaType) => {
+    try {
+      const response = await axios.get(`${ip}/`);
 
-    router.push("/landing/login");
+      setServerIp(ip, response.data.name);
+
+      router.push("/landing/login");
+    } catch (error: unknown) {
+      setError("root", {
+        type: "manual",
+        message: "Failed to connect to server.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -72,6 +82,10 @@ export default function LandingServerPage() {
 
         {errors.ip && (
           <Text className="font-bold text-red-500">{errors.ip.message}</Text>
+        )}
+
+        {errors.root && (
+          <Text className="font-bold text-red-500">{errors.root.message}</Text>
         )}
 
         <Button

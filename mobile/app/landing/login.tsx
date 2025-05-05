@@ -1,14 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
-import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
+import {
+  DnsOutlineIcon,
+  NavigateNextIcon,
+  PersonAddIcon,
+} from "../../components/Icons";
 import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
@@ -37,12 +41,14 @@ export default function LandingLoginPage() {
     setUsername,
     hashPassword,
     setToken,
+    serverName,
   } = useAuthStore(
     useShallow((state) => ({
       username: state.username,
       setUsername: state.setUsername,
       hashPassword: state.hashPassword,
       setToken: state.setToken,
+      serverName: state.serverName,
     })),
   );
 
@@ -64,6 +70,7 @@ export default function LandingLoginPage() {
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
       router.dismissAll();
+      router.replace("/");
     } catch (error) {
       if (error instanceof AxiosError) {
         setError("root", {
@@ -81,6 +88,15 @@ export default function LandingLoginPage() {
     <LandingWrapper>
       <>
         <Text className="text-white text-4xl">Login to Ultra</Text>
+
+        <Link asChild href="/landing/server">
+          <Button
+            icon={(props) => <DnsOutlineIcon {...props} />}
+            theme={monocromePaperTheme}
+          >
+            Connecting to {serverName}
+          </Button>
+        </Link>
 
         <Controller
           control={control}

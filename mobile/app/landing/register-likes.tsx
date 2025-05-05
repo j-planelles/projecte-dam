@@ -67,6 +67,7 @@ export default function RegisterLikesPage() {
     queryClient.invalidateQueries({ queryKey: ["user"] });
 
     router.dismissAll();
+    router.replace("/");
   };
 
   return (

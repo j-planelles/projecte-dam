@@ -235,13 +235,20 @@ function AboutYouPart() {
 
 function DangerZone() {
   const router = useRouter();
-  const setToken = useAuthStore((store) => store.setToken);
+  const { setToken, setConnectionTest } = useAuthStore(
+    useShallow((store) => ({
+      setToken: store.setToken,
+      setConnectionTest: store.setConnectionTest,
+    })),
+  );
 
   const [visible, setVisible] = useState<boolean>(false);
   const logOutHandler = () => {
     setVisible(false);
     setToken(null);
+    setConnectionTest(false);
     router.dismissAll();
+    router.replace("/");
   };
 
   return (

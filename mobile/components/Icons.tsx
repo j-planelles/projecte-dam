@@ -372,3 +372,16 @@ export const RefreshIcon = ({
     className={className}
   />
 );
+
+export const DnsOutlineIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialCommunityIcons
+    name="dns-outline"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
