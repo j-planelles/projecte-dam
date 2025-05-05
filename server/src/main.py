@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from time import sleep
 
+from config import SERVER_NAME
 from data.default_exercises import add_default_exercises
 from db import engine
 from fastapi import FastAPI
@@ -46,4 +47,4 @@ app.include_router(trainer_router)
 
 @app.get("/", response_model=HealthCheck, tags=["status"], description="Health check")
 async def health_check():
-    return {"name": "Ultra Workout Server", "version": "0.0.0"}
+    return {"name": SERVER_NAME}
