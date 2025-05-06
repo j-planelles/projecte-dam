@@ -92,9 +92,19 @@ const WorkoutExercise = ({
     <Box className="flex flex-col">
       <Typography className="py-2">{exercise.exercise.name}</Typography>
 
-      {exercise.sets.map((set, index) => (
-        <WorkoutSet key={index} set={set} index={index} />
-      ))}
+      {exercise.sets.length > 0 ? (
+        exercise.sets.map((set, index) => (
+          <WorkoutSet key={index} set={set} index={index} />
+        ))
+      ) : (
+        <Typography
+          className="flex-1 px-4"
+          style={{ textAlign: "center" }}
+          variant="body2"
+        >
+          Exercise without sets.
+        </Typography>
+      )}
     </Box>
   );
 };
