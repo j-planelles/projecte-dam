@@ -134,6 +134,7 @@ const WorkoutExercises = ({
         className="w-full"
         startIcon={<AddIcon />}
         onClick={showAddExercisesDialogHandler}
+        variant="outlined"
       >
         Add exercise
       </Button>
@@ -462,8 +463,6 @@ const WorkoutSetTextField = ({
   };
 
   const updateValues = (value: string) => {
-    setInternalValue(value);
-
     if (value === "" || Number.isNaN(Number(value))) {
       externalOnTextChange(0);
       setInternalValue("0");
@@ -476,6 +475,12 @@ const WorkoutSetTextField = ({
         }
       } else {
         externalOnTextChange(Number(value));
+      }
+
+      if (value.length > 1 && value.charAt(0) === "0") {
+        setInternalValue(Number(value).toString());
+      } else {
+        setInternalValue(value);
       }
     }
   };
