@@ -96,6 +96,7 @@ const SaveButton = () => {
 
   return (
     <Appbar.Action
+      animated={false}
       icon={(props) => <SaveIcon {...props} />}
       onPress={handleSubmit}
       loading={isLoading}

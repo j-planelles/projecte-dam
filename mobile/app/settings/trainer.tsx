@@ -52,6 +52,7 @@ export default function ProfileSettingsPage() {
       <Header title="Manage your trainer">
         {!isLoading && (
           <Appbar.Action
+            animated={false}
             icon={({ color }) => <RefreshIcon color={color} />}
             onPress={refreshHandler}
             disabled={isFetching}

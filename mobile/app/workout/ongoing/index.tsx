@@ -84,6 +84,7 @@ const HeaderComponent = ({
       }}
     >
       <Appbar.Action
+        animated={false}
         icon={({ color }) => (
           <TimerIcon color={isRunning ? theme.colors.primary : color} />
         )}
@@ -96,6 +97,7 @@ const HeaderComponent = ({
         onDismiss={() => setMenuVisible(false)}
         anchor={
           <Appbar.Action
+            animated={false}
             icon={({ color }) => <MoreVerticalIcon color={color} />}
             onPress={() => setMenuVisible(true)}
           />

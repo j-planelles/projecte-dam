@@ -1,5 +1,5 @@
-import { View, Text } from "react-native";
-import { TouchableRipple, useTheme } from "react-native-paper";
+import { View } from "react-native";
+import { Text, Card, useTheme } from "react-native-paper";
 
 export default function WorkoutCard({
   workout,
@@ -43,26 +43,21 @@ export default function WorkoutCard({
       : parseExercises(workout.exercises);
 
   return (
-    <View
-      className={`rounded ${className}`}
-      style={{ backgroundColor: theme.colors.surfaceVariant }}
-    >
-      <TouchableRipple onPress={onPress}>
-        <View className="p-4 gap-2">
-          <View>
-            <Text className="font-bold">{title}</Text>
-            {showCreator && <Text>by {creator}</Text>}
-          </View>
-          {showTimestamp && <Text>{timestampText}</Text>}
-          {showDescription && description && <Text>{description}</Text>}
-          <View>
-            {exercises.map((exercise, index) => (
-              <Text key={index}>{exercise}</Text>
-            ))}
-          </View>
+    <Card className={`${className}`} mode="outlined" onPress={onPress}>
+      <Card.Content className="gap-2">
+        <View>
+          <Text variant="titleMedium">{title}</Text>
+          {showCreator && <Text>by {creator}</Text>}
         </View>
-      </TouchableRipple>
-    </View>
+        {showTimestamp && <Text>{timestampText}</Text>}
+        {showDescription && description && <Text>{description}</Text>}
+        <View>
+          {exercises.map((exercise, index) => (
+            <Text key={index}>{exercise}</Text>
+          ))}
+        </View>
+      </Card.Content>
+    </Card>
   );
 }
 

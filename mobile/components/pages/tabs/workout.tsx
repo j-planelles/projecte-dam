@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Button, IconButton, Text } from "react-native-paper";
+import { Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
@@ -32,6 +32,7 @@ export default function WorkoutTab() {
 }
 
 const TemplatesList = () => {
+  const theme = useTheme();
   const router = useRouter();
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
@@ -65,44 +66,55 @@ const TemplatesList = () => {
         </View>
       )}
       {isSuccess &&
-        data
-          .map(
-            (data) =>
-              ({
-                uuid: data.uuid,
-                title: data.name,
-                description: data.description,
-                timestamp: data.instance?.timestamp_start || 0,
-                duration: data.instance?.duration || 0,
-                exercises: data.entries.map((entry) => ({
-                  restCountdownDuration: entry.rest_countdown_duration,
-                  weightUnit: entry.weight_unit,
-                  exercise: {
-                    uuid: entry.exercise.uuid,
-                    name: entry.exercise.name,
-                    description: entry.exercise.description,
-                    userNote: entry.exercise.user_note,
-                    bodyPart: entry.exercise.body_part,
-                    type: entry.exercise.type,
-                  },
-                  sets: entry.sets.map((set) => ({
-                    reps: set.reps,
-                    weight: set.weight,
+        (data.length > 0 ? (
+          data
+            .map(
+              (data) =>
+                ({
+                  uuid: data.uuid,
+                  title: data.name,
+                  description: data.description,
+                  timestamp: data.instance?.timestamp_start || 0,
+                  duration: data.instance?.duration || 0,
+                  exercises: data.entries.map((entry) => ({
+                    restCountdownDuration: entry.rest_countdown_duration,
+                    weightUnit: entry.weight_unit,
+                    exercise: {
+                      uuid: entry.exercise.uuid,
+                      name: entry.exercise.name,
+                      description: entry.exercise.description,
+                      userNote: entry.exercise.user_note,
+                      bodyPart: entry.exercise.body_part,
+                      type: entry.exercise.type,
+                    },
+                    sets: entry.sets.map((set) => ({
+                      reps: set.reps,
+                      weight: set.weight,
+                    })),
                   })),
-                })),
-              }) as workout,
-          )
-          .map((workout) => (
-            <WorkoutCard
-              key={workout.uuid}
-              workout={workout}
-              showTimestamp={false}
-              showDescription={true}
-              onPress={() =>
-                router.push(`/workout/template-view/${workout.uuid}`)
-              }
-            />
-          ))}
+                }) as workout,
+            )
+            .map((workout) => (
+              <WorkoutCard
+                key={workout.uuid}
+                workout={workout}
+                showTimestamp={false}
+                showDescription={true}
+                onPress={() =>
+                  router.push(`/workout/template-view/${workout.uuid}`)
+                }
+              />
+            ))
+        ) : (
+          <View className="flex-col items-center gap-2">
+            <DumbellIcon size={130} color={theme.colors.onSurface} />
+            <Text variant="headlineMedium">No templates found.</Text>
+            <Text>
+              Create a new template or save a past workout as a template.
+            </Text>
+            <CreateTemplateEmptyListIcon />
+          </View>
+        ))}
     </>
   );
 };
@@ -143,6 +155,22 @@ const CreateTemplateIcon = () => {
         style={{ margin: 0 }}
         disabled={isOngoingWorkout}
       />
+    </Link>
+  );
+};
+
+const CreateTemplateEmptyListIcon = () => {
+  const isOngoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
+
+  return (
+    <Link asChild href="/workout/template-view/">
+      <Button
+        icon={(props) => <AddIcon {...props} />}
+        disabled={isOngoingWorkout}
+        mode="outlined"
+      >
+        Create template
+      </Button>
     </Link>
   );
 };

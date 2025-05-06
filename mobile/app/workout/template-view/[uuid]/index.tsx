@@ -125,6 +125,7 @@ const EditWorkoutButton = () => {
   return (
     <Link asChild href={`/workout/template-view/${uuid}/edit`}>
       <Appbar.Action
+        animated={false}
         icon={({ color }) => <EditIcon color={color} />}
         disabled={isOngoingWorkout}
       />

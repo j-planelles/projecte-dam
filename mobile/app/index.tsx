@@ -101,22 +101,22 @@ const TabBarWrapper = () => {
     {
       key: "home",
       title: "Home",
-      focusedIcon: () => <HomeIcon />,
+      focusedIcon: (props) => <HomeIcon {...props} />,
     },
     {
       key: "workout",
       title: "Workout",
-      focusedIcon: () => <DumbellIcon />,
+      focusedIcon: (props) => <DumbellIcon {...props} />,
     },
     {
       key: "community",
       title: "Community",
-      focusedIcon: () => <PeopleIcon />,
+      focusedIcon: (props) => <PeopleIcon {...props} />,
     },
     {
       key: "trainer",
       title: "Trainer",
-      focusedIcon: () => <PersonIcon />,
+      focusedIcon: (props) => <PersonIcon {...props} />,
     },
   ];
 

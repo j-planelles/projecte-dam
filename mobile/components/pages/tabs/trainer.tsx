@@ -2,10 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Pressable, View } from "react-native";
-import { Avatar, Button, Text } from "react-native-paper";
+import { Avatar, Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
-import { MessagesIcon, MoreVerticalIcon, NavigateNextIcon } from "../../Icons";
+import {
+  DumbellIcon,
+  MessagesIcon,
+  MoreVerticalIcon,
+  NavigateNextIcon,
+} from "../../Icons";
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 
@@ -95,6 +100,7 @@ export default function TrainerTab() {
 }
 
 const TrainerTemplatesList = () => {
+  const theme = useTheme();
   const router = useRouter();
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
@@ -125,44 +131,56 @@ const TrainerTemplatesList = () => {
         </View>
       )}
       {isSuccess &&
-        data
-          .map(
-            (data) =>
-              ({
-                uuid: data.uuid,
-                title: data.name,
-                description: data.description,
-                timestamp: data.instance?.timestamp_start || 0,
-                duration: data.instance?.duration || 0,
-                exercises: data.entries.map((entry) => ({
-                  restCountdownDuration: entry.rest_countdown_duration,
-                  weightUnit: entry.weight_unit,
-                  exercise: {
-                    uuid: entry.exercise.uuid,
-                    name: entry.exercise.name,
-                    description: entry.exercise.description,
-                    userNote: entry.exercise.user_note,
-                    bodyPart: entry.exercise.body_part,
-                    type: entry.exercise.type,
-                  },
-                  sets: entry.sets.map((set) => ({
-                    reps: set.reps,
-                    weight: set.weight,
+        (data.length > 0 ? (
+          data
+            .map(
+              (data) =>
+                ({
+                  uuid: data.uuid,
+                  title: data.name,
+                  description: data.description,
+                  timestamp: data.instance?.timestamp_start || 0,
+                  duration: data.instance?.duration || 0,
+                  exercises: data.entries.map((entry) => ({
+                    restCountdownDuration: entry.rest_countdown_duration,
+                    weightUnit: entry.weight_unit,
+                    exercise: {
+                      uuid: entry.exercise.uuid,
+                      name: entry.exercise.name,
+                      description: entry.exercise.description,
+                      userNote: entry.exercise.user_note,
+                      bodyPart: entry.exercise.body_part,
+                      type: entry.exercise.type,
+                    },
+                    sets: entry.sets.map((set) => ({
+                      reps: set.reps,
+                      weight: set.weight,
+                    })),
                   })),
-                })),
-              }) as workout,
-          )
-          .map((workout) => (
-            <WorkoutCard
-              key={workout.uuid}
-              workout={workout}
-              showTimestamp={false}
-              showDescription={true}
-              onPress={() =>
-                router.push(`/community/template-view/${workout.uuid}`)
-              }
-            />
-          ))}
+                }) as workout,
+            )
+            .map((workout) => (
+              <WorkoutCard
+                key={workout.uuid}
+                workout={workout}
+                showTimestamp={false}
+                showDescription={true}
+                onPress={() =>
+                  router.push(`/community/template-view/${workout.uuid}`)
+                }
+              />
+            ))
+        ) : (
+          <View className="flex-1 items-center gap-8 pt-16">
+            <DumbellIcon size={130} color={theme.colors.onSurface} />
+            <View className="gap-4 items-center">
+              <Text variant="headlineLarge">No templates found.</Text>
+              <Text variant="bodyMedium">
+                Wait for your trainer to recommend you a template.
+              </Text>
+            </View>
+          </View>
+        ))}
     </>
   );
 };
@@ -177,9 +195,10 @@ const ProfilePictureHeader = ({ fullName }: { fullName: string }) => {
         <Text className="text-xl font-bold">{fullName}</Text>
       </View>
       <Link asChild href="/settings/trainer">
-        <Pressable>
-          <MoreVerticalIcon />
-        </Pressable>
+        <IconButton
+          icon={(props) => <MoreVerticalIcon {...props} />}
+          style={{ margin: 0 }}
+        />
       </Link>
     </View>
   );

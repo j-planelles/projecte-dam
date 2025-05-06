@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { FlatList, View } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import {
   Appbar,
   Button,
@@ -158,7 +158,10 @@ export default function OngoingWorkoutAddExercisePage() {
   return (
     <ThemedView className="flex-1">
       <Header title="Add exercise">
-        <Appbar.Action icon={({ color }) => <FilterIcon color={color} />} />
+        <Appbar.Action
+          animated={false}
+          icon={({ color }) => <FilterIcon color={color} />}
+        />
       </Header>
 
       <View className="px-4 py-2">
@@ -169,39 +172,45 @@ export default function OngoingWorkoutAddExercisePage() {
         />
       </View>
 
-      <FlatList
-        data={sortedExercises}
-        keyExtractor={(item) =>
-          `${item.isDefault ? "default" : "user"}-${item.uuid}`
-        }
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.name}
-            onPress={() =>
-              item.uuid && selectedExercises.includes(item.uuid)
-                ? setSelectedExercises((state) =>
-                    state.filter((value) => value !== item.uuid),
-                  )
-                : setSelectedExercises((state) =>
-                    item.uuid ? [...state, item.uuid] : state,
-                  )
-            }
-            left={(props) =>
-              item.uuid &&
-              selectedExercises.includes(item.uuid) && (
-                <List.Icon {...props} icon="check" />
-              )
-            }
-            style={{
-              backgroundColor:
+      {disableControls ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={sortedExercises}
+          keyExtractor={(item) =>
+            `${item.isDefault ? "default" : "user"}-${item.uuid}`
+          }
+          renderItem={({ item }) => (
+            <List.Item
+              title={item.name}
+              onPress={() =>
                 item.uuid && selectedExercises.includes(item.uuid)
-                  ? theme.colors.primaryContainer
-                  : "transparent",
-            }}
-          />
-        )}
-        ListEmptyComponent={<ExerciseListEmptyComponent />}
-      />
+                  ? setSelectedExercises((state) =>
+                      state.filter((value) => value !== item.uuid),
+                    )
+                  : setSelectedExercises((state) =>
+                      item.uuid ? [...state, item.uuid] : state,
+                    )
+              }
+              left={(props) =>
+                item.uuid &&
+                selectedExercises.includes(item.uuid) && (
+                  <List.Icon {...props} icon="check" />
+                )
+              }
+              style={{
+                backgroundColor:
+                  item.uuid && selectedExercises.includes(item.uuid)
+                    ? theme.colors.primaryContainer
+                    : "transparent",
+              }}
+            />
+          )}
+          ListEmptyComponent={<ExerciseListEmptyComponent />}
+        />
+      )}
 
       {selectedExercises.length > 0 && (
         <View className="px-4 py-2 gap-2">
@@ -232,14 +241,13 @@ export default function OngoingWorkoutAddExercisePage() {
 }
 
 const ExerciseListEmptyComponent = () => {
+  const theme = useTheme();
+
   return (
     <View className="flex-1 items-center gap-8 pt-16">
-      <DumbellIcon size={96} />
+      <DumbellIcon size={96} color={theme.colors.onSurface} />
       <View className="gap-4 items-center">
-        <Text variant="headlineLarge">No exercises</Text>
-        <Text variant="bodyMedium">
-          Go to exercise manager to create new exercises.
-        </Text>
+        <Text variant="headlineLarge">No exercises found.</Text>
       </View>
     </View>
   );

@@ -96,6 +96,7 @@ const SaveButton = () => {
       icon={(props) => <SaveIcon {...props} />}
       onPress={handleSubmit}
       loading={isLoading}
+      animated={false}
     />
   );
 };

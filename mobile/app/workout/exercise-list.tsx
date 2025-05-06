@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import { useMemo } from "react";
-import { FlatList, View } from "react-native";
-import { Appbar, Button, List, Text } from "react-native-paper";
+import { ActivityIndicator, FlatList, View } from "react-native";
+import { Appbar, Button, List, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { AddIcon, DumbellIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
@@ -82,45 +82,55 @@ export default function ExerciseListPage() {
     userExercisesQuery.isSuccess,
   ]);
 
+  const disableControls =
+    userExercisesQuery.isLoading || defaultExercisesQuery.isLoading;
+
   return (
     <ThemedView className="flex-1">
       <Header title="Manage Exercises">
         <Appbar.Action
+          animated={false}
           icon={({ color }) => <AddIcon color={color} />}
           onPress={() => {
             router.push("/workout/exercise-edit/");
           }}
         />
       </Header>
-      <FlatList
-        data={sortedExercises}
-        keyExtractor={(item) =>
-          `${item.isDefault ? "default" : "user"}-${item.uuid}`
-        }
-        renderItem={({ item }) => (
-          <Link
-            asChild
-            href={`/workout/exercise-edit/${item.isDefault ? `?defaultExerciseUUID=${item.uuid}` : item.uuid}`}
-          >
-            <List.Item title={item.name} />
-          </Link>
-        )}
-        ListEmptyComponent={<ExerciseListEmptyComponent />}
-      />
+      {disableControls ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={sortedExercises}
+          keyExtractor={(item) =>
+            `${item.isDefault ? "default" : "user"}-${item.uuid}`
+          }
+          renderItem={({ item }) => (
+            <Link
+              asChild
+              href={`/workout/exercise-edit/${item.isDefault ? `?defaultExerciseUUID=${item.uuid}` : item.uuid}`}
+            >
+              <List.Item title={item.name} />
+            </Link>
+          )}
+          ListEmptyComponent={<ExerciseListEmptyComponent />}
+        />
+      )}
     </ThemedView>
   );
 }
 
 const ExerciseListEmptyComponent = () => {
+  const theme = useTheme();
+
   return (
     <View className="flex-1 items-center gap-8 pt-16">
-      <DumbellIcon size={96} />
+      <DumbellIcon size={96} color={theme.colors.onSurface} />
       <Text variant="headlineLarge">No exercises...</Text>
-      <View className="flex-1 gap-4">
-        <Link href="/workout/exercise-edit">
-          <Button mode="contained">Create an exercise</Button>
-        </Link>
-      </View>
+      <Link asChild href="/workout/exercise-edit">
+        <Button mode="contained">Create an exercise</Button>
+      </Link>
     </View>
   );
 };

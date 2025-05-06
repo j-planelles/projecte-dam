@@ -3,9 +3,16 @@ import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
-import { Avatar, Button, HelperText, List, Text } from "react-native-paper";
+import {
+  Avatar,
+  Button,
+  HelperText,
+  List,
+  Text,
+  useTheme,
+} from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
-import { NavigateNextIcon } from "../../../components/Icons";
+import { NavigateNextIcon, PeopleIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
 import { useAuthStore } from "../../../store/auth-store";
@@ -101,6 +108,7 @@ const TrainerList = ({ data }: { data: any }) => {
             }
           />
         )}
+        ListEmptyComponent={TrainerListEmptyComponent}
       />
 
       <View className="p-4 gap-4">
@@ -117,5 +125,20 @@ const TrainerList = ({ data }: { data: any }) => {
         </Button>
       </View>
     </>
+  );
+};
+
+const TrainerListEmptyComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <View className="flex-1 items-center gap-4 pt-16">
+      <PeopleIcon size={130} color={theme.colors.onSurface} />
+      <Text variant="headlineLarge">No trainers found...</Text>
+      <Text variant="bodyMedium" className="px-4">
+        Clould not find any trainers that adjust to your interests. Modify your
+        interests and try again.
+      </Text>
+    </View>
   );
 };

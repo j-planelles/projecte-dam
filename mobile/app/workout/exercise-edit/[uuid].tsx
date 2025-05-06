@@ -241,6 +241,7 @@ export default function ExerciseEditPage() {
         }
       >
         <Appbar.Action
+          animated={false}
           icon={({ color }) => <SaveIcon color={color} />}
           onPress={handleSubmit(submitHandler)}
           disabled={disableControls}
