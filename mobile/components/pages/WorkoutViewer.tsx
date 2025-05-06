@@ -14,7 +14,7 @@ export default function WorkoutViewer({
 }) {
   return (
     <ScrollView>
-      <View className="gap-2">
+      <View className="gap-4">
         <WorkoutInformation
           workout={workout}
           timestamp={timestamp}
@@ -55,14 +55,10 @@ const WorkoutInformation = ({
       )}
 
       {timestamp && (
-        <Text variant="titleMedium">
-          {`${timestampDate.toLocaleString()} for ${durationText}`}
-        </Text>
+        <Text>{`${timestampDate.toLocaleString()} for ${durationText}`}</Text>
       )}
 
-      {location && workout.gym && (
-        <Text variant="titleMedium">{workout.gym}</Text>
-      )}
+      {location && workout.gym && <Text>{workout.gym}</Text>}
     </View>
   );
 };
@@ -73,12 +69,11 @@ const WorkoutExercises = ({
   exercises: workoutExercise[];
 }) => {
   return (
-    <>
-      <Divider />
+    <View className="gap-4">
       {exercises.map((exercise, index) => (
         <WorkoutExercise key={index} exercise={exercise} />
       ))}
-    </>
+    </View>
   );
 };
 
@@ -88,18 +83,26 @@ const WorkoutExercise = ({
   exercise: workoutExercise;
 }) => {
   return (
-    <View>
-      <View className="flex-1 flex-row items-center pl-4 pr-2">
+    <View className="gap-2">
+      <View className="flex-1 flex-row items-center px-4">
         <Text variant="titleMedium" className="flex-1">
           {exercise.exercise.name}
         </Text>
       </View>
 
-      {exercise.sets.map((set, index) => (
-        <WorkoutSet key={index} set={set} index={index} />
-      ))}
-
-      <Divider />
+      {exercise.sets.length > 0 ? (
+        exercise.sets.map((set, index) => (
+          <WorkoutSet key={index} set={set} index={index} />
+        ))
+      ) : (
+        <Text
+          className="flex-1 px-4"
+          style={{ textAlign: "center" }}
+          variant="bodySmall"
+        >
+          Exercise without sets.
+        </Text>
+      )}
     </View>
   );
 };
@@ -113,7 +116,7 @@ const WorkoutSet = ({
 }) => {
   return (
     <View className="flex-1 flex-row items-center py-2 px-4">
-      <Text variant="titleMedium" className="w-12 px-4">
+      <Text variant="bodyLarge" className="w-12 px-4">
         {set.type === "normal" ? index + 1 : set.type === "dropset" ? "D" : "F"}
       </Text>
       <Text variant="bodyLarge" className="flex-1 px-2">

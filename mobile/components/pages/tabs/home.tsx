@@ -138,9 +138,9 @@ const WorkoutsChart = () => {
             <Bar
               chartBounds={chartBounds}
               points={points.workouts}
-              color={theme.colors.primary}
+              color={theme.colors.secondary}
             >
-              <Paint color={theme.colors.primary} />
+              <Paint color={theme.colors.secondary} />
             </Bar>
           )}
         </CartesianChart>

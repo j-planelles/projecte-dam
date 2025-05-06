@@ -48,22 +48,19 @@ const OngoingWorkoutButton = () => {
           <View className="flex-1">
             <Text
               variant="titleLarge"
-              style={{ color: theme.colors.onSecondaryContainer }}
+              style={{ color: theme.colors.onPrimaryContainer }}
             >
               Ongoing Workout
             </Text>
             <Text
               variant="titleMedium"
-              style={{ color: theme.colors.onSecondaryContainer }}
+              style={{ color: theme.colors.onPrimaryContainer }}
             >
               {formattedTime} - {exerciseAmount} exercises
             </Text>
           </View>
 
-          <ArrowForwardIcon
-            color={theme.colors.onSecondaryContainer}
-            size={32}
-          />
+          <ArrowForwardIcon color={theme.colors.onPrimaryContainer} size={32} />
         </View>
       </TouchableRipple>
     </Link>
