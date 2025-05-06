@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Pressable } from "react-native";
-import { Divider, Menu, TextInput } from "react-native-paper";
+import { Pressable, type StyleProp, type TextStyle } from "react-native";
+import { Menu, TextInput } from "react-native-paper";
 import { ArrowDropDownIcon } from "../Icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ChoiceBoxProps = {
   label: string;
@@ -12,6 +11,7 @@ type ChoiceBoxProps = {
   className?: string;
   disabled?: boolean;
   error?: boolean;
+  style?: StyleProp<TextStyle>;
 };
 
 export function ExternalChoiceBox({
@@ -24,12 +24,11 @@ export function ExternalChoiceBox({
   error = false,
   value,
   setSelectedValue,
+  style,
 }: {
   value: string | undefined;
   setSelectedValue: (text: string) => void;
 } & ChoiceBoxProps) {
-  const insets = useSafeAreaInsets();
-
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
 
   return (
@@ -44,6 +43,7 @@ export function ExternalChoiceBox({
             value={value}
             editable={false}
             mode={mode}
+            style={style}
             right={
               <TextInput.Icon
                 icon={({ color, size }) => (
@@ -81,6 +81,7 @@ export default function ChoiceBox({
   className,
   disabled,
   error,
+  style,
 }: ChoiceBoxProps) {
   const [value, setSelectedValue] = useState<string>(elements[0]);
 
@@ -95,6 +96,7 @@ export default function ChoiceBox({
       setSelectedValue={setSelectedValue}
       disabled={disabled}
       error={error}
+      style={style}
     />
   );
 }

@@ -141,7 +141,10 @@ export default function OngoingWorkoutAddExercisePage() {
       }
 
       const exercisesToAdd: workoutExercise[] = userExercisesToAdd.map(
-        (item) => ({ exercise: item, sets: [] }),
+        (item) => ({
+          exercise: item,
+          sets: [{ weight: 0, reps: 0, type: "normal" }],
+        }),
       );
 
       addExercises(exercisesToAdd);

@@ -122,12 +122,6 @@ const WorkoutInformation = ({ showTimer }: { showTimer: boolean }) => {
       />
 
       {showTimer && <WorkoutTimer />}
-
-      <Link asChild href="/workout/ongoing/select-gym">
-        <Button mode="outlined" className="text-left">
-          {gym}
-        </Button>
-      </Link>
     </View>
   );
 };
@@ -140,7 +134,7 @@ const WorkoutTimer = () => {
     start(startTime);
   }, [start, startTime]);
 
-  return <Text variant="titleMedium">{`Elapsed time: ${formattedTime}`}</Text>;
+  return <Text variant="bodyMedium">{`Elapsed time: ${formattedTime}`}</Text>;
 };
 
 const WorkoutExercises = ({
@@ -155,7 +149,6 @@ const WorkoutExercises = ({
   const exercisesAmount = useWorkoutStore((state) => state.exercises.length);
   return (
     <>
-      <Divider />
       {Array.from({ length: exercisesAmount }, (_, i) => i).map(
         (item, index) => (
           <WorkoutExercise
@@ -173,7 +166,11 @@ const WorkoutExercises = ({
       )}
 
       <Link asChild href="/workout/ongoing/add-exercise">
-        <Button icon={({ color }) => <AddIcon color={color} />} mode="text">
+        <Button
+          icon={({ color }) => <AddIcon color={color} />}
+          mode="outlined"
+          className="mx-4 mt-2"
+        >
           Add exercise
         </Button>
       </Link>
@@ -198,16 +195,24 @@ const WorkoutExercise = ({
 }) => {
   const theme = useTheme();
 
-  const { exerciseName, setsAmount, addSet, removeExercise, moveExercise } =
-    useWorkoutStore(
-      useShallow((state) => ({
-        exerciseName: state.exercises[exerciseIndex].exercise.name,
-        setsAmount: state.exercises[exerciseIndex].sets.length,
-        addSet: state.addSet,
-        removeExercise: state.removeExercise,
-        moveExercise: state.moveExercise,
-      })),
-    );
+  const {
+    exerciseName,
+    setsAmount,
+    addSet,
+    removeExercise,
+    moveExercise,
+    restCountdownDuration,
+  } = useWorkoutStore(
+    useShallow((state) => ({
+      exerciseName: state.exercises[exerciseIndex].exercise.name,
+      setsAmount: state.exercises[exerciseIndex].sets.length,
+      addSet: state.addSet,
+      removeExercise: state.removeExercise,
+      moveExercise: state.moveExercise,
+      restCountdownDuration:
+        state.exercises[exerciseIndex].restCountdownDuration,
+    })),
+  );
 
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
 
@@ -236,9 +241,20 @@ const WorkoutExercise = ({
   return (
     <View>
       <View className="flex-1 flex-row items-center pl-4 pr-2">
-        <Text variant="titleMedium" className="flex-1">
-          {exerciseName}
-        </Text>
+        <View className="flex-1 flex-row gap-2 items-center">
+          <Text variant="titleMedium">{exerciseName}</Text>
+          {restCountdownDuration && (
+            <>
+              <TimerIcon color={theme.colors.onSurfaceDisabled} size={20} />
+              <Text
+                variant="labelSmall"
+                style={{ color: theme.colors.onSurfaceDisabled }}
+              >
+                {restCountdownDuration}s
+              </Text>
+            </>
+          )}
+        </View>
 
         <Menu
           visible={menuVisible}
@@ -402,7 +418,7 @@ const WorkoutSet = ({
       className="flex-1 flex-row items-center px-2 gap-2"
       style={{
         backgroundColor: completed
-          ? theme.colors.surfaceVariant
+          ? theme.colors.primaryContainer
           : "transparent",
       }}
     >
@@ -414,7 +430,10 @@ const WorkoutSet = ({
             <Text
               variant="titleMedium"
               className="w-12 px-2 py-2 font-bold rounded"
-              style={{ textAlign: "center" }}
+              style={{
+                textAlign: "center",
+                color: theme.colors.onPrimaryContainer,
+              }}
             >
               {setType === "normal"
                 ? index + 1
@@ -471,7 +490,12 @@ const WorkoutSet = ({
         <Text
           variant="bodyMedium"
           className="w-24 py-2 rounded"
-          style={{ textAlign: "center" }}
+          style={{
+            textAlign: "center",
+            color: completed
+              ? theme.colors.onPrimaryContainer
+              : theme.colors.onSurface,
+          }}
         >
           -
         </Text>
@@ -497,6 +521,7 @@ const WorkoutSet = ({
             }
             weightUnit={selectedWeightUnit}
             onTextChange={updateSetWeightHandler}
+            completed={!!completed}
           />
         )}
 
@@ -511,6 +536,7 @@ const WorkoutSet = ({
         }
         weightUnit={selectedWeightUnit}
         onTextChange={updateSetRepsHandler}
+        completed={!!completed}
       />
 
       {showCheckboxes && (
@@ -535,11 +561,13 @@ const WorkoutSetTextField = ({
   onTextChange: externalOnTextChange,
   unit,
   weightUnit,
+  completed,
 }: {
   value: number;
   onTextChange: (number: number) => void;
   unit: WorkoutFieldType;
   weightUnit: WeightUnit;
+  completed: boolean;
 }) => {
   const theme = useTheme();
 
@@ -573,8 +601,6 @@ const WorkoutSetTextField = ({
   };
 
   const updateValues = (value: string) => {
-    setInternalValue(value);
-
     if (value === "" || Number.isNaN(Number(value))) {
       externalOnTextChange(0);
       setInternalValue("0");
@@ -587,6 +613,12 @@ const WorkoutSetTextField = ({
         }
       } else {
         externalOnTextChange(Number(value));
+      }
+
+      if (value.length > 1 && value.charAt(0) === "0") {
+        setInternalValue(Number(value).toString());
+      } else {
+        setInternalValue(value);
       }
     }
   };
@@ -634,7 +666,11 @@ const WorkoutSetTextField = ({
         value={internalValue}
         onChangeText={updateValues}
         keyboardType="numeric"
-        style={{ backgroundColor: theme.colors.surfaceVariant }}
+        style={{
+          color: completed
+            ? theme.colors.onPrimaryContainer
+            : theme.colors.onSurface,
+        }}
         onBlur={endEditing}
         ref={textInputRef}
       />
@@ -644,8 +680,10 @@ const WorkoutSetTextField = ({
       <NativeText
         className="px-6 py-2 font-bold rounded"
         style={{
-          backgroundColor: theme.colors.surfaceVariant,
           textAlign: "center",
+          color: completed
+            ? theme.colors.onPrimaryContainer
+            : theme.colors.onSurface,
         }}
       >
         {`${
@@ -665,6 +703,8 @@ const WeightUnitDialog = ({
   exerciseIndex,
   onDismiss,
 }: { shown: boolean; exerciseIndex: number; onDismiss: () => void }) => {
+  const theme = useTheme();
+
   const updateExerciseWeightUnit = useWorkoutStore(
     (state) => state.updateExerciseWeightUnit,
   );
@@ -699,6 +739,8 @@ const WeightUnitDialog = ({
             elements={values}
             value={values[value]}
             setSelectedValue={valueUpdateHandler}
+            mode="outlined"
+            style={{ backgroundColor: theme.colors.elevation.level3 }}
           />
         </Dialog.Content>
         <Dialog.Actions>
