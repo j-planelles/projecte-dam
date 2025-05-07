@@ -16,6 +16,7 @@ import {
 import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
+import * as SecureStorage from "expo-secure-store";
 
 const schema = z.object({
   username: z.string(),
@@ -61,11 +62,17 @@ export default function LandingLoginPage() {
       setUsername(username);
       hashPassword(password);
 
+      await SecureStorage.setItemAsync("username", username);
+
       const response = await apiClient.post("/auth/token", {
         username: username,
         password: password,
       });
       setToken(response.access_token);
+
+      if (response.access_token) {
+        await SecureStorage.setItemAsync("token", response.access_token);
+      }
 
       queryClient.invalidateQueries({ queryKey: ["user"] });
 

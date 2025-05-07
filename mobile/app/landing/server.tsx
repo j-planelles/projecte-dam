@@ -11,6 +11,7 @@ import { NavigateNextIcon } from "../../components/Icons";
 import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
+import * as SecureStorage from "expo-secure-store";
 
 const schema = z.object({
   ip: z.string().url(),
@@ -37,6 +38,8 @@ export default function LandingServerPage() {
 
   const submitHandler = async ({ ip }: FormSchemaType) => {
     try {
+      await SecureStorage.setItemAsync("serverIp", ip);
+
       const response = await axios.get(`${ip}/`);
 
       setServerIp(ip, response.data.name);

@@ -19,6 +19,7 @@ import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 import { useAuthStore } from "../../store/auth-store";
 import { useRouter } from "expo-router";
+import * as SecureStorage from "expo-secure-store";
 
 export default function ProfileSettingsPage() {
   return (
@@ -257,7 +258,8 @@ const LogOutButton = () => {
   );
 
   const [visible, setVisible] = useState<boolean>(false);
-  const logOutHandler = () => {
+  const logOutHandler = async () => {
+    await SecureStorage.deleteItemAsync("token");
     setVisible(false);
     setToken(null);
     setConnectionTest(false);

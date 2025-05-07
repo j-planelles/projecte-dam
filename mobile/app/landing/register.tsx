@@ -11,6 +11,7 @@ import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
 import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
+import * as SecureStorage from "expo-secure-store";
 
 const schema = z
   .object({
@@ -49,6 +50,8 @@ export default function LandingRegisterPage() {
       setUsername(username);
       hashPassword(password);
 
+      await SecureStorage.setItemAsync("username", username);
+
       await apiClient.post("/auth/register", undefined, {
         queries: { username: username, password: password },
       });
@@ -58,7 +61,10 @@ export default function LandingRegisterPage() {
         password: password,
       });
       setToken(response.access_token);
-      console.log(response.access_token);
+
+      if (response.access_token) {
+        await SecureStorage.setItemAsync("token", response.access_token);
+      }
 
       queryClient.invalidateQueries({ queryKey: ["user"] });
 

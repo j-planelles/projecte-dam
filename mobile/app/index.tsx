@@ -16,6 +16,7 @@ import WorkoutTab from "../components/pages/tabs/workout";
 import CommunityTab from "../components/pages/tabs/community";
 import TrainerTab from "../components/pages/tabs/trainer";
 import axios from "axios";
+import * as SecureStorage from "expo-secure-store";
 
 export default function IndexPage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -35,16 +36,25 @@ export default function IndexPage() {
 
 const Redirector = () => {
   const router = useRouter();
-  const { token, serverIp, setServerIp, connectionTested, setConnectionTest } =
-    useAuthStore(
-      useShallow((state) => ({
-        token: state.token,
-        serverIp: state.serverIp,
-        setServerIp: state.setServerIp,
-        connectionTested: state.connectionTested,
-        setConnectionTest: state.setConnectionTest,
-      })),
-    );
+  const {
+    token: storeToken,
+    serverIp: storeServerIp,
+    setServerIp,
+    connectionTested,
+    setConnectionTest,
+    setUsername,
+    setToken,
+  } = useAuthStore(
+    useShallow((state) => ({
+      token: state.token,
+      serverIp: state.serverIp,
+      setServerIp: state.setServerIp,
+      connectionTested: state.connectionTested,
+      setConnectionTest: state.setConnectionTest,
+      setUsername: state.setUsername,
+      setToken: state.setToken,
+    })),
+  );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -54,6 +64,20 @@ const Redirector = () => {
       if (connectionTested) {
         setIsLoading(false);
       } else {
+        const localToken = await SecureStorage.getItemAsync("token");
+        const localServerIp = await SecureStorage.getItemAsync("serverIp");
+        const localUsername = await SecureStorage.getItemAsync("username");
+
+        const token = localToken ? localToken : storeToken;
+        const serverIp = localServerIp ? localServerIp : storeServerIp;
+
+        if (localToken) {
+          setToken(localToken);
+        }
+        if (localUsername) {
+          setUsername(localUsername);
+        }
+
         const response = await axios.get(`${serverIp}/`);
 
         setServerIp(serverIp, response.data.name);
@@ -90,7 +114,7 @@ const Redirector = () => {
       {/*   </Text> */}
       {/* </Pressable> */}
     </View>
-  ) : token === null ? null : (
+  ) : storeToken === null ? null : (
     <TabBarWrapper />
   );
 };
