@@ -6,20 +6,43 @@ import ThemeManager from "../components/ThemeManager";
 import { useAuthStore } from "../store/auth-store";
 import { useShallow } from "zustand/react/shallow";
 import axios from "axios";
+import { loadAuthConfig } from "../lib/authConfig";
 
 export function RootRedirector() {
   const navigate = useNavigate();
-  const { token, serverIp, setServerIp } = useAuthStore(
+  const {
+    token: storeToken,
+    serverIp: storeServerIp,
+    setServerIp,
+    setUsername,
+    setToken,
+  } = useAuthStore(
     useShallow((state) => ({
       token: state.token,
       serverIp: state.serverIp,
       setServerIp: state.setServerIp,
+      setUsername: state.setUsername,
+      setToken: state.setToken,
     })),
   );
   const [isLoading, setIsLoading] = useState(true);
 
   const testServer = async () => {
     try {
+      const configData = await loadAuthConfig();
+
+      const token = configData?.token ? configData.token : storeToken;
+      const serverIp = configData?.serverIp
+        ? configData.serverIp
+        : storeServerIp;
+
+      if (configData?.token) {
+        setToken(configData.token);
+      }
+      if (configData?.username) {
+        setUsername(configData.username);
+      }
+
       const response = await axios.get(`${serverIp}/`);
 
       setServerIp(serverIp, response.data.name);
@@ -44,7 +67,7 @@ export function RootRedirector() {
     if (!isLoading) {
       testServer();
     }
-  }, [isLoading, token, navigate]);
+  }, [isLoading, storeToken, navigate]);
 
   return (
     <ThemeManager>

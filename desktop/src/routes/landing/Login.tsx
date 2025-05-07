@@ -9,6 +9,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
 import { z } from "zod";
 import { AxiosError } from "axios";
+import { updateAuthConfig } from "../../lib/authConfig";
 
 const schema = z.object({
   username: z.string(),
@@ -55,11 +56,15 @@ export default function LoginPage() {
       setUsername(username);
       hashPassword(password);
 
+      await updateAuthConfig({ username: username });
+
       const response = await apiClient.post("/auth/token", {
         username: username,
         password: password,
       });
       setToken(response.access_token);
+
+      await updateAuthConfig({ token: response.access_token });
 
       queryClient.invalidateQueries({ queryKey: ["user"] });
 

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
 import axios from "axios";
+import { updateAuthConfig } from "../../lib/authConfig";
 
 const schema = z.object({
   ip: z.string().url(),
@@ -35,6 +36,7 @@ export default function ServerSelectionPage() {
       const response = await axios.get(`${ip}/`);
 
       setServerIp(ip, response.data.name);
+      await updateAuthConfig({ serverIp: ip });
 
       navigate("/landing/login");
     } catch (error: unknown) {

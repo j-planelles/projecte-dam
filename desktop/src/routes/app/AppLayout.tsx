@@ -28,6 +28,7 @@ import NavigationBar, {
 import ThemeManager from "../../components/ThemeManager";
 import { useAuthStore } from "../../store/auth-store";
 import UltraLogoText from "../../assets/logo-text";
+import { updateAuthConfig } from "../../lib/authConfig";
 
 const NAV_ITEMS: NavigationBarSection[] = [
   {
@@ -175,7 +176,8 @@ const MyAccountButton = ({ username = "User" }: { username?: string }) => {
   const setToken = useAuthStore((state) => state.setToken);
   const [isDialogShown, setIsDialogShown] = useState<boolean>(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await updateAuthConfig({ token: undefined });
     setIsDialogShown(false);
     setToken(null);
     navigate("/");
