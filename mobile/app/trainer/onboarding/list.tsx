@@ -6,8 +6,10 @@ import { ActivityIndicator, FlatList, View } from "react-native";
 import {
   Avatar,
   Button,
+  Dialog,
   HelperText,
   List,
+  Portal,
   Text,
   useTheme,
 } from "react-native-paper";
@@ -55,6 +57,7 @@ const TrainerList = ({ data }: { data: any }) => {
     })),
   );
 
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<string>("");
@@ -69,7 +72,7 @@ const TrainerList = ({ data }: { data: any }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
-      router.push("/");
+      setDialogVisible(true);
     } catch (error: any) {
       if (error instanceof AxiosError) {
         setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
@@ -80,6 +83,12 @@ const TrainerList = ({ data }: { data: any }) => {
     }
     setIsLoading(false);
   };
+
+  const navigateHome = () => {
+    setDialogVisible(false);
+    router.push("/");
+  };
+
   return (
     <>
       <FlatList
@@ -124,6 +133,21 @@ const TrainerList = ({ data }: { data: any }) => {
           Next
         </Button>
       </View>
+      <Portal>
+        <Dialog visible={dialogVisible}>
+          <Dialog.Title>Trainer requested</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              You have successfully requested a trainer's services! Now, the
+              trainer must review your request and accept it or deny it. You can
+              cancel it anytime in the settings page.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={navigateHome}>Ok</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 };

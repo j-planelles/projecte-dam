@@ -3,7 +3,15 @@ import { AxiosError } from "axios";
 import { Link } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
-import { Appbar, Avatar, Button, HelperText, Text } from "react-native-paper";
+import {
+  Appbar,
+  Avatar,
+  Button,
+  Dialog,
+  HelperText,
+  Portal,
+  Text,
+} from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import {
   PersonAddIcon,
@@ -117,10 +125,17 @@ const EnrolledContent = () => {
     })),
   );
 
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+
+  const handleDialogClose = () => {
+    setDialogVisible(false);
+  };
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
   const unenrollHandler = async () => {
+    handleDialogClose();
     setIsLoading(true);
     setQueryError(null);
     try {
@@ -145,11 +160,27 @@ const EnrolledContent = () => {
         mode="outlined"
         icon={({ color }) => <PersonRemoveIcon color={color} />}
         disabled={isLoading}
-        onPress={unenrollHandler}
+        onPress={() => setDialogVisible(true)}
       >
-        Unenroll with trainer
+        Unlink with trainer
       </Button>
       {queryError && <HelperText type="error">{queryError}</HelperText>}
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={handleDialogClose}>
+          <Dialog.Title>Unlink with trainer</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Are you sure you want to unlink with your trainer? After
+              unlinking, you won't be able to access any of the recommended
+              workouts.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleDialogClose}>No</Button>
+            <Button onPress={unenrollHandler}>Yes</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 };
@@ -163,10 +194,17 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
     })),
   );
 
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+
+  const handleDialogClose = () => {
+    setDialogVisible(false);
+  };
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
   const unenrollHandler = async () => {
+    handleDialogClose();
     setIsLoading(true);
     setQueryError(null);
     try {
@@ -196,13 +234,31 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
         mode="outlined"
         icon={({ color }) => <PersonRemoveIcon color={color} />}
         disabled={isLoading}
-        onPress={unenrollHandler}
+        onPress={() => setDialogVisible(true)}
       >
         Cancel enrollment applicaiton
       </Button>
       {queryError && <HelperText type="error">{queryError}</HelperText>}
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={handleDialogClose}>
+          <Dialog.Title>Cancel enrollment applicaiton</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Are you sure you want to cancel the enrollment request?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleDialogClose}>No</Button>
+            <Button onPress={unenrollHandler}>Yes</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
+};
+
+const CancelEnrollmentApplicaitonButton = () => {
+  return;
 };
 
 const ProfilePictureHeader = ({ fullName }: { fullName: string }) => {

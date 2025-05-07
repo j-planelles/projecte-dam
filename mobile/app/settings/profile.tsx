@@ -234,6 +234,20 @@ function AboutYouPart() {
 }
 
 function DangerZone() {
+  return (
+    <>
+      <View className="mx-4 gap-2">
+        <Text variant="titleSmall" className="pb-2">
+          Danger zone
+        </Text>
+        <LogOutButton />
+        <DeleteAccountButton />
+      </View>
+    </>
+  );
+}
+
+const LogOutButton = () => {
   const router = useRouter();
   const { setToken, setConnectionTest } = useAuthStore(
     useShallow((store) => ({
@@ -253,24 +267,13 @@ function DangerZone() {
 
   return (
     <>
-      <View className="mx-4 gap-2">
-        <Text variant="titleSmall" className="pb-2">
-          Danger zone
-        </Text>
-        <Button
-          mode="outlined"
-          icon={({ color }) => <LogOutIcon color={color} />}
-          onPress={() => setVisible(true)}
-        >
-          Log Out
-        </Button>
-        <Button
-          mode="outlined"
-          icon={({ color }) => <PersonRemoveIcon color={color} />}
-        >
-          Delete Account
-        </Button>
-      </View>
+      <Button
+        mode="outlined"
+        icon={({ color }) => <LogOutIcon color={color} />}
+        onPress={() => setVisible(true)}
+      >
+        Log Out
+      </Button>
       <Portal>
         <Dialog visible={visible} onDismiss={() => setVisible(false)}>
           <Dialog.Content>
@@ -284,4 +287,46 @@ function DangerZone() {
       </Portal>
     </>
   );
-}
+};
+
+const DeleteAccountButton = () => {
+  const router = useRouter();
+  const { setToken, setConnectionTest } = useAuthStore(
+    useShallow((store) => ({
+      setToken: store.setToken,
+      setConnectionTest: store.setConnectionTest,
+    })),
+  );
+
+  const [visible, setVisible] = useState<boolean>(false);
+  const deleteAccountHandler = () => {
+    setVisible(false);
+    setToken(null);
+    setConnectionTest(false);
+    router.dismissAll();
+    router.replace("/");
+  };
+
+  return (
+    <>
+      <Button
+        mode="outlined"
+        icon={({ color }) => <PersonRemoveIcon color={color} />}
+        onPress={() => setVisible(true)}
+      >
+        Delete account
+      </Button>
+      <Portal>
+        <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+          <Dialog.Content>
+            <Text variant="bodyMedium">Do you wish to log out?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setVisible(false)}>No</Button>
+            <Button onPress={deleteAccountHandler}>Yes</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
+  );
+};

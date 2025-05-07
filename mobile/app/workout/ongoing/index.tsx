@@ -252,9 +252,11 @@ const CancelWorkoutDialog = ({
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+        <Dialog.Title>Cancel workout</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
-            Are you sure you want to cancel the current workout?
+            Are you sure you want to cancel the current workout? All of it's
+            contents will be discarded.
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
@@ -283,6 +285,7 @@ const FinishWorkoutDialog = ({
   return (
     <Portal>
       <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+        <Dialog.Title>Finish workout</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
             Are you sure you want to finish the current workout?
