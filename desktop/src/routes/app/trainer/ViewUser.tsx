@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   IconButton,
   ListItemIcon,
@@ -106,6 +107,8 @@ const UserMenu = () => {
     setAnchorEl(null);
   };
 
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const unlinkUserHandler = async () => {
@@ -141,13 +144,47 @@ const UserMenu = () => {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={unlinkUserHandler} disabled={isLoading}>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+            setDialogOpen(true);
+          }}
+          disabled={isLoading}
+        >
           <ListItemIcon>
             <PersonRemoveIcon />
           </ListItemIcon>
           <ListItemText>Unlink user</ListItemText>
         </MenuItem>
       </Menu>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>Unlink user</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            After unlinking, the user will need to create a new request to
+            re-link again. Your recommended workouts will be unrecommended.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setDialogOpen(false);
+            }}
+            startIcon={<CloseIcon />}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setDialogOpen(false);
+              unlinkUserHandler();
+            }}
+            startIcon={<PersonRemoveIcon />}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
