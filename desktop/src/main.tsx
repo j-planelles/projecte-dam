@@ -21,6 +21,9 @@ import ViewTemplatePage from "./routes/app/templates/ViewTemplate";
 import ExerciseListPage from "./routes/app/exercises/ExerciseList";
 import ExerciseEditPage from "./routes/app/exercises/ExerciseEditor";
 import TemplateEditPage from "./routes/app/templates/EditTemplate";
+import RegisterPage from "./routes/landing/Register";
+import RegisterProfilePage from "./routes/landing/RegisterProfile";
+import SettingsPage from "./routes/app/Settings";
 
 const router = createBrowserRouter([
   {
@@ -45,12 +48,12 @@ const router = createBrowserRouter([
             path: "templates",
             children: [
               { index: true, element: <TemplatesPage /> },
-              { path: "new", element: <TemplateEditPage/> },
+              { path: "new", element: <TemplateEditPage /> },
               {
                 path: ":template-uuid",
                 children: [
                   { index: true, element: <ViewTemplatePage /> },
-                  { path: "edit", element: <TemplateEditPage/> },
+                  { path: "edit", element: <TemplateEditPage /> },
                 ],
               },
             ],
@@ -83,6 +86,7 @@ const router = createBrowserRouter([
               { path: "requests", element: <TrainerRequestsPage /> },
             ],
           },
+          { path: "settings", element: <SettingsPage /> },
         ],
         errorElement: <ErrorElement />,
       },
@@ -92,6 +96,8 @@ const router = createBrowserRouter([
         children: [
           { path: "server", element: <ServerSelectionPage /> },
           { path: "login", element: <LoginPage /> },
+          { path: "register", element: <RegisterPage /> },
+          { path: "register-profile", element: <RegisterProfilePage /> },
         ],
       },
     ],

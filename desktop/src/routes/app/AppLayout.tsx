@@ -7,6 +7,8 @@ import GroupIcon from "@mui/icons-material/Group";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import HistoryIcon from "@mui/icons-material/History";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
 import {
   AppBar,
   Avatar,
@@ -100,7 +102,7 @@ export default function AppLayout() {
 
   return (
     <ThemeManager>
-      <TopBar username={userData?.username} />
+      <TopBar username={userData?.username} fullName={userData?.full_name} />
       <Box
         sx={{
           display: "flex",
@@ -133,7 +135,10 @@ export default function AppLayout() {
   );
 }
 
-const TopBar = ({ username }: { username?: string }) => {
+const TopBar = ({
+  username,
+  fullName,
+}: { username?: string; fullName?: string }) => {
   const theme = useTheme();
 
   return (
@@ -151,7 +156,7 @@ const TopBar = ({ username }: { username?: string }) => {
             fill={theme.palette.text.primary}
           />
         </Box>
-        <MyAccountButton username={username} />
+        <MyAccountButton username={username} fullName={fullName} />
       </Toolbar>
     </AppBar>
   );
@@ -171,7 +176,10 @@ const BackIcon = () => {
   );
 };
 
-const MyAccountButton = ({ username = "User" }: { username?: string }) => {
+const MyAccountButton = ({
+  username = "user",
+  fullName = "User",
+}: { username?: string; fullName?: string }) => {
   const navigate = useNavigate();
   const setToken = useAuthStore((state) => state.setToken);
   const [isDialogShown, setIsDialogShown] = useState<boolean>(false);
@@ -183,12 +191,17 @@ const MyAccountButton = ({ username = "User" }: { username?: string }) => {
     navigate("/");
   };
 
+  const navigateToSettings = () => {
+    setIsDialogShown(false);
+    navigate("/app/settings");
+  };
+
   return (
     <>
       <Tooltip title="My Account">
         <IconButton onClick={() => setIsDialogShown(true)} sx={{ p: 0 }}>
           <Avatar sx={{ backgroundColor: "primary.main" }}>
-            {username.charAt(0).toUpperCase()}
+            {fullName.charAt(0).toUpperCase()}
           </Avatar>
         </IconButton>
       </Tooltip>
@@ -224,12 +237,19 @@ const MyAccountButton = ({ username = "User" }: { username?: string }) => {
               })}
             >
               <Avatar sx={{ backgroundColor: "primary.main" }}>
-                {username.charAt(0).toUpperCase()}
+                {fullName.charAt(0).toUpperCase()}
               </Avatar>
-              <Typography variant="h6">{username}</Typography>
+              <Box className="flex flex-col">
+                <Typography variant="h6" sx={{ margin: 0 }}>
+                  {fullName}
+                </Typography>
+                <Typography variant="body2" sx={{ margin: 0 }}>
+                  {username}
+                </Typography>
+              </Box>
             </Box>
             <Box
-              className="flex gap-4 p-2 mt-2"
+              className="flex flex-col gap-2 p-2 mt-2"
               sx={(theme) => ({
                 backgroundColor:
                   theme.palette.mode === "dark"
@@ -240,9 +260,18 @@ const MyAccountButton = ({ username = "User" }: { username?: string }) => {
               })}
             >
               <Button
+                variant="text"
+                className="flex-1"
+                onClick={navigateToSettings}
+                startIcon={<SettingsIcon />}
+              >
+                Settings
+              </Button>
+              <Button
                 variant="outlined"
                 className="flex-1"
                 onClick={handleLogout}
+                startIcon={<LogoutIcon />}
               >
                 Log out
               </Button>
