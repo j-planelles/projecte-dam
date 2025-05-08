@@ -1,3 +1,4 @@
+import { Text } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, View } from "react-native";
 import landingBackground from "../../../assets/landing-background.jpg";
@@ -25,8 +26,15 @@ export default function LandingWrapper({
         >
           <UltraLogoText fill="#FFF" />
         </View>
-        <View className="w-full absolute bottom-0 left-0 bg-black px-8 pb-20 pt-8 gap-4">
-          {children}
+        <View className="w-full absolute bottom-0 left-0">
+          <View className="w-full p-2">
+            <Text style={{ color: "gray" }}>
+              Photo by Kirill Bogomolov on Unsplash
+            </Text>
+          </View>
+          <View className="w-full bg-black px-8 pb-20 pt-8 gap-4">
+            {children}
+          </View>
         </View>
       </ImageBackground>
     </View>

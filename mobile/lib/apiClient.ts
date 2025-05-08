@@ -200,7 +200,6 @@ const UserModel = z
     username: z.string().optional().default(""),
     full_name: z.string().optional().default(""),
     biography: z.union([z.string(), z.null()]).optional(),
-    hashed_password: z.string(),
     trainer_uuid: z.union([z.string(), z.null()]).optional(),
   })
   .passthrough();
@@ -213,9 +212,7 @@ const TrainerRequestSchema = z
     created_at: z.number().int(),
   })
   .passthrough();
-const HealthCheck = z
-  .object({ name: z.string(), version: z.string() })
-  .passthrough();
+const HealthCheck = z.object({ name: z.string() }).passthrough();
 
 export const schemas = {
   Body_Get_OAuth2_token_auth_token_post,
@@ -254,7 +251,7 @@ const endpoints = makeApi([
     alias: "health_check__get",
     description: `Health check`,
     requestFormat: "json",
-    response: HealthCheck,
+    response: z.object({ name: z.string() }).passthrough(),
   },
   {
     method: "post",
@@ -290,6 +287,13 @@ const endpoints = makeApi([
         schema: HTTPValidationError,
       },
     ],
+  },
+  {
+    method: "get",
+    path: "/auth/publickey",
+    alias: "Get_public_key_auth_publickey_get",
+    requestFormat: "json",
+    response: z.string(),
   },
   {
     method: "post",

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
 import React from "react";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { ActivityIndicator, Pressable, View, Image } from "react-native";
 import { Avatar, Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
@@ -13,6 +13,7 @@ import {
 } from "../../Icons";
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
+import TrainerImage from "../../../assets/trainer-enroll.jpg";
 
 export default function TrainerTab() {
   const { apiClient, token } = useAuthStore(
@@ -67,6 +68,13 @@ export default function TrainerTab() {
       ) : (
         <>
           <Text variant="headlineLarge">Personal Trianer</Text>
+          <Image
+            source={TrainerImage}
+            className="flex-1 w-full h-full rounded-[24px]"
+            style={{ height: 200 }}
+            resizeMode="cover"
+          />
+          <Text variant="bodySmall">Photo by Michael DeMoya on Unsplash</Text>
           <Text variant="bodyMedium">
             Unleash your potential and sculpt your dream body with a
             personalized fitness journey guided by our expert gym trainer
