@@ -9,6 +9,7 @@ import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { updateAuthConfig } from "../../lib/authConfig";
 import { useAuthStore } from "../../store/auth-store";
+import { encodePassword } from "../../lib/crypto";
 
 const schema = z
   .object({
@@ -40,6 +41,7 @@ export default function RegisterPage() {
     hashPassword,
     setToken,
     apiClient,
+    serverIp,
   } = useAuthStore(
     useShallow((state) => ({
       username: state.username,
@@ -47,6 +49,7 @@ export default function RegisterPage() {
       hashPassword: state.hashPassword,
       setToken: state.setToken,
       apiClient: state.apiClient,
+      serverIp: state.serverIp,
     })),
   );
 
@@ -61,13 +64,15 @@ export default function RegisterPage() {
 
       await updateAuthConfig({ username: username });
 
+      const encodedPassword = await encodePassword(password, serverIp);
+
       await apiClient.post("/auth/register", undefined, {
-        queries: { username: username, password: password },
+        queries: { username: username, password: encodedPassword },
       });
 
       const response = await apiClient.post("/auth/token", {
         username: username,
-        password: password,
+        password: encodedPassword,
       });
       setToken(response.access_token);
 
