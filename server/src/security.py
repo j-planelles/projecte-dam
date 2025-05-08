@@ -1,9 +1,8 @@
-from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import jwt
-from sqlalchemy.orm import selectinload
 from db import get_session, session_generator
+from encryption import decrypt_message, export_public_key
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
@@ -11,7 +10,7 @@ from models.users import TrainerModel, UserConfig, UserModel
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from schemas.config_schema import MobileAppConfigSchema
-from schemas.user_schema import UserInfoSchema, UserSchema, UserInputSchema
+from schemas.user_schema import UserInfoSchema, UserInputSchema, UserSchema
 from sqlmodel import Session, select
 
 ALGORITHM = "HS256"
@@ -137,7 +136,9 @@ async def get_trainer_user(
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
-    user = _authenticate_user(form_data.username, form_data.password)
+    plain_password = decrypt_message(form_data.password)
+    print(f"Decrypted: {plain_password}")
+    user = _authenticate_user(form_data.username, plain_password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -152,7 +153,7 @@ async def login_for_access_token(
 @router.post("/register", name="Create a user", tags=["Authentication"])
 async def create_user(
     username: str,
-    password: str,  # TODO: Fer hasing al client
+    password: str,
     session: Session = Depends(get_session),
 ):
     user_in_db = get_user_by_username(username)
@@ -170,10 +171,12 @@ async def create_user(
     )
     session.add(new_user)
 
+    plain_password = decrypt_message(password)
+
     new_user_config = UserConfig(
         user_uuid=new_user.uuid,
         mobile_app_config=MobileAppConfigSchema().model_dump(),
-        hashed_password=_get_password_hash(password=password),
+        hashed_password=_get_password_hash(password=plain_password),
     )
     session.add(new_user_config)
     session.commit()
@@ -250,3 +253,10 @@ async def register_as_trainer(
     new_trainer = TrainerModel(user_uuid=current_user.uuid)
     session.add(new_trainer)
     session.commit()
+
+
+@router.get(
+    "/publickey", name="Get public key", tags=["Authentication"], response_model=str
+)
+async def get_public_key():
+    return export_public_key()

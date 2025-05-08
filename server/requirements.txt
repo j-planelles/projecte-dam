@@ -10,3 +10,4 @@ pydantic
 sqlalchemy
 psycopg[binary]
 python-decouple
+pycryptodome
