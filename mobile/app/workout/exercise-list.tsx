@@ -1,8 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
-import { Appbar, Button, List, Text, useTheme } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  List,
+  Searchbar,
+  Text,
+  useTheme,
+} from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { AddIcon, DumbellIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
@@ -85,6 +92,8 @@ export default function ExerciseListPage() {
   const disableControls =
     userExercisesQuery.isLoading || defaultExercisesQuery.isLoading;
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
   return (
     <ThemedView className="flex-1">
       <Header title="Manage Exercises">
@@ -101,21 +110,36 @@ export default function ExerciseListPage() {
           <ActivityIndicator size="large" />
         </View>
       ) : (
-        <FlatList
-          data={sortedExercises}
-          keyExtractor={(item) =>
-            `${item.isDefault ? "default" : "user"}-${item.uuid}`
-          }
-          renderItem={({ item }) => (
-            <Link
-              asChild
-              href={`/workout/exercise-edit/${item.isDefault ? `?defaultExerciseUUID=${item.uuid}` : item.uuid}`}
-            >
-              <List.Item title={item.name} />
-            </Link>
-          )}
-          ListEmptyComponent={<ExerciseListEmptyComponent />}
-        />
+        <>
+          <View className="px-4 py-2">
+            <Searchbar
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+              placeholder="Search exercises..."
+            />
+          </View>
+          <FlatList
+            data={sortedExercises.filter(
+              (exercise) =>
+                !searchTerm ||
+                exercise.name
+                  .toLowerCase()
+                  .indexOf(searchTerm.toLowerCase()) !== -1,
+            )}
+            keyExtractor={(item) =>
+              `${item.isDefault ? "default" : "user"}-${item.uuid}`
+            }
+            renderItem={({ item }) => (
+              <Link
+                asChild
+                href={`/workout/exercise-edit/${item.isDefault ? `?defaultExerciseUUID=${item.uuid}` : item.uuid}`}
+              >
+                <List.Item title={item.name} />
+              </Link>
+            )}
+            ListEmptyComponent={<ExerciseListEmptyComponent />}
+          />
+        </>
       )}
     </ThemedView>
   );

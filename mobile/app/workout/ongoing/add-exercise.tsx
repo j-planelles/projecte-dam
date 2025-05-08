@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import {
-  Appbar,
   Button,
   Chip,
   HelperText,
@@ -15,7 +14,7 @@ import {
 } from "react-native-paper";
 import { v4 as uuidv4 } from "uuid";
 import { useShallow } from "zustand/react/shallow";
-import { DumbellIcon, FilterIcon } from "../../../components/Icons";
+import { DumbellIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
 import { useAuthStore } from "../../../store/auth-store";
@@ -160,12 +159,7 @@ export default function OngoingWorkoutAddExercisePage() {
 
   return (
     <ThemedView className="flex-1">
-      <Header title="Add exercise">
-        <Appbar.Action
-          animated={false}
-          icon={({ color }) => <FilterIcon color={color} />}
-        />
-      </Header>
+      <Header title="Add exercise" />
 
       <View className="px-4 py-2">
         <Searchbar
@@ -181,7 +175,12 @@ export default function OngoingWorkoutAddExercisePage() {
         </View>
       ) : (
         <FlatList
-          data={sortedExercises}
+          data={sortedExercises.filter(
+            (exercise) =>
+              !searchTerm ||
+              exercise.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !==
+                -1,
+          )}
           keyExtractor={(item) =>
             `${item.isDefault ? "default" : "user"}-${item.uuid}`
           }
