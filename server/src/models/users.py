@@ -23,8 +23,6 @@ class UserModel(UserSchema, table=True):
     full_name: str = ""
     biography: str | None = None
 
-    hashed_password: str
-
     trainer_uuid: UUID_TYPE | None = Field(
         foreign_key="trainer.user_uuid", default=None
     )
@@ -72,6 +70,8 @@ class UserConfig(SQLModel, table=True):
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
 
     user: UserModel = Relationship(back_populates="config")
+
+    hashed_password: str
 
     is_disabled: bool = Field(default=False)
 

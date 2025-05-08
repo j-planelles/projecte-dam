@@ -54,10 +54,22 @@ def get_user_by_uuid(uuid: str):
         return item
 
 
+def get_user_settings_by_uuid(uuid: str):
+    with session_generator as session:
+        query = select(UserConfig).where(UserConfig.user_uuid == uuid)
+        item = session.exec(query).first()
+        return item
+
+
 def _authenticate_user(username: str, password: str):
     user = get_user_by_username(username)
-    if user and _verify_password(password, user.hashed_password):
-        return user
+
+    if user:
+        config = get_user_settings_by_uuid(str(user.uuid))
+
+        if config:
+            if user and _verify_password(password, config.hashed_password):
+                return user
 
 
 def _create_access_token(data: dict):
@@ -155,12 +167,13 @@ async def create_user(
         username=username,
         full_name=username,
         biography="",
-        hashed_password=_get_password_hash(password=password),
     )
     session.add(new_user)
 
     new_user_config = UserConfig(
-        user_uuid=new_user.uuid, mobile_app_config=MobileAppConfigSchema().model_dump()
+        user_uuid=new_user.uuid,
+        mobile_app_config=MobileAppConfigSchema().model_dump(),
+        hashed_password=_get_password_hash(password=password),
     )
     session.add(new_user_config)
     session.commit()
