@@ -12,6 +12,7 @@ import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import * as SecureStorage from "expo-secure-store";
+import { encodePassword } from "../../lib/crypto";
 
 const schema = z
   .object({
@@ -37,11 +38,12 @@ export default function LandingRegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-  const { setUsername, hashPassword, setToken } = useAuthStore(
+  const { setUsername, hashPassword, setToken, serverIp } = useAuthStore(
     useShallow((state) => ({
       setUsername: state.setUsername,
       hashPassword: state.hashPassword,
       setToken: state.setToken,
+      serverIp: state.serverIp,
     })),
   );
 
@@ -52,13 +54,15 @@ export default function LandingRegisterPage() {
 
       await SecureStorage.setItemAsync("username", username);
 
+      const encryptedPassword = await encodePassword(password, serverIp);
+
       await apiClient.post("/auth/register", undefined, {
-        queries: { username: username, password: password },
+        queries: { username: username, password: encryptedPassword },
       });
 
       const response = await apiClient.post("/auth/token", {
         username: username,
-        password: password,
+        password: encryptedPassword,
       });
       setToken(response.access_token);
 

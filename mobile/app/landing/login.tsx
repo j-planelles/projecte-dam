@@ -17,6 +17,7 @@ import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import * as SecureStorage from "expo-secure-store";
+import { encodePassword } from "../../lib/crypto";
 
 const schema = z.object({
   username: z.string(),
@@ -43,6 +44,7 @@ export default function LandingLoginPage() {
     hashPassword,
     setToken,
     serverName,
+    serverIp,
   } = useAuthStore(
     useShallow((state) => ({
       username: state.username,
@@ -50,6 +52,7 @@ export default function LandingLoginPage() {
       hashPassword: state.hashPassword,
       setToken: state.setToken,
       serverName: state.serverName,
+      serverIp: state.serverIp,
     })),
   );
 
@@ -64,9 +67,11 @@ export default function LandingLoginPage() {
 
       await SecureStorage.setItemAsync("username", username);
 
+      const encryptedPassword = await encodePassword(password, serverIp);
+
       const response = await apiClient.post("/auth/token", {
         username: username,
-        password: password,
+        password: encryptedPassword,
       });
       setToken(response.access_token);
 
