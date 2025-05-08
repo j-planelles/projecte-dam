@@ -372,9 +372,7 @@ const WorkoutSet = ({
 
   const { start: startRestCountdown } = useRestCountdownControl();
 
-  // TODO: Read default weight unit from settings conext when undefined
-  const selectedWeightUnit: WeightUnit =
-    weightUnit === undefined ? "metric" : weightUnit;
+  const selectedWeightUnit: WeightUnit = !weightUnit ? "metric" : weightUnit;
 
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
 
@@ -640,7 +638,7 @@ const WorkoutSetTextField = ({
       return [weightUnit === "metric" ? "kg" : "lbs", false, true];
       // biome-ignore lint/style/noUselessElse: <explanation>
     } else if (unit === "distance") {
-      return [weightUnit === "metric" ? "km" : "m", false, false];
+      return [weightUnit === "metric" ? "km" : "mi", false, false];
       // biome-ignore lint/style/noUselessElse: <explanation>
     } else if (unit === "reps") {
       return ["reps", false, false];

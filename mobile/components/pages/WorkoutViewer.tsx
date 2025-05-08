@@ -1,5 +1,6 @@
 import { ScrollView, View } from "react-native";
-import { Divider, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
+import { kgToLbs, kmToMiles } from "../../lib/unitTransformers";
 
 export default function WorkoutViewer({
   workout,
@@ -92,7 +93,13 @@ const WorkoutExercise = ({
 
       {exercise.sets.length > 0 ? (
         exercise.sets.map((set, index) => (
-          <WorkoutSet key={index} set={set} index={index} />
+          <WorkoutSet
+            key={index}
+            set={set}
+            index={index}
+            exerciseType={exercise.exercise.type}
+            weightUnit={exercise.weightUnit}
+          />
         ))
       ) : (
         <Text
@@ -107,23 +114,56 @@ const WorkoutExercise = ({
   );
 };
 
+const formatAsTime = (externalValue: number) => {
+  const formattedValue = Math.floor(externalValue).toString();
+  const minutesPart =
+    formattedValue.length >= 3
+      ? formattedValue.substring(0, formattedValue.length - 2)
+      : "0";
+  const secondsPart = formattedValue
+    .substring(formattedValue.length - 2, formattedValue.length)
+    .padStart(2, "0");
+
+  return `${minutesPart}:${secondsPart}`;
+};
+
 const WorkoutSet = ({
   set,
   index,
+  exerciseType,
+  weightUnit = "metric",
 }: {
   set: exerciseSet;
   index: number;
+  exerciseType: exercise["type"];
+  weightUnit?: WeightUnit;
 }) => {
   return (
     <View className="flex-1 flex-row items-center py-2 px-4">
       <Text variant="bodyLarge" className="w-12 px-4">
         {set.type === "normal" ? index + 1 : set.type === "dropset" ? "D" : "F"}
       </Text>
+      {exerciseType !== "duration" &&
+        exerciseType !== "countdown" &&
+        exerciseType !== "reps-only" && (
+          <Text variant="bodyLarge" className="flex-1 px-2">
+            {exerciseType === "cardio"
+              ? weightUnit === "imperial"
+                ? `${Number(kmToMiles(set.weight).toFixed(2))} mi`
+                : `${set.weight} km`
+              : exerciseType === "assisted-bodyweight"
+                ? "assisted-weight"
+                : weightUnit === "imperial"
+                  ? `${Number(kgToLbs(set.weight).toFixed(2))} lbs`
+                  : `${set.weight} kg`}
+          </Text>
+        )}
       <Text variant="bodyLarge" className="flex-1 px-2">
-        {set.weight} kg
-      </Text>
-      <Text variant="bodyLarge" className="flex-1 px-2">
-        {set.reps} reps
+        {exerciseType === "cardio" ||
+        exerciseType === "duration" ||
+        exerciseType === "countdown"
+          ? formatAsTime(set.reps)
+          : `${set.reps} reps`}
       </Text>
     </View>
   );
