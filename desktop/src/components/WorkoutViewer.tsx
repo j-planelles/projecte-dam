@@ -1,4 +1,5 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { kgToLbs, kmToMiles } from "../lib/unitTransformers";
 
 export default function WorkoutViewer({
   workout,
@@ -94,7 +95,13 @@ const WorkoutExercise = ({
 
       {exercise.sets.length > 0 ? (
         exercise.sets.map((set, index) => (
-          <WorkoutSet key={index} set={set} index={index} />
+          <WorkoutSet
+            key={index}
+            set={set}
+            index={index}
+            exerciseType={exercise.exercise.type}
+            weightUnit={exercise.weightUnit}
+          />
         ))
       ) : (
         <Typography
@@ -109,20 +116,57 @@ const WorkoutExercise = ({
   );
 };
 
+const formatAsTime = (externalValue: number) => {
+  const formattedValue = Math.floor(externalValue).toString();
+  const minutesPart =
+    formattedValue.length >= 3
+      ? formattedValue.substring(0, formattedValue.length - 2)
+      : "0";
+  const secondsPart = formattedValue
+    .substring(formattedValue.length - 2, formattedValue.length)
+    .padStart(2, "0");
+
+  return `${minutesPart}:${secondsPart}`;
+};
+
 const WorkoutSet = ({
   set,
   index,
+  exerciseType,
+  weightUnit = "metric",
 }: {
   set: exerciseSet;
   index: number;
+  exerciseType: exercise["type"];
+  weightUnit?: WeightUnit;
 }) => {
   return (
     <Box className="flex flex-1 flex-row items-center py-2">
       <Typography className="w-12 px-4" sx={{ color: "text.secondary" }}>
         {set.type === "normal" ? index + 1 : set.type === "dropset" ? "D" : "F"}
       </Typography>
-      <Typography className="flex-1 px-2">{set.weight} kg</Typography>
-      <Typography className="flex-1 px-2">{set.reps} reps</Typography>
+      {exerciseType !== "duration" &&
+        exerciseType !== "countdown" &&
+        exerciseType !== "reps-only" && (
+          <Typography className="flex-1 px-2">
+            {exerciseType === "cardio"
+              ? weightUnit === "imperial"
+                ? `${Number(kmToMiles(set.weight).toFixed(2))} mi`
+                : `${set.weight} km`
+              : exerciseType === "assisted-bodyweight"
+                ? "assisted-weight"
+                : weightUnit === "imperial"
+                  ? `${Number(kgToLbs(set.weight).toFixed(2))} lbs`
+                  : `${set.weight} kg`}
+          </Typography>
+        )}
+      <Typography className="flex-1 px-2">
+        {exerciseType === "cardio" ||
+        exerciseType === "duration" ||
+        exerciseType === "countdown"
+          ? formatAsTime(set.reps)
+          : `${set.reps} reps`}
+      </Typography>
     </Box>
   );
 };
