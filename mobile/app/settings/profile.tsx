@@ -42,8 +42,8 @@ export default function ProfileSettingsPage() {
 }
 
 const userDataSchema = z.object({
-  username: z.string(),
-  name: z.string(),
+  username: z.string().min(1, "Required"),
+  name: z.string().min(1, "Required"),
   bio: z.string().optional(),
 });
 
