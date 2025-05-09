@@ -109,9 +109,6 @@ const ExerciseSchema = z
     type: ExerciseType,
   })
   .passthrough();
-const WorkoutInstanceSchema = z
-  .object({ timestamp_start: z.number().int(), duration: z.number().int() })
-  .passthrough();
 const WeightUnit = z.enum(["metric", "imperial"]);
 const ExerciseInputSchema = z
   .object({
@@ -140,6 +137,9 @@ const WorkoutEntrySchema_Output = z
     exercise: ExerciseInputSchema,
     sets: z.array(WorkoutSetSchema),
   })
+  .passthrough();
+const WorkoutInstanceSchema = z
+  .object({ timestamp_start: z.number().int(), duration: z.number().int() })
   .passthrough();
 const GymSchema = z
   .object({
@@ -227,12 +227,12 @@ export const schemas = {
   DefaultExerciseModel,
   ExerciseModel,
   ExerciseSchema,
-  WorkoutInstanceSchema,
   WeightUnit,
   ExerciseInputSchema,
   SetType,
   WorkoutSetSchema,
   WorkoutEntrySchema_Output,
+  WorkoutInstanceSchema,
   GymSchema,
   WorkoutContentSchema_Output,
   WorkoutEntrySchema_Input,
@@ -652,6 +652,27 @@ const endpoints = makeApi([
       },
     ],
     response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/user/exercises/:exercise_uuid/last",
+    alias: "Get_exercise_user_exercises__exercise_uuid__last_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "exercise_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutEntrySchema_Output,
     errors: [
       {
         status: 422,

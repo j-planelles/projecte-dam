@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Text as NativeText,
   TextInput as NativeTextInput,
   Pressable,
@@ -40,6 +41,8 @@ import {
 } from "../../lib/unitTransformers";
 import { useTimer } from "../../lib/hooks/useTimer";
 import { useRestCountdownControl } from "../../store/rest-timer-context";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "../../store/auth-store";
 
 export default function WorkoutEditor({
   showTimer = true,
@@ -194,9 +197,16 @@ const WorkoutExercise = ({
   showCheckboxes: boolean;
 }) => {
   const theme = useTheme();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
 
   const {
     exerciseName,
+    exerciseUuid,
     setsAmount,
     addSet,
     removeExercise,
@@ -205,6 +215,7 @@ const WorkoutExercise = ({
   } = useWorkoutStore(
     useShallow((state) => ({
       exerciseName: state.exercises[exerciseIndex].exercise.name,
+      exerciseUuid: state.exercises[exerciseIndex].exercise.uuid,
       setsAmount: state.exercises[exerciseIndex].sets.length,
       addSet: state.addSet,
       removeExercise: state.removeExercise,
@@ -237,6 +248,40 @@ const WorkoutExercise = ({
 
     moveExercise(exerciseIndex, exerciseIndex + 1);
   };
+
+  const lastEntryQuery = useQuery({
+    queryKey: ["user", "/user/exercise/last", exerciseUuid],
+    queryFn: async () =>
+      await apiClient.get("/user/exercises/:exercise_uuid/last", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { exercise_uuid: exerciseUuid },
+      }),
+    // staleTime: 30 * 60 * 1000, // 30 minuts
+  });
+
+  const lastEntry = useMemo(
+    () =>
+      ({
+        restCountdownDuration: lastEntryQuery.data?.rest_countdown_duration,
+        weightUnit: lastEntryQuery.data?.weight_unit,
+        exercise: {
+          uuid: lastEntryQuery.data?.exercise.uuid,
+          name: lastEntryQuery.data?.exercise.name,
+          description: lastEntryQuery.data?.exercise.description,
+          userNote: lastEntryQuery.data?.exercise.user_note,
+          bodyPart: lastEntryQuery.data?.exercise.body_part,
+          type: lastEntryQuery.data?.exercise.type,
+        },
+        sets: lastEntryQuery.data?.sets.map((set) => ({
+          reps: set.reps,
+          weight: set.weight,
+          type: set.set_type,
+        })),
+      }) as workoutExercise,
+    [lastEntryQuery.data],
+  );
+
+  console.log(lastEntry);
 
   return (
     <View>
@@ -314,6 +359,7 @@ const WorkoutExercise = ({
           index={setIndex}
           exerciseIndex={exerciseIndex}
           showCheckboxes={showCheckboxes}
+          lastEntry={lastEntry}
         />
       ))}
 
@@ -332,10 +378,12 @@ const WorkoutSet = ({
   index,
   exerciseIndex,
   showCheckboxes,
+  lastEntry,
 }: {
   index: number;
   exerciseIndex: number;
   showCheckboxes: boolean;
+  lastEntry?: workoutExercise;
 }) => {
   const theme = useTheme();
 
@@ -480,24 +528,12 @@ const WorkoutSet = ({
         />
       </Menu>
 
-      <TouchableRipple
-        onPress={() => {
-          console.log("Pressed");
-        }}
-      >
-        <Text
-          variant="bodyMedium"
-          className="w-24 py-2 rounded"
-          style={{
-            textAlign: "center",
-            color: completed
-              ? theme.colors.onPrimaryContainer
-              : theme.colors.onSurface,
-          }}
-        >
-          -
-        </Text>
-      </TouchableRipple>
+      <LastExerciseButton
+        setIndex={index}
+        exerciseIndex={exerciseIndex}
+        completed={!!completed}
+        lastEntry={lastEntry}
+      />
 
       {exerciseType !== "duration" &&
         exerciseType !== "countdown" &&
@@ -693,6 +729,57 @@ const WorkoutSetTextField = ({
         } ${unitText}`}
       </NativeText>
     </Pressable>
+  );
+};
+
+const LastExerciseButton = ({
+  completed,
+  exerciseIndex,
+  setIndex,
+  lastEntry,
+}: {
+  completed: boolean;
+  setIndex: number;
+  exerciseIndex: number;
+  lastEntry?: workoutExercise;
+}) => {
+  const theme = useTheme();
+  const { updateSetReps, updateSetWeight } = useWorkoutStore(
+    useShallow((state) => ({
+      updateSetReps: state.updateSetReps,
+      updateSetWeight: state.updateSetWeight,
+    })),
+  );
+
+  const set = lastEntry?.sets
+    ? setIndex < lastEntry.sets.length
+      ? lastEntry.sets[setIndex]
+      : null
+    : undefined;
+
+  const updateSetHandler = () => {
+    if (set) {
+      updateSetReps(exerciseIndex, setIndex, set?.reps);
+      updateSetWeight(exerciseIndex, setIndex, set?.weight);
+    }
+  };
+
+  return (
+    <TouchableRipple onPress={updateSetHandler} disabled={completed || !set}>
+      <Text
+        variant="labelSmall"
+        className="w-24 py-2"
+        style={{
+          textAlign: "center",
+          color: completed
+            ? theme.colors.onPrimaryContainer
+            : theme.colors.onSurface,
+          // backgroundColor: "red",
+        }}
+      >
+        {set ? `${set.weight}x${set.reps}` : "-"}
+      </Text>
+    </TouchableRipple>
   );
 };
 
