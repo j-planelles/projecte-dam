@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import React from "react";
-import { ActivityIndicator, View } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, RefreshControl, View } from "react-native";
 import { Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
@@ -11,8 +11,27 @@ import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 
 export default function WorkoutTab() {
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const refreshControlHandler = () => {
+    setRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
+
   return (
-    <HomeTabsScreen>
+    <HomeTabsScreen
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refreshControlHandler}
+        />
+      }
+    >
       <Text variant="headlineLarge">Workout</Text>
 
       <StartWorkoutButton />

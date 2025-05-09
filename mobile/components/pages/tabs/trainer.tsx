@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import React from "react";
-import { ActivityIndicator, Pressable, View, Image } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Image, RefreshControl, View } from "react-native";
 import { Avatar, Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
+import TrainerImage from "../../../assets/trainer-enroll.jpg";
 import { useAuthStore } from "../../../store/auth-store";
 import {
   DumbellIcon,
@@ -13,9 +14,9 @@ import {
 } from "../../Icons";
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
-import TrainerImage from "../../../assets/trainer-enroll.jpg";
 
 export default function TrainerTab() {
+  const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -41,9 +42,26 @@ export default function TrainerTab() {
   });
 
   const isLoading = infoQuery.isLoading || requestQuery.isLoading;
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const refreshControlHandler = () => {
+    setRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
 
   return (
-    <HomeTabsScreen>
+    <HomeTabsScreen
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refreshControlHandler}
+        />
+      }
+    >
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />

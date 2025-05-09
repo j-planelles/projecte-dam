@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { RefreshControlProps, ScrollView, View } from "react-native";
 import { Text, TouchableRipple, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowForwardIcon } from "../../Icons";
@@ -10,15 +10,17 @@ import { useEffect } from "react";
 
 export default function HomeTabsScreen({
   children,
+  refreshControl
 }: {
   children: React.ReactNode;
+  refreshControl?: React.ReactElement<RefreshControlProps, string | React.JSXElementConstructor<any>> | undefined
 }) {
   const insets = useSafeAreaInsets();
   const ongoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
 
   return (
     <View className="flex-1" style={{ paddingTop: insets.top }}>
-      <ScrollView>
+      <ScrollView refreshControl={refreshControl}>
         <BasicView>{children}</BasicView>
       </ScrollView>
       {ongoingWorkout && <OngoingWorkoutButton />}

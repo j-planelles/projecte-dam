@@ -1,37 +1,49 @@
 import { Paint, useFont } from "@shopify/react-native-skia";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, RefreshControl, View } from "react-native";
 import {
   Avatar,
   Button,
+  Card,
   Chip,
-  MD3LightTheme,
+  IconButton,
   Text,
   useTheme,
-  IconButton,
-  Card,
 } from "react-native-paper";
 import { Bar, CartesianChart } from "victory-native";
 import { useShallow } from "zustand/react/shallow";
 import roboto from "../../../assets/fonts/Roboto-Regular.ttf";
 import { useAuthStore } from "../../../store/auth-store";
-import {
-  AddIcon,
-  CalendarIcon,
-  CloseIcon,
-  DumbellIcon,
-  InformationIcon,
-  SettingsIcon,
-} from "../../Icons";
+import { useWorkoutStore } from "../../../store/workout-store";
+import { AddIcon, CloseIcon, DumbellIcon, SettingsIcon } from "../../Icons";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 import WorkoutCard from "../../ui/WorkoutCard";
-import { useWorkoutStore } from "../../../store/workout-store";
-import { useState } from "react";
 
 export default function HomePage() {
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const refreshControlHandler = () => {
+    setRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
+    queryClient.invalidateQueries({ queryKey: ["user", "/user/workouts"] });
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  };
+
   return (
-    <HomeTabsScreen>
+    <HomeTabsScreen
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refreshControlHandler}
+        />
+      }
+    >
       <ProfilePictureHeader />
 
       <InfoCard />
