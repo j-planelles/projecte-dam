@@ -214,6 +214,12 @@ async def change_profile(
     current_user: UserModel = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ) -> UserSchema:
+    if updated_fields.username == "" or updated_fields.full_name == "":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid input",
+        )
+
     if updated_fields.username is not None:
         if get_user_by_username(updated_fields.username):
             raise HTTPException(
