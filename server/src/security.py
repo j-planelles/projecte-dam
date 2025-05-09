@@ -238,11 +238,23 @@ async def change_profile(
 
 @router.post("/disable", name="Disable a user account", tags=["Authentication"])
 async def disable_user(
+    current_user: UserModel = Depends(get_current_active_user),
     current_user_settings: UserConfig = Depends(get_current_user_settings),
     session: Session = Depends(get_session),
 ):
+    query = select(UserModel).where(UserModel.trainer_uuid == current_user.uuid)
+    associated_users = session.exec(query).all()
+
+    for user_mod in associated_users:
+        user_mod.trainer_uuid = None
+        session.add(user_mod)
+
+    current_user.username = f"{current_user.username}-deleted-{uuid4()}"
+    session.add(current_user)
+
     current_user_settings.is_disabled = True
     session.add(current_user_settings)
+
     session.commit()
 
 

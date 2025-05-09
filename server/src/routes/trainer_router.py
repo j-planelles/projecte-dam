@@ -5,7 +5,7 @@ from uuid import UUID
 from db import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from models.trainer import TrainerRecommendationModel, TrainerRequestModel
-from models.users import TrainerModel, UserModel
+from models.users import TrainerModel, UserModel, UserConfig
 from models.workout import WorkoutContentModel, WorkoutInstanceModel
 from schemas.trainer_scehma import TrainerRequestSchema
 from schemas.types.enums import TrainerRequestActions
@@ -280,10 +280,19 @@ async def search_trainers(
     current_user: UserModel = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
-    query = select(UserModel).join(
-        TrainerModel,
-        UserModel.uuid == TrainerModel.user_uuid,  # pyright: ignore[]
+    query = (
+        select(UserModel)
+        .join(
+            TrainerModel,
+            UserModel.uuid == TrainerModel.user_uuid,  # pyright: ignore[]
+        )
+        .join(
+            UserConfig,
+            UserModel.uuid == UserConfig.user_uuid,  # pyright: ignore[]
+        )
+        .where(UserConfig.is_disabled == False)
     )
+
     users = session.exec(query).all()
 
     return users
