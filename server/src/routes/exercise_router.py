@@ -3,9 +3,11 @@ from db import get_session
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.exercise import DefaultExerciseModel, ExerciseModel
 from models.users import UserModel
+from models.workout import WorkoutContentModel, WorkoutEntryModel, WorkoutInstanceModel
 from schemas.exercise_schema import DefaultExerciseSchema, ExerciseSchema
+from schemas.workout_schema import WorkoutEntrySchema
 from security import get_current_active_user
-from sqlmodel import Session, select
+from sqlmodel import Session, desc, select
 
 router = APIRouter()
 
@@ -183,6 +185,40 @@ async def delete_exercise(
     exercise.is_disabled = True
     session.add(exercise)
     session.commit()
+
+
+@router.get(
+    "/user/exercises/{exercise_uuid}/last",
+    name="Get exercise",
+    tags=["Exercises"],
+    response_model=WorkoutEntrySchema,
+)
+async def get_last_exercise(
+    exercise_uuid: str,
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    query = (
+        select(WorkoutEntryModel)
+        .join(
+            WorkoutContentModel,
+            WorkoutEntryModel.workout_uuid == WorkoutContentModel.uuid,  # pyright: ignore[]
+        )
+        .join(
+            WorkoutInstanceModel,
+            WorkoutInstanceModel.workout_uuid == WorkoutContentModel.uuid,  # pyright: ignore[]
+        )
+        .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+        .where(WorkoutEntryModel.exercise_uuid == exercise_uuid)
+        .order_by(desc(WorkoutInstanceModel.timestamp_start))
+        .limit(1)
+    )
+    workout_entry = session.exec(query).first()
+
+    if not workout_entry:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+
+    return workout_entry
 
 
 @router.get(
