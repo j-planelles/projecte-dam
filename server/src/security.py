@@ -137,12 +137,19 @@ async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
     plain_password = decrypt_message(form_data.password)
-    print(f"Decrypted: {plain_password}")
     user = _authenticate_user(form_data.username, plain_password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    config = get_user_settings_by_uuid(str(user.uuid))
+    if not config or config.is_disabled:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account disabled",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -229,6 +236,18 @@ async def disable_user(
     session: Session = Depends(get_session),
 ):
     current_user_settings.is_disabled = True
+    session.add(current_user_settings)
+    session.commit()
+
+
+@router.post("/change-password", name="Change password", tags=["Authentication"])
+async def change_password(
+    password: str,
+    current_user_settings: UserConfig = Depends(get_current_user_settings),
+    session: Session = Depends(get_session),
+):
+    plain_password = decrypt_message(password)
+    current_user_settings.hashed_password = _get_password_hash(password=plain_password)
     session.add(current_user_settings)
     session.commit()
 
