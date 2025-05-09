@@ -255,6 +255,27 @@ const endpoints = makeApi([
   },
   {
     method: "post",
+    path: "/auth/change-password",
+    alias: "Change_password_auth_change_password_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "password",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
     path: "/auth/disable",
     alias: "Disable_a_user_account_auth_disable_post",
     requestFormat: "json",

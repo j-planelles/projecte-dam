@@ -20,6 +20,7 @@ import { ThemedView } from "../../components/ui/screen/Screen";
 import { useAuthStore } from "../../store/auth-store";
 import { useRouter } from "expo-router";
 import * as SecureStorage from "expo-secure-store";
+import { encodePassword } from "../../lib/crypto";
 
 export default function ProfileSettingsPage() {
   return (
@@ -46,7 +47,7 @@ const userDataSchema = z.object({
   bio: z.string().optional(),
 });
 
-type FormSchemaType = z.infer<typeof userDataSchema>;
+type UserDataFormSchemaType = z.infer<typeof userDataSchema>;
 
 function UserDataForm() {
   const queryClient = useQueryClient();
@@ -72,7 +73,11 @@ function UserDataForm() {
     }
   }, [data, isSuccess]);
 
-  const submitHandler = async ({ username, name, bio }: FormSchemaType) => {
+  const submitHandler = async ({
+    username,
+    name,
+    bio,
+  }: UserDataFormSchemaType) => {
     try {
       await apiClient.post(
         "/auth/profile",
@@ -113,7 +118,9 @@ function UserDataForm() {
     setError,
     setValue,
     formState: { errors, isSubmitting, isSubmitSuccessful },
-  } = useForm<FormSchemaType>({ resolver: zodResolver(userDataSchema) });
+  } = useForm<UserDataFormSchemaType>({
+    resolver: zodResolver(userDataSchema),
+  });
   return (
     <View className="mx-4 gap-2">
       <Text variant="titleSmall">User data</Text>
@@ -207,13 +214,112 @@ function UserDataForm() {
   );
 }
 
+const changePasswordSchema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
+
+type ChangePasswordFormSchemaType = z.infer<typeof changePasswordSchema>;
+
 function ChangePasswordForm() {
+  const { apiClient, token, serverIp } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+      serverIp: state.serverIp,
+    })),
+  );
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting, isSubmitSuccessful },
+  } = useForm<ChangePasswordFormSchemaType>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+
+  const submitHandler = async ({ password }: ChangePasswordFormSchemaType) => {
+    try {
+      const encryptedPassword = await encodePassword(password, serverIp);
+
+      await apiClient.post("/auth/change-password", undefined, {
+        queries: { password: encryptedPassword },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setError("root", {
+          type: "manual",
+          message: "Something went wrong.",
+        });
+      }
+    }
+  };
+
   return (
     <View className="mx-4 gap-2">
       <Text variant="titleSmall">Change Password</Text>
-      <TextInput label="Password" mode="outlined" secureTextEntry />
-      <TextInput label="Repeat Password" mode="outlined" secureTextEntry />
-      <Button mode="outlined">Change password</Button>
+      <Controller
+        control={control}
+        name="password"
+        rules={{ required: true }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            label="Password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            mode="outlined"
+            error={!!errors.password}
+            secureTextEntry
+          />
+        )}
+      />
+      {errors.password && (
+        <Text className="font-bold text-red-500">
+          {errors.password.message}
+        </Text>
+      )}
+
+      <Controller
+        control={control}
+        name="confirmPassword"
+        rules={{ required: true }}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            label="Confirm password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            mode="outlined"
+            error={!!errors.confirmPassword}
+            secureTextEntry
+          />
+        )}
+      />
+      {errors.confirmPassword && (
+        <Text className="font-bold text-red-500">
+          {errors.confirmPassword.message}
+        </Text>
+      )}
+
+      <Button
+        mode="outlined"
+        loading={isSubmitting}
+        disabled={isSubmitting}
+        onPress={handleSubmit(submitHandler)}
+      >
+        Change password
+      </Button>
+
+      {isSubmitSuccessful && (
+        <HelperText type="info">Password changed.</HelperText>
+      )}
     </View>
   );
 }
@@ -299,14 +405,29 @@ const DeleteAccountButton = () => {
       setConnectionTest: store.setConnectionTest,
     })),
   );
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
 
   const [visible, setVisible] = useState<boolean>(false);
-  const deleteAccountHandler = () => {
-    setVisible(false);
-    setToken(null);
-    setConnectionTest(false);
-    router.dismissAll();
-    router.replace("/");
+  const deleteAccountHandler = async () => {
+    try {
+      await apiClient.post("/auth/disable", undefined, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      await SecureStorage.deleteItemAsync("token");
+      setVisible(false);
+      setToken(null);
+      setConnectionTest(false);
+      router.dismissAll();
+      router.replace("/");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -321,7 +442,9 @@ const DeleteAccountButton = () => {
       <Portal>
         <Dialog visible={visible} onDismiss={() => setVisible(false)}>
           <Dialog.Content>
-            <Text variant="bodyMedium">Do you wish to log out?</Text>
+            <Text variant="bodyMedium">
+              Do you wish to delete your account?
+            </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setVisible(false)}>No</Button>
