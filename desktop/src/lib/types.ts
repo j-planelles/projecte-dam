@@ -61,8 +61,8 @@ type workout = {
 };
 
 type message = {
-  uuid: string;
-  text: string;
+  timestamp: number;
+  content: string;
   sentByTrainer: boolean;
 };
 

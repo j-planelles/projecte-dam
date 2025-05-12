@@ -109,9 +109,6 @@ const ExerciseSchema = z
     type: ExerciseType,
   })
   .passthrough();
-const WorkoutInstanceSchema = z
-  .object({ timestamp_start: z.number().int(), duration: z.number().int() })
-  .passthrough();
 const WeightUnit = z.enum(["metric", "imperial"]);
 const ExerciseInputSchema = z
   .object({
@@ -140,6 +137,9 @@ const WorkoutEntrySchema_Output = z
     exercise: ExerciseInputSchema,
     sets: z.array(WorkoutSetSchema),
   })
+  .passthrough();
+const WorkoutInstanceSchema = z
+  .object({ timestamp_start: z.number().int(), duration: z.number().int() })
   .passthrough();
 const GymSchema = z
   .object({
@@ -212,6 +212,15 @@ const TrainerRequestSchema = z
     created_at: z.number().int(),
   })
   .passthrough();
+const MessageModel = z
+  .object({
+    user_uuid: z.string().uuid(),
+    trainer_uuid: z.string().uuid(),
+    timestamp: z.number().int(),
+    content: z.string(),
+    is_sent_by_trainer: z.boolean(),
+  })
+  .passthrough();
 const HealthCheck = z.object({ name: z.string() }).passthrough();
 
 export const schemas = {
@@ -227,12 +236,12 @@ export const schemas = {
   DefaultExerciseModel,
   ExerciseModel,
   ExerciseSchema,
-  WorkoutInstanceSchema,
   WeightUnit,
   ExerciseInputSchema,
   SetType,
   WorkoutSetSchema,
   WorkoutEntrySchema_Output,
+  WorkoutInstanceSchema,
   GymSchema,
   WorkoutContentSchema_Output,
   WorkoutEntrySchema_Input,
@@ -241,6 +250,7 @@ export const schemas = {
   UserModel,
   TrainerModel,
   TrainerRequestSchema,
+  MessageModel,
   HealthCheck,
 };
 
@@ -252,6 +262,27 @@ const endpoints = makeApi([
     description: `Health check`,
     requestFormat: "json",
     response: z.object({ name: z.string() }).passthrough(),
+  },
+  {
+    method: "post",
+    path: "/auth/change-password",
+    alias: "Change_password_auth_change_password_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "password",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
   },
   {
     method: "post",
@@ -430,6 +461,53 @@ const endpoints = makeApi([
       },
     ],
     response: UserSchema,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
+    path: "/trainer/users/:user_uuid/messages",
+    alias: "Get_messages_from_user_trainer_users__user_uuid__messages_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: z.array(MessageModel),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/trainer/users/:user_uuid/messages",
+    alias: "Send_message_to_user_trainer_users__user_uuid__messages_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "user_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+      {
+        name: "content",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
     errors: [
       {
         status: 422,
@@ -662,6 +740,27 @@ const endpoints = makeApi([
   },
   {
     method: "get",
+    path: "/user/exercises/:exercise_uuid/last",
+    alias: "Get_exercise_user_exercises__exercise_uuid__last_get",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "exercise_uuid",
+        type: "Path",
+        schema: z.string(),
+      },
+    ],
+    response: WorkoutEntrySchema_Output,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
+  },
+  {
+    method: "get",
     path: "/user/templates",
     alias: "Get_user_templates_user_templates_get",
     requestFormat: "json",
@@ -769,6 +868,34 @@ const endpoints = makeApi([
     alias: "Get_trainer_info_user_trainer_info_get",
     requestFormat: "json",
     response: UserModel,
+  },
+  {
+    method: "get",
+    path: "/user/trainer/messages",
+    alias: "Get_messages_from_trainer_user_trainer_messages_get",
+    requestFormat: "json",
+    response: z.array(MessageModel),
+  },
+  {
+    method: "post",
+    path: "/user/trainer/messages",
+    alias: "Send_message_to_trainer_user_trainer_messages_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "content",
+        type: "Query",
+        schema: z.string(),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
   },
   {
     method: "get",

@@ -1,4 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
+import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
@@ -144,6 +145,14 @@ const UserMenu = () => {
         open={open}
         onClose={handleClose}
       >
+        <Link to={`/app/trainer/users/${userUuid}/messages`}>
+          <MenuItem disabled={isLoading}>
+            <ListItemIcon>
+              <ChatIcon />
+            </ListItemIcon>
+            <ListItemText>Message Board</ListItemText>
+          </MenuItem>
+        </Link>
         <MenuItem
           onClick={() => {
             handleClose();

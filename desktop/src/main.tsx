@@ -24,6 +24,7 @@ import TemplateEditPage from "./routes/app/templates/EditTemplate";
 import RegisterPage from "./routes/landing/Register";
 import RegisterProfilePage from "./routes/landing/RegisterProfile";
 import SettingsPage from "./routes/app/Settings";
+import TrainerMessageBoardPage from "./routes/app/trainer/MessageBoard";
 
 const router = createBrowserRouter([
   {
@@ -79,7 +80,13 @@ const router = createBrowserRouter([
                   { index: true, element: <TrainerUsersPage /> },
                   {
                     path: ":user-uuid",
-                    element: <TrainerViewUserPage />,
+                    children: [
+                      { index: true, element: <TrainerViewUserPage /> },
+                      {
+                        path: "messages",
+                        element: <TrainerMessageBoardPage />,
+                      },
+                    ],
                   },
                 ],
               },
