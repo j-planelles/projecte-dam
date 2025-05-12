@@ -282,7 +282,7 @@ export default function ExerciseEditPage() {
               mode="outlined"
               setSelectedValue={onChange}
               value={value}
-              disabled={disableControls}
+              disabled={disableControls || params.uuid !== undefined}
               error={errors.type !== undefined}
             />
           )}
@@ -290,6 +290,13 @@ export default function ExerciseEditPage() {
 
         {errors.type && (
           <HelperText type="error">{errors.type?.message}</HelperText>
+        )}
+
+        {params.uuid !== undefined && (
+          <HelperText type="info">
+            You cannot change an exercise's type once created. To do so, delete
+            it and create it again.
+          </HelperText>
         )}
 
         <Controller
