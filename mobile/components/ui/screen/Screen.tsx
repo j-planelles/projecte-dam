@@ -1,6 +1,9 @@
 import { ScrollView, View } from "react-native";
 import { useTheme } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function Screen({ children }: { children?: React.ReactNode }) {
   return (
@@ -38,10 +41,14 @@ export function ThemedView({
   className,
 }: { children?: React.ReactNode; className?: string }) {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
-      style={{ backgroundColor: theme.colors.background }}
+      style={{
+        backgroundColor: theme.colors.background,
+        paddingBottom: insets.bottom,
+      }}
       className={`flex-1 ${className}`}
     >
       {children}
