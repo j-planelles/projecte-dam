@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { SystemBars } from "react-native-edge-to-edge";
 import { Appbar } from "react-native-paper";
 
 export default function Header({
@@ -15,7 +15,7 @@ export default function Header({
 
   return (
     <>
-      <StatusBar style="auto" />
+      <SystemBars style="auto" />
       <Appbar.Header style={style}>
         <Appbar.BackAction onPress={() => router.back()} />
         {title !== "" && <Appbar.Content title={title} />}

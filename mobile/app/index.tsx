@@ -1,8 +1,10 @@
-import { Link, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import axios from "axios";
+import { useRouter } from "expo-router";
+import * as SecureStorage from "expo-secure-store";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text, Pressable } from "react-native";
-import { useAuthStore } from "../store/auth-store";
+import { ActivityIndicator, Text, View } from "react-native";
+import { SystemBars } from "react-native-edge-to-edge";
+import { BottomNavigation } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import {
   DumbellIcon,
@@ -10,13 +12,11 @@ import {
   PeopleIcon,
   PersonIcon,
 } from "../components/Icons";
-import { BottomNavigation } from "react-native-paper";
-import HomePage from "../components/pages/tabs/home";
-import WorkoutTab from "../components/pages/tabs/workout";
 import CommunityTab from "../components/pages/tabs/community";
+import HomePage from "../components/pages/tabs/home";
 import TrainerTab from "../components/pages/tabs/trainer";
-import axios from "axios";
-import * as SecureStorage from "expo-secure-store";
+import WorkoutTab from "../components/pages/tabs/workout";
+import { useAuthStore } from "../store/auth-store";
 
 export default function IndexPage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -29,7 +29,7 @@ export default function IndexPage() {
     <Redirector />
   ) : (
     <View className="flex-1 items-center justify-center bg-black">
-      <StatusBar style="light" />
+      <SystemBars style="light" />
     </View>
   );
 }
@@ -102,7 +102,7 @@ const Redirector = () => {
   return isLoading ? (
     <View className="flex-1 bg-black">
       <View className="flex-1 items-center justify-center">
-        <StatusBar style="light" />
+        <SystemBars style="light" />
         <ActivityIndicator size="large" color="white" />
       </View>
       <Text className="w-full text-center text-white">
@@ -153,7 +153,7 @@ const TabBarWrapper = () => {
 
   return (
     <>
-      <StatusBar style="auto" />
+      <SystemBars style="auto" />
       <BottomNavigation
         navigationState={{ index, routes }}
         onIndexChange={setIndex}

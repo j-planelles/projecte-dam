@@ -1,12 +1,12 @@
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { SystemBars } from "react-native-edge-to-edge";
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import { RestCountdownProvider } from "../store/rest-timer-context";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
-import { useColorScheme } from "react-native";
+import { useColorScheme, View } from "react-native";
 
 const client = new QueryClient();
 
@@ -22,21 +22,24 @@ export default function MainLayout() {
       : { ...MD3LightTheme, colors: theme.light };
 
   return (
-    <>
-      <StatusBar style="auto" />
-      <SafeAreaProvider>
-        <QueryClientProvider client={client}>
-          <RestCountdownProvider>
-            <PaperProvider theme={paperTheme}>
+    <SafeAreaProvider>
+      <SystemBars style="auto" />
+      <QueryClientProvider client={client}>
+        <RestCountdownProvider>
+          <PaperProvider theme={paperTheme}>
+            <View
+              style={{ flex: 1, backgroundColor: paperTheme.colors.surface }}
+            >
               <Stack
                 screenOptions={{
                   headerShown: false,
+                  contentStyle: { backgroundColor: paperTheme.colors.surface },
                 }}
               />
-            </PaperProvider>
-          </RestCountdownProvider>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </>
+            </View>
+          </PaperProvider>
+        </RestCountdownProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }

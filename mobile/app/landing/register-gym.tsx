@@ -1,13 +1,11 @@
-import { Link, Stack } from "expo-router";
+import { Link } from "expo-router";
 import { FlatList, Pressable, Text, View } from "react-native";
-import { Button, List, MD3LightTheme } from "react-native-paper";
-import { NavigateNextIcon } from "../../components/Icons";
-import { useState } from "react";
+import { Button, List } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
-import { useUserRegistrationStore } from "../../store/registration-store";
+import { NavigateNextIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
-import { StatusBar } from "expo-status-bar";
 import { ThemedView } from "../../components/ui/screen/Screen";
+import { useUserRegistrationStore } from "../../store/registration-store";
 
 type GymListType = {
   id: number;

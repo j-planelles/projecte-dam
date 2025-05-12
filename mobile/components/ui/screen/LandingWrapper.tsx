@@ -1,9 +1,9 @@
-import { Text } from "react-native-paper";
-import { StatusBar } from "expo-status-bar";
 import { ImageBackground, View } from "react-native";
+import { SystemBars } from "react-native-edge-to-edge";
+import { Text } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import landingBackground from "../../../assets/landing-background.jpg";
 import UltraLogoText from "../logo-text";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LandingWrapper({
   children,
@@ -14,7 +14,7 @@ export default function LandingWrapper({
 
   return (
     <View className="bg-black w-full h-full">
-      <StatusBar style="light" />
+      <SystemBars style="light" />
       <ImageBackground
         source={landingBackground}
         className="w-full h-full"
