@@ -77,7 +77,7 @@ export default function TrainerTab() {
                 mode="contained"
                 className="flex-1"
               >
-                Chat with {infoQuery.data.full_name.split(" ")[0]}
+                Message Board
               </Button>
             </Link>
           </View>

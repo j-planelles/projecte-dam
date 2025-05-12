@@ -385,3 +385,11 @@ export const DnsOutlineIcon = ({
     className={className}
   />
 );
+
+export const ChatIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialIcons name="chat" size={size} color={color} className={className} />
+);
