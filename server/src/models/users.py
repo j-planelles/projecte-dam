@@ -76,7 +76,6 @@ class UserConfig(SQLModel, table=True):
     is_disabled: bool = Field(default=False)
 
     mobile_app_config: dict[str, str] = Field(sa_column=Column(JSON))
-    user_likes: List[str] = Field(default=[], sa_column=Column(JSON))
 
     regular_gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
     regular_gym: Optional["GymModel"] = Relationship(

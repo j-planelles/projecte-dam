@@ -3,6 +3,7 @@ from time import sleep
 
 from config import SERVER_NAME
 from data.default_exercises import add_default_exercises
+from data.default_interests import add_default_interests
 from db import engine
 from fastapi import FastAPI
 from models.core import HealthCheck
@@ -24,6 +25,7 @@ async def lifespan(_: FastAPI):
 
     SQLModel.metadata.create_all(engine)
     add_default_exercises()
+    add_default_interests()
 
     yield
 

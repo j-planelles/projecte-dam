@@ -1,5 +1,4 @@
 from uuid import UUID as UUID_TYPE
-from sqlalchemy import func
 from sqlmodel import Field, Relationship, SQLModel, UniqueConstraint
 
 from models.users import TrainerModel, UserModel
@@ -57,4 +56,14 @@ class TrainerRequestModel(SQLModel, table=True):
 
     is_processed: bool = False
 
-    # __table_args__ = (UniqueConstraint("user_uuid", "trainer_uuid", "created_at"),)
+
+class UserInterestModel(SQLModel, table=True):
+    __tablename__ = "interest"  # pyright: ignore[]
+    uuid: UUID_TYPE = Field(primary_key=True)
+    name: str
+
+
+class UserInterestLinkModel(SQLModel, table=True):
+    __tablename__ = "interest_link"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+    interest_uuid: UUID_TYPE = Field(foreign_key="interest.uuid", primary_key=True)

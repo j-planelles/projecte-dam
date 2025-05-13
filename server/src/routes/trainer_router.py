@@ -4,15 +4,20 @@ from uuid import UUID
 
 from db import get_session
 from fastapi import APIRouter, Depends, HTTPException
-from models.trainer import TrainerRecommendationModel, TrainerRequestModel
+from models.trainer import (
+    TrainerRecommendationModel,
+    TrainerRequestModel,
+    UserInterestModel,
+    UserInterestLinkModel,
+)
 from models.users import TrainerModel, UserModel, UserConfig
 from models.workout import WorkoutContentModel, WorkoutInstanceModel
-from schemas.trainer_scehma import TrainerRequestSchema
+from schemas.trainer_scehma import TrainerRequestSchema, UserInterestSchema
 from schemas.types.enums import TrainerRequestActions
 from schemas.user_schema import UserSchema
 from schemas.workout_schema import WorkoutContentSchema
 from security import get_current_active_user, get_trainer_user, get_user_by_uuid
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 from sqlalchemy import and_
 
 router = APIRouter()
@@ -280,6 +285,25 @@ async def search_trainers(
     current_user: UserModel = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
+    selected_interests_query = (
+        select(UserInterestLinkModel).where(
+            UserInterestLinkModel.user_uuid == current_user.uuid
+        )  # pyright: ignore[]
+    )
+    selected_interests = [
+        item.interest_uuid for item in session.exec(selected_interests_query).all()
+    ]
+
+    users_query = (
+        select(UserInterestLinkModel.user_uuid)
+        .where(UserInterestLinkModel.interest_uuid.in_(selected_interests))  # pyright: ignore[]
+        .group_by(UserInterestLinkModel.user_uuid)  # pyright: ignore[]
+        .having(
+            func.count(func.distinct(UserInterestLinkModel.interest_uuid))
+            == len(selected_interests)
+        )
+    )
+
     query = (
         select(UserModel)
         .join(
@@ -291,6 +315,7 @@ async def search_trainers(
             UserModel.uuid == UserConfig.user_uuid,  # pyright: ignore[]
         )
         .where(UserConfig.is_disabled == False)
+        .where(UserModel.uuid.in_(users_query))  # pyright: ignore[]
     )
 
     users = session.exec(query).all()
@@ -499,3 +524,65 @@ async def view_user_recommendation(
         raise HTTPException(status_code=404, detail="Workout not found.")
 
     return result
+
+
+@router.get(
+    "/user/trainer/interests",
+    response_model=list[UserInterestSchema],
+    name="Get interests",
+    tags=["Trainer/User"],
+)
+async def get_interests(
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    interests = session.exec(select(UserInterestModel)).all()
+
+    selected_interests_query = (
+        select(UserInterestModel)
+        .join(
+            UserInterestLinkModel,
+            UserInterestModel.uuid == UserInterestLinkModel.interest_uuid,  # pyright: ignore[]
+        )
+        .where(UserInterestLinkModel.user_uuid == current_user.uuid)  # pyright: ignore[]
+    )
+    selected_interests = session.exec(selected_interests_query).all()
+    selected_interests_uuid = [item.uuid for item in selected_interests]
+
+    result = [
+        UserInterestSchema(
+            **item.model_dump(), selected=item.uuid in selected_interests_uuid
+        )
+        for item in interests
+    ]
+
+    return result
+
+
+@router.post(
+    "/user/trainer/interests",
+    name="Update interests",
+    tags=["Trainer/User"],
+)
+async def set_interests(
+    selected_interests_uuid: list[str],
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    selected_interests_query = (
+        select(UserInterestLinkModel).where(
+            UserInterestLinkModel.user_uuid == current_user.uuid
+        )  # pyright: ignore[]
+    )
+    selected_interests = session.exec(selected_interests_query).all()
+
+    for interest in selected_interests:
+        session.delete(interest)
+    session.commit()
+
+    for interest in selected_interests_uuid:
+        link = UserInterestLinkModel(
+            user_uuid=current_user.uuid, interest_uuid=UUID(interest)
+        )
+        session.add(link)
+    session.commit()
