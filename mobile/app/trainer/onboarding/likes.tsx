@@ -1,6 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { ScrollView, View } from "react-native";
-import { Button, Chip, Text } from "react-native-paper";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, View } from "react-native";
+import { Button, Chip, HelperText, Text } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import {
   AddIcon,
@@ -8,65 +10,66 @@ import {
   NavigateNextIcon,
 } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
-import { useUserRegistrationStore } from "../../../store/registration-store";
 import { ThemedView } from "../../../components/ui/screen/Screen";
-
-const MOCK_LIKES = [
-  "CrossFit",
-  "Weightlifting",
-  "HIIT (High-Intensity Interval Training)",
-  "Bodyweight Training",
-  "Powerlifting",
-  "Yoga",
-  "Pilates",
-  "Endurance Training",
-  "Functional Training",
-  "Mobility Work",
-  "Strength Training",
-  "Hypertrophy",
-  "Olympic Lifting",
-  "Kettlebell Workouts",
-  "TRX Suspension Training",
-  "Dance-Based Workouts",
-  "Cycling",
-  "Swimming",
-  "Running",
-  "Boot Camp",
-  "Martial Arts",
-  "Low-Impact Training",
-  "Active Recovery",
-  "Time-Efficient Workouts",
-  "Mind-Body Connection",
-  "Outdoor Adventures",
-  "Team Sports",
-  "Rehabilitation Focus",
-  "Specialized Skills",
-];
+import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerOnboardingLikesPage() {
   const router = useRouter();
-
-  const { likes, addLike, removeLike } = useUserRegistrationStore(
+  const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
-      likes: state.likes,
-      addLike: state.addLike,
-      removeLike: state.removeLike,
+      apiClient: state.apiClient,
+      token: state.token,
     })),
   );
+  const { data, isSuccess } = useQuery({
+    queryKey: ["user", "/user/trainer/interests"],
+    queryFn: async () =>
+      await apiClient.get("/user/trainer/interests", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
+
+  const [likes, setLikes] = useState<string[]>([]);
   const navigationDisabled = likes.length < 1;
 
-  const checkClickHandler = (checkIndex: number) => {
-    if (likes.includes(checkIndex)) {
-      removeLike(checkIndex);
+  const addLike = (newItem: string) => {
+    setLikes((state) => [...state, newItem]);
+  };
+
+  const removeLike = (newItem: string) => {
+    setLikes((state) => state.filter((item) => item !== newItem));
+  };
+
+  useEffect(() => {
+    if (data) {
+      setLikes(data.filter((item) => item.selected).map((item) => item.uuid));
+    }
+  }, [data]);
+
+  const checkClickHandler = (newItem: string) => {
+    if (likes.includes(newItem)) {
+      removeLike(newItem);
     } else {
-      addLike(checkIndex);
+      addLike(newItem);
     }
   };
 
-  const handleSubmit = () => {
-    console.log(likes.map((likeIndex) => MOCK_LIKES[likeIndex]));
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
-    router.push("/trainer/onboarding/list");
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setQueryError(null);
+    try {
+      await apiClient.post("/user/trainer/interests", likes, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      router.push("/trainer/onboarding/list");
+    } catch (error: unknown) {
+      setQueryError(error?.message);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -75,27 +78,34 @@ export default function TrainerOnboardingLikesPage() {
 
       <ScrollView>
         <View className="flex-row flex-wrap p-4 gap-4">
-          {MOCK_LIKES.map((item, index) => (
-            <Chip
-              key={index}
-              icon={({ color }) =>
-                likes.includes(index) ? (
-                  <CheckIcon color={color} />
-                ) : (
-                  <AddIcon color={color} />
-                )
-              }
-              selected={likes.includes(index)}
-              showSelectedOverlay={true}
-              onPress={() => checkClickHandler(index)}
-            >
-              {item}
-            </Chip>
-          ))}
+          {isSuccess ? (
+            data.map((item) => (
+              <Chip
+                key={item.uuid}
+                icon={({ color }) =>
+                  likes.includes(item.uuid) ? (
+                    <CheckIcon color={color} />
+                  ) : (
+                    <AddIcon color={color} />
+                  )
+                }
+                selected={likes.includes(item.uuid)}
+                showSelectedOverlay={true}
+                onPress={() => checkClickHandler(item.uuid)}
+              >
+                {item.name}
+              </Chip>
+            ))
+          ) : (
+            <View className="flex-1 justify-center">
+              <ActivityIndicator size={"large"} />
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <View className="p-4 gap-4">
+        {queryError && <HelperText type="error">{queryError}</HelperText>}
         {navigationDisabled && (
           <Text>Please select at least one interest.</Text>
         )}
@@ -105,7 +115,7 @@ export default function TrainerOnboardingLikesPage() {
         <Button
           className="w-full"
           icon={({ color }) => <NavigateNextIcon color={color} />}
-          disabled={navigationDisabled}
+          disabled={navigationDisabled || isLoading}
           mode="contained"
           onPress={handleSubmit}
         >

@@ -9,6 +9,7 @@ import { NavigateNextIcon } from "../../components/Icons";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({
   name: z.string(),
@@ -18,6 +19,7 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -32,7 +34,7 @@ export default function LandingRegisterProfilePage() {
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
   const submitHandler = async ({ name, bio }: FormSchemaType) => {
     try {
-      const result = await apiClient.post(
+      await apiClient.post(
         "/auth/profile",
         {
           biography: bio,
@@ -41,9 +43,10 @@ export default function LandingRegisterProfilePage() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      console.log(result);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
 
-      router.push("/landing/register-gym");
+      router.dismissAll();
+      router.replace("/");
     } catch {
       setError("root", { type: "manual", message: "Something went wrong." });
     }
