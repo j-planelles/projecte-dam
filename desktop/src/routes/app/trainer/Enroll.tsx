@@ -6,6 +6,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Button, Container, Typography } from "@mui/material";
 import { useAuthStore } from "../../../store/auth-store";
 import { useNavigate } from "react-router";
+import LikesDialog from "../../../components/LikesDialog";
 
 export default function TrainerEnrollPage() {
   return (
@@ -65,6 +66,7 @@ const EnrollButton = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
+  const [showLikesDialog, setShowLikesDialog] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -75,7 +77,7 @@ const EnrollButton = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
       queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
-      navigate("/app/dashboard");
+      setShowLikesDialog(true);
     } catch (error: any) {
       if (error instanceof AxiosError) {
         setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
@@ -102,6 +104,14 @@ const EnrollButton = () => {
           {queryError}
         </Typography>
       )}
+      <LikesDialog
+        open={showLikesDialog}
+        onSuccess={() => {
+          setShowLikesDialog(false);
+          navigate("/app/dashboard");
+        }}
+        dismissable={false}
+      />
     </>
   );
 };

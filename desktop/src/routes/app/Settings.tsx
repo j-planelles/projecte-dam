@@ -22,6 +22,7 @@ import { encodePassword } from "../../lib/crypto";
 import { useAuthStore } from "../../store/auth-store";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { updateAuthConfig } from "../../lib/authConfig";
+import LikesDialog from "../../components/LikesDialog";
 
 export default function SettingsPage() {
   return (
@@ -29,6 +30,8 @@ export default function SettingsPage() {
       <UserDataForm />
 
       <ChangePasswordForm />
+
+      <UserDataPart />
 
       <DangerZone />
     </Container>
@@ -311,6 +314,39 @@ function ChangePasswordForm() {
           Password changed.
         </FormHelperText>
       )}
+    </Box>
+  );
+}
+
+function UserDataPart() {
+  const [showLikesDialog, setShowLikesDialog] = useState<boolean>(false);
+
+  return (
+    <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box>
+        <Typography variant="subtitle1">About you</Typography>
+        <Typography variant="body2">
+          We use your likes to better pair you with users.
+        </Typography>
+      </Box>
+      <Button
+        variant="outlined"
+        onClick={() => {
+          setShowLikesDialog(true);
+        }}
+      >
+        Review my interests
+      </Button>
+
+      <LikesDialog
+        open={showLikesDialog}
+        onClose={() => {
+          setShowLikesDialog(false);
+        }}
+        onSuccess={() => {
+          setShowLikesDialog(false);
+        }}
+      />
     </Box>
   );
 }

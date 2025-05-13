@@ -212,6 +212,9 @@ const TrainerRequestSchema = z
     created_at: z.number().int(),
   })
   .passthrough();
+const UserInterestSchema = z
+  .object({ uuid: z.string().uuid(), name: z.string(), selected: z.boolean() })
+  .passthrough();
 const MessageModel = z
   .object({
     user_uuid: z.string().uuid(),
@@ -250,6 +253,7 @@ export const schemas = {
   UserModel,
   TrainerModel,
   TrainerRequestSchema,
+  UserInterestSchema,
   MessageModel,
   HealthCheck,
 };
@@ -868,6 +872,34 @@ const endpoints = makeApi([
     alias: "Get_trainer_info_user_trainer_info_get",
     requestFormat: "json",
     response: UserModel,
+  },
+  {
+    method: "get",
+    path: "/user/trainer/interests",
+    alias: "Get_interests_user_trainer_interests_get",
+    requestFormat: "json",
+    response: z.array(UserInterestSchema),
+  },
+  {
+    method: "post",
+    path: "/user/trainer/interests",
+    alias: "Update_interests_user_trainer_interests_post",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: z.array(z.string()),
+      },
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError,
+      },
+    ],
   },
   {
     method: "get",
