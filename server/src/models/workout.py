@@ -2,8 +2,6 @@ from typing import Optional
 from uuid import UUID as UUID_TYPE
 from uuid import uuid4
 
-from pydantic import ConfigDict
-
 from schemas.types.enums import SetType, WeightUnit
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import (
@@ -12,7 +10,6 @@ from sqlmodel import (
     Enum,
     Field,
     ForeignKeyConstraint,
-    Numeric,
     Relationship,
     SQLModel,
 )
@@ -32,7 +29,6 @@ class WorkoutContentModel(SQLModel, table=True):
 
     name: str
     description: str | None = None
-    isPublic: bool = Field(default=False)
 
     creator_uuid: UUID_TYPE = Field(foreign_key="users.uuid")
 
@@ -42,13 +38,6 @@ class WorkoutContentModel(SQLModel, table=True):
 
     entries: list["WorkoutEntryModel"] = Relationship(
         sa_relationship_kwargs={"cascade": "all"}
-    )
-
-    gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
-    gym: Optional["GymModel"] = Relationship(
-        sa_relationship_kwargs={
-            "foreign_keys": "[WorkoutContentModel.gym_id]",
-        }
     )
 
 
@@ -70,7 +59,6 @@ class WorkoutEntryModel(SQLModel, table=True):
     index: int = Field(primary_key=True)
 
     rest_countdown_duration: int | None = None
-    note: str | None = None
 
     weight_unit: WeightUnit | None = Field(
         sa_column=Column(Enum(WeightUnit), nullable=True), default=None
@@ -110,4 +98,3 @@ class WorkoutSetModel(SQLModel, table=True):
 
 
 from models.exercise import ExerciseModel
-from models.gym import GymModel

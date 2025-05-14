@@ -77,14 +77,10 @@ async def add_user_workout(
     current_user: UserModel = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
-    # TODO: Relacionar gym, entries i sets (afegir indexes), creator
     workout_entry = WorkoutContentModel(
         uuid=uuid4(),
         creator_uuid=current_user.uuid,
-        gym_id=input_workout.gym_id,
-        **input_workout.model_dump(
-            exclude_none=True, include={"name", "description", "isPublic"}
-        ),
+        **input_workout.model_dump(exclude_none=True, include={"name", "description"}),
     )
 
     for i, input_entry in enumerate(input_workout.entries):
@@ -97,7 +93,6 @@ async def add_user_workout(
             **input_entry.model_dump(
                 include={
                     "rest_countdown_duration",
-                    "note",
                     "weight_unit",
                 }
             ),

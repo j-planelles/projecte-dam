@@ -4,7 +4,6 @@ from uuid import UUID as UUID_TYPE
 from sqlmodel import BigInteger, Column, Field, SQLModel
 
 from schemas.exercise_schema import ExerciseInputSchema
-from schemas.gym_schema import GymSchema
 from schemas.types.enums import SetType, WeightUnit
 
 
@@ -16,7 +15,6 @@ class WorkoutSetSchema(SQLModel):
 
 class WorkoutEntrySchema(SQLModel):
     rest_countdown_duration: int | None = None
-    note: str | None = None
     weight_unit: WeightUnit | None = None
 
     exercise: ExerciseInputSchema
@@ -32,13 +30,9 @@ class WorkoutContentSchema(SQLModel):
     uuid: UUID_TYPE | None = None
     name: str
     description: str | None = None
-    isPublic: bool = Field(default=False)
 
     instance: WorkoutInstanceSchema | None = None
     entries: list[WorkoutEntrySchema]
-
-    gym_id: UUID_TYPE | None = None
-    gym: GymSchema | None = None
 
 
 class WorkoutTemplateSchema(WorkoutContentSchema):

@@ -46,18 +46,6 @@ class TrainerModel(SQLModel, table=True):
     )
 
 
-class GymOwnerModel(SQLModel, table=True):
-    __tablename__ = "gym_owner"  # pyright: ignore[]
-    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
-
-    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
-
-    gyms: list["GymModel"] = Relationship(
-        back_populates="owner",
-        sa_relationship_kwargs={"foreign_keys": "[GymModel.owner_uuid]"},
-    )
-
-
 class AdminModel(SQLModel, table=True):
     __tablename__ = "admin"  # pyright: ignore[]
     user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
@@ -74,13 +62,3 @@ class UserConfig(SQLModel, table=True):
     hashed_password: str
 
     is_disabled: bool = Field(default=False)
-
-    mobile_app_config: dict[str, str] = Field(sa_column=Column(JSON))
-
-    regular_gym_id: Optional[UUID_TYPE] = Field(default=None, foreign_key="gym.uuid")
-    regular_gym: Optional["GymModel"] = Relationship(
-        sa_relationship_kwargs={"foreign_keys": "[UserConfig.regular_gym_id]"}
-    )
-
-
-from models.gym import GymModel
