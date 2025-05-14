@@ -6,7 +6,6 @@ import { ActivityIndicator, RefreshControl, View } from "react-native";
 import {
   Avatar,
   Button,
-  Card,
   Chip,
   IconButton,
   Text,
@@ -17,7 +16,7 @@ import { useShallow } from "zustand/react/shallow";
 import roboto from "../../../assets/fonts/Roboto-Regular.ttf";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { AddIcon, CloseIcon, DumbellIcon, SettingsIcon } from "../../Icons";
+import { AddIcon, DumbellIcon, SettingsIcon } from "../../Icons";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 import WorkoutCard from "../../ui/WorkoutCard";
 
@@ -46,8 +45,6 @@ export default function HomePage() {
       }
     >
       <ProfilePictureHeader />
-
-      <InfoCard />
 
       <WorkoutsChart />
 
@@ -271,7 +268,6 @@ const WorkoutsList = () => {
                         uuid: entry.exercise.uuid,
                         name: entry.exercise.name,
                         description: entry.exercise.description,
-                        userNote: entry.exercise.user_note,
                         bodyPart: entry.exercise.body_part,
                         type: entry.exercise.type,
                       },
@@ -332,34 +328,5 @@ const StartWorkoutButton = () => {
     >
       Start an empty workout
     </Button>
-  );
-};
-
-const InfoCard = () => {
-  const [info, setInfo] = useState<null | string>(
-    "Recordar implementar aquesta funcionalitat!",
-  );
-
-  const dismissHandler = () => {
-    setInfo(null);
-  };
-
-  return (
-    info && (
-      <Card mode="outlined">
-        <Card.Content>
-          <Text variant="bodyMedium">{info}</Text>
-        </Card.Content>
-        <Card.Actions>
-          <Button
-            icon={(props) => <CloseIcon {...props} />}
-            onPress={dismissHandler}
-            mode="contained-tonal"
-          >
-            Dismiss
-          </Button>
-        </Card.Actions>
-      </Card>
-    )
   );
 };

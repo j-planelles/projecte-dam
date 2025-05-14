@@ -42,7 +42,6 @@ export default function ViewWorkoutPage() {
             uuid: entry.exercise.uuid,
             name: entry.exercise.name,
             description: entry.exercise.description,
-            userNote: entry.exercise.user_note,
             bodyPart: entry.exercise.body_part,
             type: entry.exercise.type,
           },
@@ -67,7 +66,7 @@ export default function ViewWorkoutPage() {
       {error && <Text>{error.message}</Text>}
       {isSuccess && (
         <>
-          <WorkoutViewer workout={workout} creator={false} />
+          <WorkoutViewer workout={workout} />
 
           <View className="p-4">
             <SaveAsTemplateButton workout={workout} />
@@ -108,7 +107,6 @@ const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
               uuid: exercise.exercise.uuid,
               name: exercise.exercise.name,
               description: exercise.exercise.description,
-              user_note: exercise.exercise.userNote,
               body_part: exercise.exercise.bodyPart,
               type: exercise.exercise.type,
             },

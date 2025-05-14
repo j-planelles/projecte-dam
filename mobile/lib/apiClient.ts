@@ -89,7 +89,6 @@ const ExerciseModel = z
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
     uuid: z.string().uuid(),
-    user_note: z.union([z.string(), z.null()]).optional(),
     is_disabled: z.boolean().optional().default(false),
     default_exercise_uuid: z.union([z.string(), z.null()]).optional(),
     body_part: BodyPart,
@@ -102,7 +101,6 @@ const ExerciseSchema = z
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
     uuid: z.string().uuid(),
-    user_note: z.union([z.string(), z.null()]).optional(),
     is_disabled: z.boolean().optional().default(false),
     default_exercise_uuid: z.union([z.string(), z.null()]).optional(),
     body_part: BodyPart,
@@ -113,7 +111,6 @@ const WeightUnit = z.enum(["metric", "imperial"]);
 const ExerciseInputSchema = z
   .object({
     uuid: z.union([z.string(), z.null()]).optional(),
-    user_note: z.union([z.string(), z.null()]).optional(),
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
     body_part: BodyPart,
@@ -132,7 +129,6 @@ const WorkoutSetSchema = z
 const WorkoutEntrySchema_Output = z
   .object({
     rest_countdown_duration: z.union([z.number(), z.null()]).optional(),
-    note: z.union([z.string(), z.null()]).optional(),
     weight_unit: z.union([WeightUnit, z.null()]).optional(),
     exercise: ExerciseInputSchema,
     sets: z.array(WorkoutSetSchema),
@@ -141,30 +137,18 @@ const WorkoutEntrySchema_Output = z
 const WorkoutInstanceSchema = z
   .object({ timestamp_start: z.number().int(), duration: z.number().int() })
   .passthrough();
-const GymSchema = z
-  .object({
-    uuid: z.string().uuid(),
-    name: z.string(),
-    description: z.string(),
-    address: z.string(),
-  })
-  .passthrough();
 const WorkoutContentSchema_Output = z
   .object({
     uuid: z.union([z.string(), z.null()]).optional(),
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    isPublic: z.boolean().optional().default(false),
     instance: z.union([WorkoutInstanceSchema, z.null()]).optional(),
     entries: z.array(WorkoutEntrySchema_Output),
-    gym_id: z.union([z.string(), z.null()]).optional(),
-    gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
 const WorkoutEntrySchema_Input = z
   .object({
     rest_countdown_duration: z.union([z.number(), z.null()]).optional(),
-    note: z.union([z.string(), z.null()]).optional(),
     weight_unit: z.union([WeightUnit, z.null()]).optional(),
     exercise: ExerciseInputSchema,
     sets: z.array(WorkoutSetSchema),
@@ -175,11 +159,8 @@ const WorkoutContentSchema_Input = z
     uuid: z.union([z.string(), z.null()]).optional(),
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    isPublic: z.boolean().optional().default(false),
     instance: z.union([WorkoutInstanceSchema, z.null()]).optional(),
     entries: z.array(WorkoutEntrySchema_Input),
-    gym_id: z.union([z.string(), z.null()]).optional(),
-    gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
 const WorkoutStatsSchema = z
@@ -194,11 +175,8 @@ const WorkoutTemplateSchema = z
     uuid: z.union([z.string(), z.null()]).optional(),
     name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    isPublic: z.boolean().optional().default(false),
     instance: z.null().optional(),
     entries: z.array(WorkoutEntrySchema_Input),
-    gym_id: z.union([z.string(), z.null()]).optional(),
-    gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
 const UserModel = z
@@ -252,7 +230,6 @@ export const schemas = {
   WorkoutSetSchema,
   WorkoutEntrySchema_Output,
   WorkoutInstanceSchema,
-  GymSchema,
   WorkoutContentSchema_Output,
   WorkoutEntrySchema_Input,
   WorkoutContentSchema_Input,

@@ -5,23 +5,14 @@ import { kgToLbs, kmToMiles } from "../../lib/unitTransformers";
 export default function WorkoutViewer({
   workout,
   timestamp = true,
-  location = true,
-  creator = true,
 }: {
   workout: workout;
   timestamp?: boolean;
-  location?: boolean;
-  creator?: boolean;
 }) {
   return (
     <ScrollView>
       <View className="gap-4">
-        <WorkoutInformation
-          workout={workout}
-          timestamp={timestamp}
-          location={location}
-          creator={creator}
-        />
+        <WorkoutInformation workout={workout} timestamp={timestamp} />
         <WorkoutExercises exercises={workout.exercises} />
       </View>
     </ScrollView>
@@ -31,13 +22,9 @@ export default function WorkoutViewer({
 const WorkoutInformation = ({
   workout,
   timestamp,
-  location,
-  creator,
 }: {
   workout: workout;
   timestamp: boolean;
-  location: boolean;
-  creator: boolean;
 }) => {
   const timestampDate = new Date(workout.timestamp);
   const durationSeconds = Math.trunc(workout.duration % 60);
@@ -48,7 +35,6 @@ const WorkoutInformation = ({
     <View className="px-4 gap-2">
       <View>
         <Text variant="titleLarge">{workout.title}</Text>
-        {creator && <Text variant="titleSmall">by {workout.creator}</Text>}
       </View>
 
       {workout.description && (
@@ -58,8 +44,6 @@ const WorkoutInformation = ({
       {timestamp && (
         <Text>{`${timestampDate.toLocaleString()} for ${durationText}`}</Text>
       )}
-
-      {location && workout.gym && <Text>{workout.gym}</Text>}
     </View>
   );
 };

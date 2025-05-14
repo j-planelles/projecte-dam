@@ -1,12 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Text as NativeText,
   TextInput as NativeTextInput,
   Pressable,
-  ScrollView,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import {
   Button,
   Checkbox,
@@ -19,32 +20,28 @@ import {
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
-import {
-  AddIcon,
-  ArrowDownIcon,
-  ArrowDropDownIcon,
-  ArrowUpIcon,
-  DumbellIcon,
-  MoreVerticalIcon,
-  TimerIcon,
-  TrashCanIcon,
-} from "../Icons";
-import { Link } from "expo-router";
-import { useWorkoutStore } from "../../store/workout-store";
 import { useShallow } from "zustand/react/shallow";
-import ChoiceBox, { ExternalChoiceBox } from "../ui/ChoiceBox";
+import { useTimer } from "../../lib/hooks/useTimer";
 import {
   kgToLbs,
   kmToMiles,
   lbsToKg,
   milesToKm,
 } from "../../lib/unitTransformers";
-import { useTimer } from "../../lib/hooks/useTimer";
-import { useRestCountdownControl } from "../../store/rest-timer-context";
-import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth-store";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useRestCountdownControl } from "../../store/rest-timer-context";
 import { useSettingsStore } from "../../store/settings-store";
+import { useWorkoutStore } from "../../store/workout-store";
+import {
+  AddIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  DumbellIcon,
+  MoreVerticalIcon,
+  TimerIcon,
+  TrashCanIcon,
+} from "../Icons";
+import { ExternalChoiceBox } from "../ui/ChoiceBox";
 
 export default function WorkoutEditor({
   showTimer = true,
@@ -100,11 +97,10 @@ export default function WorkoutEditor({
 }
 
 const WorkoutInformation = ({ showTimer }: { showTimer: boolean }) => {
-  const { title, description, gym, setName, setDescription } = useWorkoutStore(
+  const { title, description, setName, setDescription } = useWorkoutStore(
     useShallow((state) => ({
       title: state.title,
       description: state.description,
-      gym: state.gym,
       setName: state.setName,
       setDescription: state.setDescription,
     })),
@@ -270,7 +266,6 @@ const WorkoutExercise = ({
           uuid: lastEntryQuery.data?.exercise.uuid,
           name: lastEntryQuery.data?.exercise.name,
           description: lastEntryQuery.data?.exercise.description,
-          userNote: lastEntryQuery.data?.exercise.user_note,
           bodyPart: lastEntryQuery.data?.exercise.body_part,
           type: lastEntryQuery.data?.exercise.type,
         },

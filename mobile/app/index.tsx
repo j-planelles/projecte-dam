@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import * as SecureStorage from "expo-secure-store";
@@ -6,22 +7,29 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { BottomNavigation } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
-import {
-  DumbellIcon,
-  HomeIcon,
-  PeopleIcon,
-  PersonIcon,
-} from "../components/Icons";
-import CommunityTab from "../components/pages/tabs/community";
+import { DumbellIcon, HomeIcon, PersonIcon } from "../components/Icons";
 import HomePage from "../components/pages/tabs/home";
 import TrainerTab from "../components/pages/tabs/trainer";
 import WorkoutTab from "../components/pages/tabs/workout";
 import { useAuthStore } from "../store/auth-store";
+import { useSettingsStore } from "../store/settings-store";
 
 export default function IndexPage() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const setEnableLastLest = useSettingsStore(
+    (state) => state.setEnableLastLest,
+  );
+
+  const getSettings = async () => {
+    const item = await AsyncStorage.getItem("enableLastSet");
+
+    if (item) {
+      setEnableLastLest(item === "true");
+    }
+  };
 
   useEffect(() => {
+    getSettings();
     setIsMounted(true);
   }, []);
 
@@ -133,11 +141,6 @@ const TabBarWrapper = () => {
       focusedIcon: (props) => <DumbellIcon {...props} />,
     },
     {
-      key: "community",
-      title: "Community",
-      focusedIcon: (props) => <PeopleIcon {...props} />,
-    },
-    {
       key: "trainer",
       title: "Trainer",
       focusedIcon: (props) => <PersonIcon {...props} />,
@@ -147,7 +150,6 @@ const TabBarWrapper = () => {
   const renderScene = BottomNavigation.SceneMap({
     home: HomePage,
     workout: WorkoutTab,
-    community: CommunityTab,
     trainer: TrainerTab,
   });
 

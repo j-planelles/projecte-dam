@@ -24,7 +24,6 @@ export default function FinishWorkoutPage() {
       uuid: state.uuid,
       title: state.title,
       timestamp: state.timestamp,
-      gym: state.gym,
       description: state.description,
       exercises: state.exercises,
     })),
@@ -59,7 +58,6 @@ export default function FinishWorkoutPage() {
               uuid: exercise.exercise.uuid,
               name: exercise.exercise.name,
               description: exercise.exercise.description,
-              user_note: exercise.exercise.userNote,
               body_part: exercise.exercise.bodyPart,
               type: exercise.exercise.type,
             },
@@ -105,7 +103,7 @@ export default function FinishWorkoutPage() {
         )}
       </View>
 
-      <WorkoutViewer workout={workoutData} creator={false} />
+      <WorkoutViewer workout={workoutData} />
     </ThemedView>
   );
 }

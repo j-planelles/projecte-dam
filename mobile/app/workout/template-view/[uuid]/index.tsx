@@ -43,7 +43,6 @@ export default function ViewTemplatePage() {
             uuid: entry.exercise.uuid,
             name: entry.exercise.name,
             description: entry.exercise.description,
-            userNote: entry.exercise.user_note,
             bodyPart: entry.exercise.body_part,
             type: entry.exercise.type,
           },
@@ -69,12 +68,7 @@ export default function ViewTemplatePage() {
       {error && <Text>{error.message}</Text>}
       {isSuccess && (
         <>
-          <WorkoutViewer
-            workout={workout}
-            creator={false}
-            timestamp={false}
-            location={false}
-          />
+          <WorkoutViewer workout={workout} timestamp={false} />
 
           <View className="p-4">
             <StartWorkoutButton workout={workout} />
