@@ -38,7 +38,6 @@ export default function ViewWorkoutPage() {
             uuid: entry.exercise.uuid,
             name: entry.exercise.name,
             description: entry.exercise.description,
-            userNote: entry.exercise.user_note,
             bodyPart: entry.exercise.body_part,
             type: entry.exercise.type,
           },

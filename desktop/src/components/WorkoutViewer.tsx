@@ -4,22 +4,13 @@ import { kgToLbs, kmToMiles } from "../lib/unitTransformers";
 export default function WorkoutViewer({
   workout,
   timestamp = true,
-  location = true,
-  creator = false,
 }: {
   workout: workout;
   timestamp?: boolean;
-  location?: boolean;
-  creator?: boolean;
 }) {
   return (
     <Box>
-      <WorkoutInformation
-        workout={workout}
-        timestamp={timestamp}
-        location={location}
-        creator={creator}
-      />
+      <WorkoutInformation workout={workout} timestamp={timestamp} />
       <WorkoutExercises exercises={workout.exercises} />
     </Box>
   );
@@ -28,13 +19,9 @@ export default function WorkoutViewer({
 const WorkoutInformation = ({
   workout,
   timestamp,
-  location,
-  creator,
 }: {
   workout: workout;
   timestamp: boolean;
-  location: boolean;
-  creator: boolean;
 }) => {
   const timestampDate = new Date(workout.timestamp);
   const durationSeconds = Math.trunc(workout.duration % 60);
@@ -45,9 +32,6 @@ const WorkoutInformation = ({
     <Box className="flex flex-col gap-2">
       <Box>
         <Typography variant="h3">{workout.title}</Typography>
-        {creator && (
-          <Typography variant="body1">by {workout.creator}</Typography>
-        )}
       </Box>
 
       {workout.description && (
@@ -58,11 +42,6 @@ const WorkoutInformation = ({
         {timestamp && (
           <Typography variant="body1">
             {`${timestampDate.toLocaleString()} for ${durationText}`}
-          </Typography>
-        )}
-        {location && workout.gym && (
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            {workout.gym}
           </Typography>
         )}
       </Box>

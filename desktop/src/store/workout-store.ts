@@ -43,8 +43,6 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
   title: "",
   timestamp: 0,
   duration: 0,
-  gym: "",
-  creator: "",
   description: "",
   exercises: [],
 
@@ -54,8 +52,6 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       title: "New template",
       timestamp: Date.now(),
       duration: 0,
-      gym: "",
-      creator: "",
       description: "",
       exercises: [],
     }),
@@ -65,8 +61,6 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       uuid: v4(),
       timestamp: Date.now(),
       duration: 0,
-      gym: "",
-      creator: "",
     }),
   setName: (name: string) =>
     set({

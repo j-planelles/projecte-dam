@@ -26,7 +26,6 @@ type exercise = {
     | "legs"
     | "olympic"
     | "other";
-  userNote?: string;
   description?: string;
 };
 
@@ -54,8 +53,6 @@ type workout = {
   title: string;
   timestamp: number;
   duration: number;
-  gym?: string;
-  creator?: string;
   description?: string;
   exercises: workoutExercise[];
 };
@@ -71,10 +68,4 @@ type user = {
   username: string;
   name: string;
   description?: string;
-};
-
-type gym = {
-  uuid: string;
-  name: string;
-  address: string;
 };

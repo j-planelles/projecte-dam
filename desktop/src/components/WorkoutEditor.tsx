@@ -657,7 +657,6 @@ const AddExerciseDialog = ({
               description: item.description,
               type: item.type,
               bodyPart: item.body_part,
-              userNote: item.user_note,
               isDefault: false,
               default_exercise_uuid: item.default_exercise_uuid,
             } as exerciseList;
