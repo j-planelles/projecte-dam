@@ -1,7 +1,7 @@
 import { Paint, useFont } from "@shopify/react-native-skia";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, RefreshControl, View } from "react-native";
 import {
   Avatar,
@@ -29,6 +29,7 @@ export default function HomePage() {
     setRefreshing(true);
     queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
     queryClient.invalidateQueries({ queryKey: ["user", "/user/workouts"] });
+    queryClient.invalidateQueries({ queryKey: ["user", "/user/stats"] });
 
     setTimeout(() => {
       setRefreshing(false);
@@ -113,13 +114,53 @@ const ProfilePictureHeader = () => {
   );
 };
 
+function getFirstDaysOfWeek(delta: number, amount: number) {
+  const today = new Date();
+
+  const dayOfWeek = today.getDay() - 1;
+  const firstDayOfThisWeek = new Date(today);
+  firstDayOfThisWeek.setDate(today.getDate() - dayOfWeek);
+
+  const d = new Date(firstDayOfThisWeek);
+  d.setDate(firstDayOfThisWeek.getDate() - (amount - delta) * 7);
+
+  return d;
+}
+
 const WorkoutsChart = () => {
   const theme = useTheme();
   const font = useFont(roboto, 12);
-  const DATA = Array.from({ length: 8 }, (_, i) => ({
-    weekDelta: i,
-    workouts: Math.floor(Math.random() * 6) + 1,
-  }));
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data, isSuccess } = useQuery({
+    queryKey: ["user", "/user/stats"],
+    queryFn: async () =>
+      await apiClient.get("/user/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
+
+  const chartData = useMemo(
+    () =>
+      data?.workouts_per_week?.toReversed().map((item, index) => ({
+        weekDelta: index,
+        workouts: item,
+      })) ||
+      Array.from({ length: 8 }, (_, i) => ({
+        weekDelta: i,
+        workouts: 0,
+      })),
+    [data],
+  );
+
+  const xTickValues = useMemo(
+    () => chartData.map((dataPoint) => dataPoint.weekDelta),
+    [chartData],
+  );
 
   return (
     <>
@@ -127,31 +168,38 @@ const WorkoutsChart = () => {
 
       <View style={{ height: 150 }}>
         <CartesianChart
-          data={DATA}
+          data={chartData}
           xKey={"weekDelta"}
           yKeys={["workouts"]}
           domainPadding={{ left: 30, right: 30, top: 10 }}
           domain={{
             y: [
               0,
-              DATA.map((data) => data.workouts).reduce((x, y) =>
-                Math.max(x, y),
-              ),
+              chartData
+                .map((data) => data.workouts)
+                .reduce((x, y) => Math.max(x, y), 0),
             ],
           }}
           axisOptions={{
             font: font,
-            formatXLabel: (value) => value.toString(),
+            tickValues: xTickValues,
+            formatXLabel: (value) => {
+              const date = getFirstDaysOfWeek(value + 1, chartData.length);
+              const day = date.getDate().toString().padStart(2, "0");
+              const month = (date.getMonth() + 1).toString().padStart(2, "0");
+
+              return `${day}/${month}`;
+            },
+            formatYLabel: (label) =>
+              label.toString().indexOf(".") === -1 && isSuccess
+                ? label.toString()
+                : "",
             labelColor: theme.colors.onSurface,
             lineColor: theme.colors.onSurfaceDisabled,
           }}
         >
           {({ points, chartBounds }) => (
-            <Bar
-              chartBounds={chartBounds}
-              points={points.workouts}
-              color={theme.colors.secondary}
-            >
+            <Bar chartBounds={chartBounds} points={points.workouts}>
               <Paint color={theme.colors.secondary} />
             </Bar>
           )}
@@ -159,8 +207,16 @@ const WorkoutsChart = () => {
       </View>
 
       <View className="flex-row gap-2">
-        <Chip>100 workouts</Chip>
-        <Chip>3 this week</Chip>
+        {isSuccess ? (
+          <>
+            <Chip>{data.workouts} workouts</Chip>
+            <Chip>{data.workouts_last_week} this week</Chip>
+          </>
+        ) : (
+          <View className="flex-1 justify-center">
+            <ActivityIndicator size={"small"} />
+          </View>
+        )}
       </View>
     </>
   );

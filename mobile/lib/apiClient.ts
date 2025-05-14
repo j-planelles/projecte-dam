@@ -182,6 +182,13 @@ const WorkoutContentSchema_Input = z
     gym: z.union([GymSchema, z.null()]).optional(),
   })
   .passthrough();
+const WorkoutStatsSchema = z
+  .object({
+    workouts: z.number().int(),
+    workouts_last_week: z.number().int(),
+    workouts_per_week: z.array(z.number().int()),
+  })
+  .passthrough();
 const WorkoutTemplateSchema = z
   .object({
     uuid: z.union([z.string(), z.null()]).optional(),
@@ -249,6 +256,7 @@ export const schemas = {
   WorkoutContentSchema_Output,
   WorkoutEntrySchema_Input,
   WorkoutContentSchema_Input,
+  WorkoutStatsSchema,
   WorkoutTemplateSchema,
   UserModel,
   TrainerModel,
@@ -762,6 +770,13 @@ const endpoints = makeApi([
         schema: HTTPValidationError,
       },
     ],
+  },
+  {
+    method: "get",
+    path: "/user/stats",
+    alias: "Get_user_statistics_user_stats_get",
+    requestFormat: "json",
+    response: WorkoutStatsSchema,
   },
   {
     method: "get",
