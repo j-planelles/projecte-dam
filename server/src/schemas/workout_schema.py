@@ -43,3 +43,9 @@ class WorkoutContentSchema(SQLModel):
 
 class WorkoutTemplateSchema(WorkoutContentSchema):
     instance: None = None
+
+
+class WorkoutStatsSchema(SQLModel):
+    workouts: int
+    workouts_last_week: int
+    workouts_per_week: list[int]

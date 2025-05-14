@@ -9,9 +9,10 @@ from models.workout import (
     WorkoutInstanceModel,
     WorkoutSetModel,
 )
-from schemas.workout_schema import WorkoutContentSchema
+from schemas.workout_schema import WorkoutContentSchema, WorkoutStatsSchema
 from security import get_current_active_user
-from sqlmodel import Session, desc, select
+from sqlmodel import Session, desc, func, select
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
@@ -126,3 +127,75 @@ async def add_user_workout(
         session.add(workout_instance)
 
     session.commit()
+
+
+@router.get(
+    "/user/stats",
+    response_model=WorkoutStatsSchema,
+    name="Get user statistics",
+    tags=["Workouts"],
+)
+async def get_user_stats(
+    current_user: UserModel = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+) -> WorkoutStatsSchema:
+    now = datetime.combine(datetime.now().date(), datetime.min.time())
+    start_of_week = now - timedelta(days=now.weekday())
+
+    workouts = session.exec(
+        select(func.count())
+        .select_from(WorkoutContentModel)
+        .join(
+            WorkoutInstanceModel,
+            WorkoutContentModel.uuid == WorkoutInstanceModel.workout_uuid,  # pyright: ignore[]
+        )
+        .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+    ).first()
+
+    workouts_last_week = session.exec(
+        select(func.count())
+        .select_from(WorkoutContentModel)
+        .join(
+            WorkoutInstanceModel,
+            WorkoutContentModel.uuid == WorkoutInstanceModel.workout_uuid,  # pyright: ignore[]
+        )
+        .where(WorkoutInstanceModel.timestamp_start >= start_of_week.timestamp() * 1000)
+        .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+    ).first()
+
+    if workouts is None or workouts_last_week is None:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    workouts_per_week = [workouts_last_week]
+
+    for i in range(7):
+        date = now - timedelta(weeks=i + 1)
+        start_of_week_period = date - timedelta(days=date.weekday())
+        end_of_week_period = start_of_week_period + timedelta(days=7)
+
+        workouts_period = session.exec(
+            select(func.count())
+            .select_from(WorkoutContentModel)
+            .join(
+                WorkoutInstanceModel,
+                WorkoutContentModel.uuid == WorkoutInstanceModel.workout_uuid,  # pyright: ignore[]
+            )
+            .where(WorkoutContentModel.creator_uuid == current_user.uuid)
+            .where(
+                WorkoutInstanceModel.timestamp_start
+                >= start_of_week_period.timestamp() * 1000
+            )
+            .where(
+                WorkoutInstanceModel.timestamp_start
+                < end_of_week_period.timestamp() * 1000
+            )
+        ).first()
+
+        if workouts_period is not None:
+            workouts_per_week.append(workouts_period)
+
+    return WorkoutStatsSchema(
+        workouts=workouts,
+        workouts_last_week=workouts_last_week,
+        workouts_per_week=workouts_per_week,
+    )
