@@ -44,6 +44,7 @@ import { useRestCountdownControl } from "../../store/rest-timer-context";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth-store";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useSettingsStore } from "../../store/settings-store";
 
 export default function WorkoutEditor({
   showTimer = true,
@@ -418,6 +419,7 @@ const WorkoutSet = ({
       exerciseType: state.exercises[exerciseIndex].exercise.type,
     })),
   );
+  const enableLastSet = useSettingsStore((state) => state.enableLastSet);
 
   const { start: startRestCountdown } = useRestCountdownControl();
 
@@ -529,12 +531,14 @@ const WorkoutSet = ({
         />
       </Menu>
 
-      <LastExerciseButton
-        setIndex={index}
-        exerciseIndex={exerciseIndex}
-        completed={!!completed}
-        lastEntry={lastEntry}
-      />
+      {enableLastSet && (
+        <LastExerciseButton
+          setIndex={index}
+          exerciseIndex={exerciseIndex}
+          completed={!!completed}
+          lastEntry={lastEntry}
+        />
+      )}
 
       {exerciseType !== "duration" &&
         exerciseType !== "countdown" &&
