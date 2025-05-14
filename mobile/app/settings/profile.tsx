@@ -11,8 +11,9 @@ import {
   TextInput,
   Dialog,
   Portal,
+  Snackbar,
 } from "react-native-paper";
-import { z } from "zod";
+import { unknown, z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { LogOutIcon, PersonRemoveIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
@@ -21,6 +22,7 @@ import { useAuthStore } from "../../store/auth-store";
 import { useRouter } from "expo-router";
 import * as SecureStorage from "expo-secure-store";
 import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
 
 export default function ProfileSettingsPage() {
   return (
@@ -91,22 +93,15 @@ function UserDataForm() {
 
       queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
     } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error?.response?.status === 409) {
-          setError("username", {
-            type: "manual",
-            message: "Username already taken.",
-          });
-        } else {
-          setError("root", {
-            type: "manual",
-            message: error.message,
-          });
-        }
+      if (error instanceof AxiosError && error?.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "Username already taken.",
+        });
       } else {
         setError("root", {
           type: "manual",
-          message: (error as Error).message || "Something went wrong.",
+          message: handleError(error),
         });
       }
     }
@@ -252,12 +247,10 @@ function ChangePasswordForm() {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
-      if (error instanceof AxiosError) {
-        setError("root", {
-          type: "manual",
-          message: "Something went wrong.",
-        });
-      }
+      setError("root", {
+        type: "manual",
+        message: handleError(error),
+      });
     }
   };
 
@@ -412,8 +405,11 @@ const DeleteAccountButton = () => {
     })),
   );
 
+  const [queryError, setQueryError] = useState<string | null>(null);
+
   const [visible, setVisible] = useState<boolean>(false);
   const deleteAccountHandler = async () => {
+    setQueryError(null);
     try {
       await apiClient.post("/auth/disable", undefined, {
         headers: { Authorization: `Bearer ${token}` },
@@ -426,7 +422,7 @@ const DeleteAccountButton = () => {
       router.dismissAll();
       router.replace("/");
     } catch (error) {
-      console.error(error);
+      setQueryError(handleError(unknown));
     }
   };
 
@@ -439,6 +435,11 @@ const DeleteAccountButton = () => {
       >
         Delete account
       </Button>
+      <Portal>
+        <Snackbar visible={!!queryError} onDismiss={() => setQueryError(null)}>
+          {queryError}
+        </Snackbar>
+      </Portal>
       <Portal>
         <Dialog visible={visible} onDismiss={() => setVisible(false)}>
           <Dialog.Content>

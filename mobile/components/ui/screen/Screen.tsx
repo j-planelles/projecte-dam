@@ -47,7 +47,6 @@ export function ThemedView({
     <View
       style={{
         backgroundColor: theme.colors.background,
-        paddingBottom: insets.bottom,
       }}
       className={`flex-1 ${className}`}
     >

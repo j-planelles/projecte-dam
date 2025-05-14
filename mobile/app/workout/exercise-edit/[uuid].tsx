@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -22,6 +21,7 @@ import { SaveIcon, TrashCanIcon } from "../../../components/Icons";
 import { ExternalChoiceBox } from "../../../components/ui/ChoiceBox";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
 const exerciseTypes = {
@@ -202,10 +202,8 @@ export default function ExerciseEditPage() {
       queryClient.invalidateQueries({ queryKey: ["user", "/user/exercises"] });
 
       router.back();
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setError("root", { type: "manual", message: error.message });
-      }
+    } catch (error: unknown) {
+      setError("root", { type: "manual", message: handleError(error) });
     }
   };
 

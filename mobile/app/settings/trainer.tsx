@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { Link } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
@@ -20,6 +19,7 @@ import {
 } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
+import { handleError } from "../../lib/errorHandler";
 import { useAuthStore } from "../../store/auth-store";
 
 export default function ProfileSettingsPage() {
@@ -143,13 +143,8 @@ const EnrolledContent = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };
@@ -212,13 +207,8 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

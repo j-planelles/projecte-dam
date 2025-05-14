@@ -12,6 +12,7 @@ import {
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
 import { useAuthStore } from "../../../store/auth-store";
+import { handleError } from "../../../lib/errorHandler";
 
 export default function TrainerOnboardingLikesPage() {
   const router = useRouter();
@@ -67,7 +68,7 @@ export default function TrainerOnboardingLikesPage() {
 
       router.push("/trainer/onboarding/list");
     } catch (error: unknown) {
-      setQueryError(error?.message);
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

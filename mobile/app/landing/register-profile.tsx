@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
-import { NavigateNextIcon } from "../../components/Icons";
-import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
+import { NavigateNextIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { handleError } from "../../lib/errorHandler";
+import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
-import { useQueryClient } from "@tanstack/react-query";
 
 const schema = z.object({
   name: z.string(),
@@ -47,8 +48,8 @@ export default function LandingRegisterProfilePage() {
 
       router.dismissAll();
       router.replace("/");
-    } catch {
-      setError("root", { type: "manual", message: "Something went wrong." });
+    } catch (error: unknown) {
+      setError("root", { type: "manual", message: handleError(error) });
     }
   };
 

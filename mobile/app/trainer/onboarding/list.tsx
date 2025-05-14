@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
@@ -17,6 +16,7 @@ import { useShallow } from "zustand/react/shallow";
 import { NavigateNextIcon, PeopleIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerOnboardingListPage() {
@@ -73,13 +73,8 @@ const TrainerList = ({ data }: { data: any }) => {
       });
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
       setDialogVisible(true);
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

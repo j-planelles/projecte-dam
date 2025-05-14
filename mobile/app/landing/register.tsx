@@ -13,6 +13,7 @@ import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import * as SecureStorage from "expo-secure-store";
 import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
 
 const schema = z
   .object({
@@ -73,19 +74,17 @@ export default function LandingRegisterPage() {
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
       router.push("/landing/register-profile");
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error?.response?.status === 409) {
-          setError("username", {
-            type: "manual",
-            message: "Username already taken.",
-          });
-        } else {
-          setError("root", {
-            type: "manual",
-            message: "Something went wrong.",
-          });
-        }
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error?.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "Username already taken.",
+        });
+      } else {
+        setError("root", {
+          type: "manual",
+          message: handleError(error),
+        });
       }
     }
   };
@@ -163,6 +162,12 @@ export default function LandingRegisterPage() {
         {errors.confirmPassword && (
           <Text className="font-bold text-red-500">
             {errors.confirmPassword.message}
+          </Text>
+        )}
+
+        {errors.root && (
+          <Text className="font-bold text-red-500">
+            {errors.root.message}
           </Text>
         )}
 

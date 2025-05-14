@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Appbar } from "react-native-paper";
@@ -8,6 +7,7 @@ import { SaveIcon } from "../../../components/Icons";
 import WorkoutEditor from "../../../components/pages/WorkoutEditor";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
@@ -82,11 +82,7 @@ const SaveButton = () => {
       );
       router.replace(`/workout/template-view/${response.uuid}`);
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        console.error(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        console.error(`${error}`);
-      }
+      console.error(handleError(error));
     }
     setIsLoading(false);
   };

@@ -6,12 +6,14 @@ import {
   RefreshControl,
   View,
 } from "react-native";
-import { Searchbar, Text, useTheme } from "react-native-paper";
+import { Portal, Searchbar, Snackbar, Text, useTheme } from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
 import { ChatIcon, PersonIcon, SendIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 import { useAuthStore } from "../../store/auth-store";
+import { unknown } from "zod";
+import { handleError } from "../../lib/errorHandler";
 
 export default function TrainerChatPage() {
   const queryClient = useQueryClient();
@@ -32,6 +34,7 @@ export default function TrainerChatPage() {
   const [messageInput, setMessageInput] = useState<string>("");
   const [messages, setMessages] = useState<message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const scrollToEnd = () => {
     if (flatListRef.current) {
@@ -53,6 +56,7 @@ export default function TrainerChatPage() {
   };
 
   const handleSubmit = async () => {
+    setQueryError(null)
     if (messageInput) {
       setIsLoading(true);
       try {
@@ -73,7 +77,7 @@ export default function TrainerChatPage() {
         setTimeout(scrollToEnd, 100);
         setMessageInput("");
       } catch (error: unknown) {
-        console.error(error);
+        setQueryError(handleError(unknown));
       }
       setIsLoading(false);
     }
@@ -135,6 +139,11 @@ export default function TrainerChatPage() {
           </>
         )}
       </View>
+      <Portal>
+        <Snackbar visible={!!queryError} onDismiss={() => setQueryError(null)}>
+          {queryError}
+        </Snackbar>
+      </Portal>
     </ThemedView>
   );
 }

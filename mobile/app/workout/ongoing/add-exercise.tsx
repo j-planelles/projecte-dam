@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
@@ -17,6 +16,7 @@ import { useShallow } from "zustand/react/shallow";
 import { DumbellIcon } from "../../../components/Icons";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
@@ -149,10 +149,8 @@ export default function OngoingWorkoutAddExercisePage() {
       addExercises(exercisesToAdd);
 
       router.back();
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setGlobalError(error.message);
-      }
+    } catch (error: unknown) {
+      setGlobalError(handleError(error));
     }
     setIsLoading(false);
   };

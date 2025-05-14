@@ -1,14 +1,14 @@
-import Header from "../../../components/ui/Header";
-import { ThemedView } from "../../../components/ui/screen/Screen";
-import { useWorkoutStore } from "../../../store/workout-store";
-import { useShallow } from "zustand/react/shallow";
-import WorkoutViewer from "../../../components/pages/WorkoutViewer";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useAuthStore } from "../../../store/auth-store";
 import { ActivityIndicator, View } from "react-native";
 import { Text } from "react-native-paper";
-import { AxiosError } from "axios";
-import { useQueryClient } from "@tanstack/react-query";
+import { useShallow } from "zustand/react/shallow";
+import WorkoutViewer from "../../../components/pages/WorkoutViewer";
+import Header from "../../../components/ui/Header";
+import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
 export default function FinishWorkoutPage() {
   const queryClient = useQueryClient();
@@ -76,15 +76,8 @@ export default function FinishWorkoutPage() {
       );
       cancelWorkout();
       queryClient.invalidateQueries({ queryKey: ["user", "/user/workouts"] });
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setGlobalError(
-          `${error?.request?.status} ${error?.request?.response}.`,
-        );
-      } else {
-        setGlobalError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setGlobalError(handleError(error));
     }
     setIsLoading(false);
   };

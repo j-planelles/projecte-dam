@@ -18,6 +18,7 @@ import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import * as SecureStorage from "expo-secure-store";
 import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
 
 const schema = z.object({
   username: z.string(),
@@ -84,15 +85,13 @@ export default function LandingLoginPage() {
       router.dismissAll();
       router.replace("/");
     } catch (error) {
-      if (error instanceof AxiosError) {
-        setError("root", {
-          type: "manual",
-          message:
-            error?.response?.status === 401
-              ? "Invalid username and password"
-              : "Internal server error. Please try again later.",
-        });
-      }
+      setError("root", {
+        type: "manual",
+        message:
+          error instanceof AxiosError && error?.response?.status === 401
+            ? "Invalid username and password"
+            : handleError(error),
+      });
     }
   };
 

@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -8,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import WorkoutViewer from "../../../components/pages/WorkoutViewer";
 import Header from "../../../components/ui/Header";
 import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
 export default function ViewWorkoutPage() {
@@ -125,13 +125,8 @@ const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
       );
       queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
       router.push(`/workout/template-view/${response.uuid}`);
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };
