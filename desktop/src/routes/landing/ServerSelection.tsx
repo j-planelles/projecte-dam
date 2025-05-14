@@ -1,12 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import { useEffect, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import axios from "axios";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
+import { handleError } from "../../lib/errorHandler";
 import { useAuthStore } from "../../store/auth-store";
-import axios from "axios";
 import { updateAuthConfig } from "../../lib/authConfig";
 
 const schema = z.object({
@@ -42,7 +43,7 @@ export default function ServerSelectionPage() {
     } catch (error: unknown) {
       setError("root", {
         type: "manual",
-        message: "Failed to connect to server.",
+        message: handleError(error),
       });
     }
   };

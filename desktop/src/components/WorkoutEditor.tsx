@@ -24,6 +24,7 @@ import {
   MenuItem,
   Select,
   type SelectChangeEvent,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -39,6 +40,7 @@ import { useWorkoutStore } from "../store/workout-store";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth-store";
 import SearchField from "./SearchField";
+import { handleError } from "../lib/errorHandler";
 
 export default function WorkoutEditor() {
   const [weightUnitDialogShown, setWeightUnitDialogShown] =
@@ -691,9 +693,11 @@ const AddExerciseDialog = ({
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const confirmHandler = (exerciseUuid: string) => async () => {
     setIsLoading(true);
+    setQueryError(null);
     try {
       const exercise = sortedExercises.filter(
         (item) => item.uuid === exerciseUuid,
@@ -726,72 +730,80 @@ const AddExerciseDialog = ({
 
       onDismiss();
     } catch (error: unknown) {
-      console.error(error);
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };
 
   return (
-    <Dialog open={shown} onClose={onDismiss} fullWidth>
-      <DialogTitle>Add Exercise</DialogTitle>
-      <DialogContent>
-        {(userExercisesQuery.isLoading || defaultExercisesQuery.isLoading) && (
-          <Box className="flex items-center justify-center">
-            <CircularProgress />
-          </Box>
-        )}
-        {userExercisesQuery.error && (
-          <Typography color="error">
-            {userExercisesQuery.error.message}
-          </Typography>
-        )}
-        {defaultExercisesQuery.error && (
-          <Typography color="error">
-            {defaultExercisesQuery.error.message}
-          </Typography>
-        )}
-        {!!sortedExercises &&
-          (sortedExercises.length > 0 ? (
-            <>
-              <SearchField
-                value={searchTerm}
-                onValueChange={(event) => {
-                  setSearchTerm(event.target.value);
-                }}
-                placeholder="Search exercises"
-                className="mb-2"
-              />
-              {sortedExercises
-                .filter(
-                  (exercise) =>
-                    !searchTerm ||
-                    exercise.name
-                      .trim()
-                      .toLowerCase()
-                      .indexOf(searchTerm.trim().toLowerCase()) !== -1,
-                )
-                .map((exercise) => (
-                  <ListItemButton
-                    key={exercise.uuid}
-                    onClick={confirmHandler(exercise.uuid)}
-                  >
-                    <ListItemText
-                      primary={exercise.name}
-                      secondary={exercise.description}
-                    />
-                  </ListItemButton>
-                ))}
-            </>
-          ) : (
-            <Box className="flex flex-col items-center gap-2">
-              <FitnessCenterIcon sx={{ width: 180, height: 180 }} />
-              <Typography variant="h4">No exercises found...</Typography>
+    <>
+      <Dialog open={shown} onClose={onDismiss} fullWidth>
+        <DialogTitle>Add Exercise</DialogTitle>
+        <DialogContent>
+          {(userExercisesQuery.isLoading ||
+            defaultExercisesQuery.isLoading) && (
+            <Box className="flex items-center justify-center">
+              <CircularProgress />
             </Box>
-          ))}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onDismiss}>Cancel</Button>
-      </DialogActions>
-    </Dialog>
+          )}
+          {userExercisesQuery.error && (
+            <Typography color="error">
+              {userExercisesQuery.error.message}
+            </Typography>
+          )}
+          {defaultExercisesQuery.error && (
+            <Typography color="error">
+              {defaultExercisesQuery.error.message}
+            </Typography>
+          )}
+          {!!sortedExercises &&
+            (sortedExercises.length > 0 ? (
+              <>
+                <SearchField
+                  value={searchTerm}
+                  onValueChange={(event) => {
+                    setSearchTerm(event.target.value);
+                  }}
+                  placeholder="Search exercises"
+                  className="mb-2"
+                />
+                {sortedExercises
+                  .filter(
+                    (exercise) =>
+                      !searchTerm ||
+                      exercise.name
+                        .trim()
+                        .toLowerCase()
+                        .indexOf(searchTerm.trim().toLowerCase()) !== -1,
+                  )
+                  .map((exercise) => (
+                    <ListItemButton
+                      key={exercise.uuid}
+                      onClick={confirmHandler(exercise.uuid)}
+                    >
+                      <ListItemText
+                        primary={exercise.name}
+                        secondary={exercise.description}
+                      />
+                    </ListItemButton>
+                  ))}
+              </>
+            ) : (
+              <Box className="flex flex-col items-center gap-2">
+                <FitnessCenterIcon sx={{ width: 180, height: 180 }} />
+                <Typography variant="h4">No exercises found...</Typography>
+              </Box>
+            ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onDismiss}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={!!queryError}
+        onClose={() => setQueryError(null)}
+        message={queryError}
+      />
+    </>
   );
 };

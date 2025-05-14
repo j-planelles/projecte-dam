@@ -13,6 +13,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import WorkoutViewer from "../../../components/WorkoutViewer";
 import { useAuthStore } from "../../../store/auth-store";
+import { handleError } from "../../../lib/errorHandler";
 
 export default function ViewTemplatePage() {
   const { "template-uuid": workoutUuid } = useParams();
@@ -102,7 +103,7 @@ const ActionButtons = () => {
       navigate("/app/templates");
     } catch (error: unknown) {
       setQueryError(
-        "Failed to remove template. Please remove any recommendations first.",
+        `Failed to remove template. Please remove any recommendations first. ${handleError(error)}`,
       );
     }
   };

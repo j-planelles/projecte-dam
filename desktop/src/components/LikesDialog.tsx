@@ -81,7 +81,7 @@ export default function LikesDialog({
 
       onSuccess();
     } catch (error: unknown) {
-      setQueryError(error?.message);
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

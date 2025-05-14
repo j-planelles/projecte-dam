@@ -9,8 +9,9 @@ import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { updateAuthConfig } from "../../lib/authConfig";
-import { useAuthStore } from "../../store/auth-store";
 import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
+import { useAuthStore } from "../../store/auth-store";
 
 const schema = z.object({
   username: z.string(),
@@ -75,16 +76,13 @@ export default function LoginPage() {
 
       navigate("/");
     } catch (error) {
-      if (error instanceof AxiosError) {
-        console.error(error);
-        setError("root", {
-          type: "manual",
-          message:
-            error?.response?.status === 401
-              ? "Invalid username and password"
-              : "Internal server error. Please try again later.",
-        });
-      }
+      setError("root", {
+        type: "manual",
+        message:
+          error instanceof AxiosError && error?.response?.status === 401
+            ? "Invalid username and password"
+            : handleError(error),
+      });
     }
   };
 

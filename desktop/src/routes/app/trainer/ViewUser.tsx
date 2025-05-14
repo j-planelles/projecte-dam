@@ -23,6 +23,7 @@ import {
   Menu,
   MenuItem,
   Skeleton,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ import { useShallow } from "zustand/react/shallow";
 import SearchField from "../../../components/SearchField";
 import WorkoutCard from "../../../components/WorkoutCard";
 import WorkoutViewer from "../../../components/WorkoutViewer";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerViewUserPage() {
@@ -111,9 +113,11 @@ const UserMenu = () => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const unlinkUserHandler = async () => {
     setIsLoading(true);
+    setQueryError(null);
     try {
       await apiClient.post("/trainer/users/:user_uuid/unpair", undefined, {
         params: { user_uuid: userUuid ? userUuid : "" },
@@ -124,12 +128,8 @@ const UserMenu = () => {
       });
       handleClose();
       navigate("/app/trainer/users");
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        console.error(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        console.error(`${error?.message}`);
-      }
+    } catch (error) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };
@@ -194,6 +194,11 @@ const UserMenu = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={!!queryError}
+        onClose={() => setQueryError(null)}
+        message={queryError}
+      />
     </>
   );
 };
@@ -364,12 +369,8 @@ const WorkoutInfoModal = ({
         queryKey: ["user", "trainer", userUuid],
       });
       onClose();
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-      }
+    } catch (error) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };
@@ -490,12 +491,8 @@ const WorkoutAddModal = ({
         queryKey: ["user", "trainer", userUuid],
       });
       onClose();
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-      }
+    } catch (error) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

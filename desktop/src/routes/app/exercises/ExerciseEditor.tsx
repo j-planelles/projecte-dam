@@ -25,6 +25,7 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
+import { handleError } from "../../../lib/errorHandler";
 
 const exerciseTypes = {
   barbell: "Barbell",
@@ -184,8 +185,8 @@ export default function ExerciseEditPage() {
       }
       queryClient.invalidateQueries({ queryKey: ["user", "/user/exercises"] });
       navigate(-1);
-    } catch (error: any) {
-      setError("root", { type: "manual", message: error });
+    } catch (error: unknown) {
+      setError("root", { type: "manual", message: handleError(error) });
     }
   };
 

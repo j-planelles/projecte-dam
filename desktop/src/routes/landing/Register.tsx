@@ -10,6 +10,7 @@ import { useShallow } from "zustand/react/shallow";
 import { updateAuthConfig } from "../../lib/authConfig";
 import { useAuthStore } from "../../store/auth-store";
 import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
 
 const schema = z
   .object({
@@ -82,18 +83,16 @@ export default function RegisterPage() {
 
       navigate("/landing/register-profile");
     } catch (error) {
-      if (error instanceof AxiosError) {
-        if (error?.response?.status === 409) {
-          setError("username", {
-            type: "manual",
-            message: "Username already taken.",
-          });
-        } else {
-          setError("root", {
-            type: "manual",
-            message: "Something went wrong.",
-          });
-        }
+      if (error instanceof AxiosError && error?.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "Username already taken.",
+        });
+      } else {
+        setError("root", {
+          type: "manual",
+          message: handleError(error),
+        });
       }
     }
   };

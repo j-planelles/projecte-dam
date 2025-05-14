@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { z } from "zod";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
+import { handleError } from "../../lib/errorHandler";
 
 const schema = z.object({
   name: z.string(),
@@ -41,8 +42,8 @@ export default function RegisterProfilePage() {
       );
 
       navigate("/");
-    } catch {
-      setError("root", { type: "manual", message: "Something went wrong." });
+    } catch (error) {
+      setError("root", { type: "manual", message: handleError(error) });
     }
   };
 

@@ -19,6 +19,7 @@ import { AxiosError } from "axios";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
+import { handleError } from "../../../lib/errorHandler";
 
 export default function TrainerRequestsPage() {
   const { apiClient, token } = useAuthStore(
@@ -125,12 +126,8 @@ const UserListItemActions = ({ userUUID }: { userUUID: string }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInput(userInput);
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

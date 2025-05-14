@@ -14,6 +14,7 @@ import { useWorkoutStore } from "../../../store/workout-store";
 import { useAuthStore } from "../../../store/auth-store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { handleError } from "../../../lib/errorHandler";
 
 export default function TemplateEditPage() {
   const { "template-uuid": templateUuid } = useParams();
@@ -191,11 +192,7 @@ const SaveTemplateButton = () => {
         navigate(`/app/templates/${response.uuid}`);
       }
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error}`);
-      }
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

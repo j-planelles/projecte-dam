@@ -7,6 +7,7 @@ import { Button, Container, Typography } from "@mui/material";
 import { useAuthStore } from "../../../store/auth-store";
 import { useNavigate } from "react-router";
 import LikesDialog from "../../../components/LikesDialog";
+import { handleError } from "../../../lib/errorHandler";
 
 export default function TrainerEnrollPage() {
   return (
@@ -78,13 +79,8 @@ const EnrollButton = () => {
       queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
       queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
       setShowLikesDialog(true);
-    } catch (error: any) {
-      if (error instanceof AxiosError) {
-        setQueryError(`${error?.request?.status} ${error?.request?.response}.`);
-      } else {
-        setQueryError(`${error?.message}`);
-        console.error(error.message);
-      }
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
     }
     setIsLoading(false);
   };

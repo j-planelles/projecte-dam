@@ -6,12 +6,14 @@ import {
   Container,
   IconButton,
   InputBase,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
+import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerMessageBoardPage() {
@@ -39,6 +41,7 @@ export default function TrainerMessageBoardPage() {
   const [messages, setMessages] = useState<message[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (data) {
@@ -56,6 +59,7 @@ export default function TrainerMessageBoardPage() {
   }, [data]);
 
   const handleSubmit = async () => {
+    setQueryError(null);
     if (messageInput) {
       setIsLoading(true);
       try {
@@ -76,7 +80,7 @@ export default function TrainerMessageBoardPage() {
 
         setMessageInput("");
       } catch (error: unknown) {
-        console.error(error);
+        setQueryError(handleError(error));
       }
       setIsLoading(false);
     }
@@ -129,6 +133,11 @@ export default function TrainerMessageBoardPage() {
           <CircularProgress />
         </Box>
       )}
+      <Snackbar
+        open={!!queryError}
+        onClose={() => setQueryError(null)}
+        message={queryError}
+      />
     </Container>
   );
 }

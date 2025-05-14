@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogContentText,
   FormHelperText,
+  Snackbar,
 } from "@mui/material";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -23,6 +24,7 @@ import { useAuthStore } from "../../store/auth-store";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { updateAuthConfig } from "../../lib/authConfig";
 import LikesDialog from "../../components/LikesDialog";
+import { handleError } from "../../lib/errorHandler";
 
 export default function SettingsPage() {
   return (
@@ -375,8 +377,10 @@ const DeleteAccountButton = () => {
   );
 
   const [visible, setVisible] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const deleteAccountHandler = async () => {
+    setQueryError(null)
     try {
       await apiClient.post("/auth/disable", undefined, {
         headers: { Authorization: `Bearer ${token}` },
@@ -387,7 +391,7 @@ const DeleteAccountButton = () => {
       setToken(null);
       navigate("/");
     } catch (error) {
-      console.error(error);
+      setQueryError(handleError(error));
     }
   };
 
@@ -400,6 +404,12 @@ const DeleteAccountButton = () => {
       >
         Delete account
       </Button>
+
+      <Snackbar
+        open={!!queryError}
+        onClose={() => setQueryError(null)}
+        message={queryError}
+      />
 
       <Dialog open={visible} onClose={() => setVisible(false)}>
         <DialogContent>
