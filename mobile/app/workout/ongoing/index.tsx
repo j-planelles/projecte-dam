@@ -37,7 +37,7 @@ export default function OngoingWorkoutPage() {
     useState<boolean>(false);
 
   return (
-    <ThemedView className="flex-1">
+    <ThemedView className="flex-1" avoidKeyboard={false}>
       <HeaderComponent
         setTimerDialogVisible={setTimerDialogVisible}
         setCancelWorkoutDialogVisible={setCancelWorkoutDialogVisible}

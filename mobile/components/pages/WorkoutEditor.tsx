@@ -43,6 +43,7 @@ import { useTimer } from "../../lib/hooks/useTimer";
 import { useRestCountdownControl } from "../../store/rest-timer-context";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../store/auth-store";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 export default function WorkoutEditor({
   showTimer = true,
@@ -69,7 +70,7 @@ export default function WorkoutEditor({
 
   return (
     <>
-      <ScrollView>
+      <KeyboardAwareScrollView bottomOffset={50}>
         <View className="gap-2 pb-8">
           <WorkoutInformation showTimer={showTimer} />
           <WorkoutExercises
@@ -78,7 +79,7 @@ export default function WorkoutEditor({
             showRestCountdownDurationDialog={showRestCountdownDialogHandler}
           />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <WeightUnitDialog
         shown={weightUnitDialogShown}
         exerciseIndex={weightUnitDialogIndex}

@@ -10,10 +10,15 @@ import { useEffect } from "react";
 
 export default function HomeTabsScreen({
   children,
-  refreshControl
+  refreshControl,
 }: {
   children: React.ReactNode;
-  refreshControl?: React.ReactElement<RefreshControlProps, string | React.JSXElementConstructor<any>> | undefined
+  refreshControl?:
+    | React.ReactElement<
+        RefreshControlProps,
+        string | React.JSXElementConstructor<any>
+      >
+    | undefined;
 }) {
   const insets = useSafeAreaInsets();
   const ongoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);

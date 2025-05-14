@@ -13,7 +13,7 @@ import { useWorkoutStore } from "../../../store/workout-store";
 
 export default function CreateTemplatePage() {
   return (
-    <ThemedView className="flex-1">
+    <ThemedView className="flex-1" avoidKeyboard={false}>
       <Header title="Create Template">
         <SaveButton />
       </Header>

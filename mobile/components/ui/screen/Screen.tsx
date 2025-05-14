@@ -1,4 +1,5 @@
 import { ScrollView, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useTheme } from "react-native-paper";
 import {
   SafeAreaView,
@@ -17,9 +18,11 @@ export default function Screen({ children }: { children?: React.ReactNode }) {
 
 export function BasicScreen({ children }: { children?: React.ReactNode }) {
   return (
-    <SafeAreaView>
-      <BasicView>{children}</BasicView>
-    </SafeAreaView>
+    <KeyboardAvoidingView behavior="translate-with-padding" className="flex-1">
+      <SafeAreaView>
+        <BasicView>{children}</BasicView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -39,7 +42,12 @@ export function BasicView({ children }: { children?: React.ReactNode }) {
 export function ThemedView({
   children,
   className,
-}: { children?: React.ReactNode; className?: string }) {
+  avoidKeyboard = true,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  avoidKeyboard?: boolean;
+}) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -47,10 +55,17 @@ export function ThemedView({
     <View
       style={{
         backgroundColor: theme.colors.background,
+        paddingBottom: insets.bottom,
       }}
       className={`flex-1 ${className}`}
     >
-      {children}
+      <KeyboardAvoidingView
+        behavior="padding"
+        className="flex-1"
+        enabled={avoidKeyboard}
+      >
+        {children}
+      </KeyboardAvoidingView>
     </View>
   );
 }
