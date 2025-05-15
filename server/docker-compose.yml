@@ -33,16 +33,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  adminer:
-    image: adminer:latest
-    container_name: adminer_web
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-
 volumes:
   postgres_data:
