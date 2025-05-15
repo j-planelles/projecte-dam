@@ -42,7 +42,6 @@ export default function LandingLoginPage() {
   const {
     username: storeUsername,
     setUsername,
-    hashPassword,
     setToken,
     serverName,
     serverIp,
@@ -50,7 +49,6 @@ export default function LandingLoginPage() {
     useShallow((state) => ({
       username: state.username,
       setUsername: state.setUsername,
-      hashPassword: state.hashPassword,
       setToken: state.setToken,
       serverName: state.serverName,
       serverIp: state.serverIp,
@@ -64,7 +62,6 @@ export default function LandingLoginPage() {
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
-      hashPassword(password);
 
       await SecureStorage.setItemAsync("username", username);
 

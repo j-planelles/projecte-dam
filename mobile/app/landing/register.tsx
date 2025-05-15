@@ -39,10 +39,9 @@ export default function LandingRegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-  const { setUsername, hashPassword, setToken, serverIp } = useAuthStore(
+  const { setUsername, setToken, serverIp } = useAuthStore(
     useShallow((state) => ({
       setUsername: state.setUsername,
-      hashPassword: state.hashPassword,
       setToken: state.setToken,
       serverIp: state.serverIp,
     })),
@@ -51,7 +50,6 @@ export default function LandingRegisterPage() {
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
-      hashPassword(password);
 
       await SecureStorage.setItemAsync("username", username);
 
@@ -166,9 +164,7 @@ export default function LandingRegisterPage() {
         )}
 
         {errors.root && (
-          <Text className="font-bold text-red-500">
-            {errors.root.message}
-          </Text>
+          <Text className="font-bold text-red-500">{errors.root.message}</Text>
         )}
 
         <Button
