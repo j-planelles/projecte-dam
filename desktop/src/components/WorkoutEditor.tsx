@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
@@ -16,7 +15,6 @@ import {
   Divider,
   IconButton,
   InputBase,
-  Link,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -26,21 +24,22 @@ import {
   type SelectChangeEvent,
   Snackbar,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { useShallow } from "zustand/react/shallow";
+import { handleError } from "../lib/errorHandler";
 import {
   kgToLbs,
   kmToMiles,
   lbsToKg,
   milesToKm,
 } from "../lib/unitTransformers";
-import { useWorkoutStore } from "../store/workout-store";
-import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth-store";
+import { useWorkoutStore } from "../store/workout-store";
 import SearchField from "./SearchField";
-import { handleError } from "../lib/errorHandler";
 
 export default function WorkoutEditor() {
   const [weightUnitDialogShown, setWeightUnitDialogShown] =
@@ -283,7 +282,6 @@ const WorkoutSet = ({
     setType,
     updateSetType,
     weightUnit,
-    restCountdownDuration,
     exerciseType,
   } = useWorkoutStore(
     useShallow((state) => ({
@@ -295,8 +293,6 @@ const WorkoutSet = ({
       setType: state.exercises[exerciseIndex].sets[index].type,
       updateSetType: state.updateSetType,
       weightUnit: state.exercises[exerciseIndex].weightUnit,
-      restCountdownDuration:
-        state.exercises[exerciseIndex].restCountdownDuration,
       exerciseType: state.exercises[exerciseIndex].exercise.type,
     })),
   );
@@ -779,6 +775,7 @@ const AddExerciseDialog = ({
                     <ListItemButton
                       key={exercise.uuid}
                       onClick={confirmHandler(exercise.uuid)}
+                      disabled={isLoading}
                     >
                       <ListItemText
                         primary={exercise.name}

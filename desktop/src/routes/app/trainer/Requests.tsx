@@ -15,11 +15,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useAuthStore } from "../../../store/auth-store";
 import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerRequestsPage() {
   const { apiClient, token } = useAuthStore(

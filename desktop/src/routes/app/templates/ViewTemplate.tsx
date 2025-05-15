@@ -12,8 +12,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import WorkoutViewer from "../../../components/WorkoutViewer";
-import { useAuthStore } from "../../../store/auth-store";
 import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
 
 export default function ViewTemplatePage() {
   const { "template-uuid": workoutUuid } = useParams();
@@ -71,7 +71,7 @@ export default function ViewTemplatePage() {
       {isSuccess && (
         <>
           <ActionButtons />
-          <WorkoutViewer workout={workout} timestamp={false} location={false} />
+          <WorkoutViewer workout={workout} timestamp={false} />
         </>
       )}
     </Container>

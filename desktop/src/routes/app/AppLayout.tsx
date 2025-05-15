@@ -1,14 +1,12 @@
-import { useShallow } from "zustand/react/shallow";
-import { useQuery } from "@tanstack/react-query";
-import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import GroupIcon from "@mui/icons-material/Group";
-import HomeIcon from "@mui/icons-material/Home";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import HistoryIcon from "@mui/icons-material/History";
-import SettingsIcon from "@mui/icons-material/Settings";
+import HomeIcon from "@mui/icons-material/Home";
 import LogoutIcon from "@mui/icons-material/Logout";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   AppBar,
   Avatar,
@@ -22,15 +20,17 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router";
+import { Outlet, useNavigate } from "react-router";
+import { useShallow } from "zustand/react/shallow";
+import UltraLogoText from "../../assets/logo-text";
 import NavigationBar, {
   type NavigationBarSection,
 } from "../../components/NavigationBar";
 import ThemeManager from "../../components/ThemeManager";
-import { useAuthStore } from "../../store/auth-store";
-import UltraLogoText from "../../assets/logo-text";
 import { updateAuthConfig } from "../../lib/authConfig";
+import { useAuthStore } from "../../store/auth-store";
 
 const NAV_ITEMS: NavigationBarSection[] = [
   {

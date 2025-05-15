@@ -4,17 +4,18 @@ import {
   Button,
   CircularProgress,
   Container,
+  Portal,
+  Snackbar,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import WorkoutEditor from "../../../components/WorkoutEditor";
-import { useWorkoutStore } from "../../../store/workout-store";
-import { useAuthStore } from "../../../store/auth-store";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
 export default function TemplateEditPage() {
   const { "template-uuid": templateUuid } = useParams();
@@ -112,7 +113,6 @@ const SaveTemplateButton = () => {
       uuid: state.uuid,
       title: state.title,
       timestamp: state.timestamp,
-      gym: state.gym,
       description: state.description,
       exercises: state.exercises,
     })),
@@ -195,13 +195,18 @@ const SaveTemplateButton = () => {
   };
 
   return (
-    <Button
-      variant="outlined"
-      startIcon={<SaveIcon />}
-      disabled={isLoading}
-      onClick={() => handleSubmit()}
-    >
-      {templateUuid ? "Update template" : "Save template"}
-    </Button>
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<SaveIcon />}
+        disabled={isLoading}
+        onClick={() => handleSubmit()}
+      >
+        {templateUuid ? "Update template" : "Save template"}
+      </Button>
+      <Portal>
+        <Snackbar open={!!queryError} onClose={() => setQueryError(null)} />
+      </Portal>
+    </>
   );
 };

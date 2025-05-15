@@ -1,13 +1,12 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-import { useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Button, Container, Typography } from "@mui/material";
-import { useAuthStore } from "../../../store/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useShallow } from "zustand/react/shallow";
 import LikesDialog from "../../../components/LikesDialog";
 import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerEnrollPage() {
   return (
@@ -102,6 +101,7 @@ const EnrollButton = () => {
       )}
       <LikesDialog
         open={showLikesDialog}
+        onClose={() => {}}
         onSuccess={() => {
           setShowLikesDialog(false);
           navigate("/app/dashboard");

@@ -1,5 +1,5 @@
-import CheckIcon from "@mui/icons-material/Check";
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
 import {
   Box,
   Button,
@@ -13,9 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { handleError } from "../lib/errorHandler";
 import { useAuthStore } from "../store/auth-store";
 
 export default function LikesDialog({

@@ -140,7 +140,7 @@ const CardRequests = () => {
       token: state.token,
     })),
   );
-  const { data, isLoading, isSuccess, error } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ["user", "trainer", "/trainer/requests"],
     queryFn: async () =>
       await apiClient.get("/trainer/requests", {
@@ -158,7 +158,9 @@ const CardRequests = () => {
             data.map(
               (item, index) =>
                 index < 5 && (
-                  <Typography key={item.uuid}>{item.user.full_name}</Typography>
+                  <Typography key={item.uuid as string}>
+                    {item.user.full_name}
+                  </Typography>
                 ),
             )
           ) : (
@@ -179,7 +181,7 @@ const CardUsers = () => {
       token: state.token,
     })),
   );
-  const { data, isLoading, isSuccess, error } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ["user", "trainer", "/trainer/users"],
     queryFn: async () =>
       await apiClient.get("/trainer/users", {
@@ -218,7 +220,7 @@ const CardTemplates = () => {
       token: state.token,
     })),
   );
-  const { data, isLoading, isSuccess, error } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ["user", "/user/templates"],
     queryFn: async () =>
       await apiClient.get("/user/templates", {
@@ -260,7 +262,7 @@ const CardWorkouts = () => {
       token: state.token,
     })),
   );
-  const { data, isLoading, isSuccess, error } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ["user", "/user/workouts"],
     queryFn: async () =>
       await apiClient.get("/user/workouts", {

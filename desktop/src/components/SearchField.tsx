@@ -1,6 +1,6 @@
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, IconButton, InputBase, TextField } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { Box, IconButton, InputBase } from "@mui/material";
 
 export default function SearchField({
   value,

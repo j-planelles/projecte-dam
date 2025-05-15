@@ -14,7 +14,7 @@ export default function WorkoutCard({
   showTimestamp?: boolean;
 }) {
   return (
-    <Card variant="outlined" onClick={onClick}>
+    <Card variant="outlined" onClick={onClick} className={className}>
       <CardActionArea>
         <CardContent>
           <Typography variant="h6" component="div">
