@@ -1,120 +1,40 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { FlatList, View } from "react-native";
-import { Searchbar, Text, useTheme } from "react-native-paper";
-import { PersonIcon, SendIcon } from "../../components/Icons";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  View,
+} from "react-native";
+import { Portal, Searchbar, Snackbar, Text, useTheme } from "react-native-paper";
+import { useShallow } from "zustand/react/shallow";
+import { ChatIcon, PersonIcon, SendIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
-
-const SAMPLE_MESSAGES: message[] = [
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440000",
-    text: "Hello, how are you?",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440001",
-    text: "I'm good, thanks!",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440002",
-    text: "What's up?",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440003",
-    text: "Not much, just chillin'",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440004",
-    text: "That sounds cool",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440005",
-    text: "Yeah, it is",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440006",
-    text: "Do you want to meet up?",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440007",
-    text: "Maybe later",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440008",
-    text: "Okay, sounds good",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440009",
-    text: "I'll talk to you later",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440010",
-    text: "Later!",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440011",
-    text: "Hey, what's up?",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440012",
-    text: "Not much, just got back from a run",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440013",
-    text: "Nice! How was it?",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440014",
-    text: "It was good, I needed the exercise",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440015",
-    text: "Yeah, exercise is important",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440016",
-    text: "Definitely, I feel more energized now",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440017",
-    text: "That's great to hear",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440018",
-    text: "Yeah, I'm feeling good",
-    sentByTrainer: true,
-  },
-  {
-    uuid: "123e4567-e89b-12d3-a456-426655440019",
-    text: "I'm glad to hear that",
-    sentByTrainer: false,
-  },
-  {
-    uuid: "126e4567-e89b-12d3-a456-426655440019",
-    text: "I'm glad to hear that",
-    sentByTrainer: false,
-  },
-];
+import { ThemedView } from "../../components/ui/screen/Screen";
+import { useAuthStore } from "../../store/auth-store";
+import { unknown } from "zod";
+import { handleError } from "../../lib/errorHandler";
 
 export default function TrainerChatPage() {
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data } = useQuery({
+    queryKey: ["user", "trainer", "/user/trainer/messages"],
+    queryFn: async () =>
+      await apiClient.get("/user/trainer/messages", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
   const flatListRef = useRef<null | FlatList>(null);
   const [messageInput, setMessageInput] = useState<string>("");
+  const [messages, setMessages] = useState<message[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
 
   const scrollToEnd = () => {
     if (flatListRef.current) {
@@ -122,52 +42,120 @@ export default function TrainerChatPage() {
     }
   };
 
-  const handleSubmit = () => {
-    scrollToEnd();
-    console.log(messageInput);
-    setMessageInput("");
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const refreshControlHandler = () => {
+    setRefreshing(true);
+    queryClient.invalidateQueries({
+      queryKey: ["user", "trainer", "/user/trainer/messages"],
+    });
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
+
+  const handleSubmit = async () => {
+    setQueryError(null)
+    if (messageInput) {
+      setIsLoading(true);
+      try {
+        await apiClient.post("/user/trainer/messages", undefined, {
+          queries: { content: messageInput },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setMessages((lastState) => [
+          ...lastState,
+          {
+            content: messageInput,
+            timestamp: Date.now(),
+            sentByTrainer: false,
+          },
+        ]);
+
+        setTimeout(scrollToEnd, 100);
+        setMessageInput("");
+      } catch (error: unknown) {
+        setQueryError(handleError(unknown));
+      }
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    scrollToEnd()
-  }, [flatListRef]);
+    if (data) {
+      setMessages(
+        data.map(
+          (item) =>
+            ({
+              content: item.content,
+              timestamp: item.timestamp,
+              sentByTrainer: item.is_sent_by_trainer,
+            }) as message,
+        ),
+      );
+    }
+  }, [data]);
 
   return (
-    <View className="flex-1">
-      <Header title="Trainer Chat" />
+    <ThemedView className="flex-1">
+      <Header title="Message Board" />
       <View className="flex-1">
-        <FlatList
-          data={SAMPLE_MESSAGES}
-          keyExtractor={(item) => item.uuid}
-          renderItem={({ item }) => <MessageBubble message={item} />}
-          ref={flatListRef}
-        />
-        <View className="px-4 py-4">
-          <Searchbar
-            placeholder="Message Jordi..."
-            value={messageInput}
-            onChangeText={setMessageInput}
-            icon={({ color }) => <PersonIcon color={color} />}
-            clearIcon={({ color }) => <SendIcon color={color} />}
-            onClearIconPress={handleSubmit}
-            returnKeyType="send"
-            onPress={() => {
-              setTimeout(scrollToEnd, 100);
-            }}
-            onSubmitEditing={handleSubmit}
-          />
-        </View>
+        {!data ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            <FlatList
+              data={messages}
+              keyExtractor={(item) => item.timestamp}
+              renderItem={({ item }) => <MessageBubble message={item} />}
+              ref={flatListRef}
+              onContentSizeChange={scrollToEnd}
+              ListEmptyComponent={<MessagesListEmptyComponent />}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={refreshControlHandler}
+                />
+              }
+            />
+            <View className="px-4 py-4">
+              <Searchbar
+                placeholder="Type your message..."
+                value={messageInput}
+                onChangeText={setMessageInput}
+                icon={(props) => <PersonIcon {...props} />}
+                clearIcon={(props) => <SendIcon {...props} />}
+                onClearIconPress={handleSubmit}
+                returnKeyType="send"
+                onPress={() => {
+                  setTimeout(scrollToEnd, 100);
+                }}
+                onSubmitEditing={handleSubmit}
+                editable={!isLoading}
+              />
+            </View>
+          </>
+        )}
       </View>
-    </View>
+      <Portal>
+        <Snackbar visible={!!queryError} onDismiss={() => setQueryError(null)}>
+          {queryError}
+        </Snackbar>
+      </Portal>
+    </ThemedView>
   );
 }
 
 const MessageBubble = ({ message }: { message: message }) => {
   const theme = useTheme();
   return (
-    <View className="pt-4 px-4">
+    <View
+      className={`pt-2 px-4 flex-1 flex-row ${message.sentByTrainer ? "justify-start" : "justify-end"}`}
+    >
       <View
-        className={`px-4 py-2 rounded-t-3xl ${message.sentByTrainer ? "rounded-br-3xl rounded-bl-md" : "rounded-bl-3xl rounded-br-md"}`}
+        className={`px-4 py-2 w-auto rounded-t-3xl ${message.sentByTrainer ? "rounded-br-3xl rounded-bl-md" : "rounded-bl-3xl rounded-br-md"}`}
         style={{
           backgroundColor: message.sentByTrainer
             ? theme.colors.surfaceVariant
@@ -183,9 +171,20 @@ const MessageBubble = ({ message }: { message: message }) => {
           }}
           variant="bodyLarge"
         >
-          {message.text}
+          {message.content}
         </Text>
       </View>
+    </View>
+  );
+};
+
+const MessagesListEmptyComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <View className="flex-1 items-center gap-8 pt-16">
+      <ChatIcon size={96} color={theme.colors.onSurface} />
+      <Text variant="headlineLarge">No messages...</Text>
     </View>
   );
 };

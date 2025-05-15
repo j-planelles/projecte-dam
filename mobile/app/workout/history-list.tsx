@@ -1,173 +1,91 @@
-import { FlatList, View } from "react-native";
-import Screen, { BasicScreen } from "../../components/ui/screen/Screen";
-import WorkoutCard from "../../components/ui/WorkoutCard";
-import { Stack, useRouter } from "expo-router";
-import { TouchableRipple } from "react-native-paper";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { ActivityIndicator, FlatList, View, Text } from "react-native";
+import { useShallow } from "zustand/react/shallow";
 import Header from "../../components/ui/Header";
+import { ThemedView } from "../../components/ui/screen/Screen";
+import WorkoutCard from "../../components/ui/WorkoutCard";
+import { useAuthStore } from "../../store/auth-store";
+import { useMemo } from "react";
 
-const SAMPLE_WORKOUTS: workout[] = [
-  {
-    uuid: "c1be768f-4455-4b1d-ac6c-2ddf82e2a137",
-    title: "Full Body Strength Training",
-    timestamp: 1697001600,
-    duration: 90,
-    gym: "Planet Fitness",
-    creator: "John Doe",
-    description:
-      "A comprehensive full-body workout focusing on building strength and endurance",
-    exercises: [
-      {
-        exercise: {
-          name: "Bench Press",
-        },
-        sets: [
-          { reps: 8, weight: 135 },
-          { reps: 8, weight: 135 },
-          { reps: 8, weight: 135 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Pull-ups",
-        },
-        sets: [
-          { reps: 10, weight: 0 },
-          { reps: 8, weight: 0 },
-          { reps: 6, weight: 0 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Dumbbell Squat",
-        },
-        sets: [
-          { reps: 12, weight: 40 },
-          { reps: 10, weight: 40 },
-          { reps: 8, weight: 40 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Deadlift",
-        },
-        sets: [
-          { reps: 6, weight: 185 },
-          { reps: 6, weight: 185 },
-          { reps: 4, weight: 185 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Bicep Curl",
-        },
-        sets: [
-          { reps: 12, weight: 20 },
-          { reps: 10, weight: 20 },
-          { reps: 8, weight: 20 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Tricep Dip",
-        },
-        sets: [
-          { reps: 15, weight: 0 },
-          { reps: 12, weight: 0 },
-          { reps: 10, weight: 0 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Plank",
-        },
-        sets: [
-          { reps: 60, weight: 0 },
-          { reps: 60, weight: 0 },
-        ],
-      },
-    ],
-  },
-  {
-    uuid: "efd04bdc-2997-4729-8442-5b9a106aa933",
-    title: "Upper Body Strength",
-    timestamp: 1697001600,
-    duration: 75,
-    gym: "Planet Fitness",
-    creator: "John Doe",
-    description: "Focus on building upper body strength and endurance",
-    exercises: [
-      {
-        exercise: {
-          name: "Bench Press",
-        },
-        sets: [
-          { reps: 8, weight: 135 },
-          { reps: 8, weight: 135 },
-          { reps: 8, weight: 135 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Pull-ups",
-        },
-        sets: [
-          { reps: 10, weight: 0 },
-          { reps: 8, weight: 0 },
-          { reps: 6, weight: 0 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Dumbbell Shoulder Press",
-        },
-        sets: [
-          { reps: 10, weight: 30 },
-          { reps: 8, weight: 30 },
-          { reps: 6, weight: 30 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Bicep Curl",
-        },
-        sets: [
-          { reps: 12, weight: 20 },
-          { reps: 10, weight: 20 },
-          { reps: 8, weight: 20 },
-        ],
-      },
-      {
-        exercise: {
-          name: "Tricep Dip",
-        },
-        sets: [
-          { reps: 15, weight: 0 },
-          { reps: 12, weight: 0 },
-          { reps: 10, weight: 0 },
-        ],
-      },
-    ],
-  },
-];
 export default function TemplatesListPage() {
   const router = useRouter();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data, isLoading, isSuccess, error } = useQuery({
+    queryKey: ["user", "/user/workouts"],
+    queryFn: async () =>
+      await apiClient.get("/user/workouts", {
+        headers: { Authorization: `Bearer ${token}` },
+        queries: { limit: 100 },
+      }),
+  });
+
+  const workouts = useMemo(
+    () =>
+      data?.map(
+        (data) =>
+          ({
+            uuid: data.uuid,
+            title: data.name,
+            description: data.description,
+            timestamp: data.instance?.timestamp_start || 0,
+            duration: data.instance?.duration || 0,
+            exercises: data.entries.map((entry) => ({
+              restCountdownDuration: entry.rest_countdown_duration,
+              weightUnit: entry.weight_unit,
+              exercise: {
+                uuid: entry.exercise.uuid,
+                name: entry.exercise.name,
+                description: entry.exercise.description,
+                bodyPart: entry.exercise.body_part,
+                type: entry.exercise.type,
+              },
+              sets: entry.sets.map((set) => ({
+                reps: set.reps,
+                weight: set.weight,
+              })),
+            })),
+          }) as workout,
+      ),
+    [data],
+  );
 
   return (
-    <View className="flex-1">
+    <ThemedView className="flex-1">
       <Header title="Workout History" />
-      <FlatList
-        className="p-2"
-        data={SAMPLE_WORKOUTS}
-        keyExtractor={(item) => item.uuid}
-        renderItem={({ item }) => (
-          <WorkoutCard
-            workout={item}
-            className="mb-2"
-            showDescription
-            onPress={() => router.push(`/workout/workout-view/${item.uuid}`)}
-          />
-        )}
-      />
-    </View>
+
+      {isLoading && (
+        <View>
+          <ActivityIndicator size={"large"} />
+        </View>
+      )}
+      {error && (
+        <View>
+          <Text>{error.message}</Text>
+        </View>
+      )}
+      {isSuccess && (
+        <FlatList
+          className="p-2"
+          data={workouts}
+          keyExtractor={(item) =>
+            item.uuid ? item.uuid : Math.random().toString()
+          }
+          renderItem={({ item }) => (
+            <WorkoutCard
+              workout={item}
+              className="mb-2"
+              showDescription
+              onPress={() => router.push(`/workout/workout-view/${item.uuid}`)}
+            />
+          )}
+        />
+      )}
+    </ThemedView>
   );
 }

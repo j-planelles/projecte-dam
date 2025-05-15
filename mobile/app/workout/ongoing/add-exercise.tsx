@@ -1,48 +1,162 @@
-import { FlatList, View } from "react-native";
-import Header from "../../../components/ui/Header";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import {
-  Appbar,
   Button,
   Chip,
+  HelperText,
   List,
   Searchbar,
+  Text,
   useTheme,
 } from "react-native-paper";
-import { FilterIcon } from "../../../components/Icons";
-import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useShallow } from "zustand/react/shallow";
+import { DumbellIcon } from "../../../components/Icons";
+import Header from "../../../components/ui/Header";
+import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
-const SAMPLE_EXERCISES: exercise[] = [
-  { uuid: "123e4567-e89b-12d3-a456-426614174000", name: "Bench Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174001", name: "Squats" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174002", name: "Lunges" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174003", name: "Deadlifts" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174004", name: "Bicep Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174005", name: "Tricep Dips" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174006", name: "Shoulder Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174007", name: "Leg Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174008", name: "Chest Fly" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174009", name: "Lat Pulldowns" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174010", name: "Rowing Exercise" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174011", name: "Shoulder Rotations" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174012", name: "Wrist Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174013", name: "Calf Raises" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174014", name: "Russian Twists" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174015", name: "Leg Extensions" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174016", name: "Leg Curls" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174017", name: "Chest Press" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174018", name: "Seated Row" },
-  { uuid: "123e4567-e89b-12d3-a456-426614174019", name: "Face Pulls" },
-];
 export default function OngoingWorkoutAddExercisePage() {
   const theme = useTheme();
+  const router = useRouter();
+
+  const addExercises = useWorkoutStore((state) => state.addExercises);
+
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const userExercisesQuery = useQuery({
+    queryKey: ["user", "/user/exercises"],
+    queryFn: async () =>
+      await apiClient.get("/user/exercises", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
+  const defaultExercisesQuery = useQuery({
+    queryKey: ["user", "/default-exercises"],
+    queryFn: async () =>
+      await apiClient.get("/default-exercises", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    staleTime: 2 * 60 * 60 * 1000, // 2 hores
+  });
+
+  const sortedExercises = useMemo(() => {
+    const defaultExercisesFilter: string[] = [];
+    const userExercises: exerciseList[] =
+      userExercisesQuery.isSuccess && Array.isArray(userExercisesQuery.data)
+        ? userExercisesQuery.data.map((item) => {
+            if (item.default_exercise_uuid) {
+              defaultExercisesFilter.push(item.default_exercise_uuid);
+            }
+
+            return {
+              uuid: item.uuid,
+              name: item.name,
+              description: item.description,
+              type: item.type,
+              bodyPart: item.body_part,
+              isDefault: false,
+              default_exercise_uuid: item.default_exercise_uuid,
+            } as exerciseList;
+          })
+        : [];
+    const defaultExercises: exerciseList[] =
+      defaultExercisesQuery.isSuccess &&
+      Array.isArray(defaultExercisesQuery.data)
+        ? defaultExercisesQuery.data
+            .map(
+              (item) =>
+                ({
+                  uuid: item.uuid,
+                  name: item.name,
+                  description: item.description,
+                  type: item.type,
+                  bodyPart: item.body_part,
+                  isDefault: true,
+                }) as exerciseList,
+            )
+            .filter((item) => defaultExercisesFilter.indexOf(item.uuid) === -1)
+        : [];
+    return [...userExercises, ...defaultExercises].sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    );
+  }, [
+    defaultExercisesQuery.data,
+    defaultExercisesQuery.isSuccess,
+    userExercisesQuery.data,
+    userExercisesQuery.isSuccess,
+  ]);
+
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const disableControls =
+    isLoading ||
+    userExercisesQuery.isLoading ||
+    defaultExercisesQuery.isLoading;
+
+  const addExerciseHandler = async () => {
+    setIsLoading(true);
+    setGlobalError(null);
+    try {
+      const userExercisesToAdd = sortedExercises.filter(
+        (item) => selectedExercises.includes(item.uuid) && !item.isDefault,
+      );
+
+      const defaultExercisesToAdd = sortedExercises.filter(
+        (item) => selectedExercises.includes(item.uuid) && item.isDefault,
+      );
+
+      for (const exercise of defaultExercisesToAdd) {
+        const exerciseUUID = uuidv4();
+        await apiClient.post(
+          "/user/exercises",
+          {
+            uuid: exerciseUUID,
+            name: exercise.name,
+            description: exercise.description,
+            type: exercise.type,
+            body_part: exercise.bodyPart,
+            default_exercise_uuid: exercise.uuid,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        userExercisesToAdd.push({ ...exercise, uuid: exerciseUUID });
+      }
+
+      const exercisesToAdd: workoutExercise[] = userExercisesToAdd.map(
+        (item) => ({
+          exercise: item,
+          sets: [{ weight: 0, reps: 0, type: "normal" }],
+        }),
+      );
+
+      addExercises(exercisesToAdd);
+
+      router.back();
+    } catch (error: unknown) {
+      setGlobalError(handleError(error));
+    }
+    setIsLoading(false);
+  };
+
   return (
-    <View className="flex-1">
-      <Header title="Add exercise">
-        <Appbar.Action icon={({ color }) => <FilterIcon color={color} />} />
-      </Header>
+    <ThemedView className="flex-1">
+      <Header title="Add exercise" />
 
       <View className="px-4 py-2">
         <Searchbar
@@ -52,56 +166,88 @@ export default function OngoingWorkoutAddExercisePage() {
         />
       </View>
 
-      <FlatList
-        data={SAMPLE_EXERCISES}
-        keyExtractor={(item) =>
-          item.uuid ? item.uuid : Math.random().toString()
-        }
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.name}
-            onPress={() =>
-              item.uuid && selectedExercises.includes(item.uuid)
-                ? setSelectedExercises((state) =>
-                    state.filter((value) => value !== item.uuid),
-                  )
-                : setSelectedExercises((state) =>
-                    item.uuid ? [...state, item.uuid] : state,
-                  )
-            }
-            left={(props) =>
-              item.uuid &&
-              selectedExercises.includes(item.uuid) && (
-                <List.Icon {...props} icon="check" />
-              )
-            }
-            style={{
-              backgroundColor:
+      {disableControls ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={sortedExercises.filter(
+            (exercise) =>
+              !searchTerm ||
+              exercise.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !==
+                -1,
+          )}
+          keyExtractor={(item) =>
+            `${item.isDefault ? "default" : "user"}-${item.uuid}`
+          }
+          renderItem={({ item }) => (
+            <List.Item
+              title={item.name}
+              onPress={() =>
                 item.uuid && selectedExercises.includes(item.uuid)
-                  ? theme.colors.primaryContainer
-                  : "transparent",
-            }}
-          />
-        )}
-      />
+                  ? setSelectedExercises((state) =>
+                      state.filter((value) => value !== item.uuid),
+                    )
+                  : setSelectedExercises((state) =>
+                      item.uuid ? [...state, item.uuid] : state,
+                    )
+              }
+              left={(props) =>
+                item.uuid &&
+                selectedExercises.includes(item.uuid) && (
+                  <List.Icon {...props} icon="check" />
+                )
+              }
+              style={{
+                backgroundColor:
+                  item.uuid && selectedExercises.includes(item.uuid)
+                    ? theme.colors.primaryContainer
+                    : "transparent",
+              }}
+            />
+          )}
+          ListEmptyComponent={<ExerciseListEmptyComponent />}
+        />
+      )}
 
       {selectedExercises.length > 0 && (
         <View className="px-4 py-2 gap-2">
           <View className="flex-row gap-2 flex-wrap">
             {selectedExercises.map((exerciseId) => {
-              const exercise = SAMPLE_EXERCISES.filter(
+              const exercise = sortedExercises.filter(
                 (item) => item.uuid === exerciseId,
               )[0];
               return <Chip key={exerciseId}>{exercise.name}</Chip>;
             })}
           </View>
-          <Button mode="contained">
+          {globalError !== null && (
+            <HelperText type="error">{globalError}</HelperText>
+          )}
+          <Button
+            mode="contained"
+            onPress={addExerciseHandler}
+            disabled={disableControls}
+          >
             {selectedExercises.length > 1
               ? `Add ${selectedExercises.length} exercises`
               : "Add exercise"}
           </Button>
         </View>
       )}
-    </View>
+    </ThemedView>
   );
 }
+
+const ExerciseListEmptyComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <View className="flex-1 items-center gap-8 pt-16">
+      <DumbellIcon size={96} color={theme.colors.onSurface} />
+      <View className="gap-4 items-center">
+        <Text variant="headlineLarge">No exercises found.</Text>
+      </View>
+    </View>
+  );
+};

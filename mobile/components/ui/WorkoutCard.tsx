@@ -1,33 +1,28 @@
-import { View, Text } from "react-native";
-import { TouchableRipple, useTheme } from "react-native-paper";
+import { View } from "react-native";
+import { Text, Card, useTheme } from "react-native-paper";
 
 export default function WorkoutCard({
   workout,
   onPress,
   className,
   showDescription = false,
-  showCreator = false,
   showTimestamp = true,
 }: {
   workout?: workout;
   onPress?: () => any;
   className?: string;
   showDescription?: boolean;
-  showCreator?: boolean;
   showTimestamp?: boolean;
 }) {
-  const theme = useTheme()
+  const theme = useTheme();
 
   const title: string =
     workout === undefined ? "Afternoon Workout" : workout.title;
 
-  const creator: string =
-    workout === undefined ? "Jordi Planelles" : workout.creator;
-
   const timestampText: string =
     workout === undefined
-      ? "Thursday 24th 2025, 5:30 PM @ Gym Vital"
-      : parseTimestamp(workout.timestamp, workout.duration, workout.gym);
+      ? "Thursday 24th 2025, 5:30 PM"
+      : parseTimestamp(workout.timestamp, workout.duration);
 
   const description: string =
     workout === undefined ? "Sample workout" : workout.description;
@@ -43,32 +38,30 @@ export default function WorkoutCard({
       : parseExercises(workout.exercises);
 
   return (
-    <View className={`rounded ${className}`} style={{backgroundColor: theme.colors.surfaceVariant}}>
-      <TouchableRipple onPress={onPress}>
-        <View className="p-4 gap-2">
-          <View>
-            <Text className="font-bold">{title}</Text>
-            {showCreator && <Text>by {creator}</Text>}
-          </View>
-          {showTimestamp && <Text>{timestampText}</Text>}
-          {showDescription && <Text>{description}</Text>}
-          <View>
-            {exercises.map((exercise, index) => (
-              <Text key={index}>{exercise}</Text>
-            ))}
-          </View>
+    <Card className={`${className}`} mode="outlined" onPress={onPress}>
+      <Card.Content className="gap-2">
+        <View>
+          <Text variant="titleMedium">{title}</Text>
         </View>
-      </TouchableRipple>
-    </View>
+        {showTimestamp && <Text>{timestampText}</Text>}
+        {showDescription && description && <Text>{description}</Text>}
+        <View>
+          {exercises.map((exercise, index) => (
+            <Text key={index}>{exercise}</Text>
+          ))}
+        </View>
+      </Card.Content>
+    </Card>
   );
 }
 
-const parseTimestamp = (timestamp: number, duration: number, gym: string) => {
+const parseTimestamp = (timestamp: number, duration: number) => {
   const timestampDate = new Date(timestamp);
-  const durationDate = new Date(duration);
-  const durationText = `${String(durationDate.getHours()).padStart(2, "0")}:${String(durationDate.getMinutes()).padStart(2, "0")}`;
+  const durationSeconds = Math.trunc(duration % 60);
+  const durationMinutes = Math.trunc(duration / 60);
+  const durationText = `${durationMinutes}:${String(durationSeconds).padStart(2, "0")}`;
 
-  return `${timestampDate.toLocaleString()} for ${durationText} @ ${gym}`;
+  return `${timestampDate.toLocaleString()} for ${durationText}`;
 };
 
 const parseExercises = (exercises: workoutExercise[]) => {

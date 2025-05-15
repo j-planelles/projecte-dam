@@ -1,204 +1,123 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { FlatList, View } from "react-native";
-import { Avatar, Button, List, Text } from "react-native-paper";
-import { NavigateNextIcon } from "../../../components/Icons";
-import Header from "../../../components/ui/Header";
 import { useState } from "react";
-
-const SAMPLE_TRAINERS: trainer[] = [
-  {
-    username: "trainer1",
-    name: "John Doe",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer2",
-    name: "Jane Doe",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer3",
-    name: "Bob Smith",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer4",
-    name: "Alice Johnson",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer5",
-    name: "Mike Brown",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-  {
-    username: "trainer6",
-    name: "Emily Davis",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer7",
-    name: "David Lee",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer8",
-    name: "Sarah Taylor",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer9",
-    name: "Kevin White",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer10",
-    name: "Rebecca Martin",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-  {
-    username: "trainer11",
-    name: "James Wilson",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer12",
-    name: "Jessica Thompson",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer13",
-    name: "William Harris",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer14",
-    name: "Amanda Garcia",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer15",
-    name: "Matthew Rodriguez",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-  {
-    username: "trainer16",
-    name: "Heather Lopez",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer17",
-    name: "Brian Hall",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer18",
-    name: "Nicole Brooks",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer19",
-    name: "Daniel Jenkins",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer20",
-    name: "Lisa Nguyen",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-  {
-    username: "trainer21",
-    name: "Michael Sanders",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer22",
-    name: "Elizabeth Russell",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer23",
-    name: "Christopher Reynolds",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer24",
-    name: "Katherine Foster",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer25",
-    name: "Anthony Cooper",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-  {
-    username: "trainer26",
-    name: "Samantha Peterson",
-    description: "A beginner trainer with a passion for Pokémon.",
-  },
-  {
-    username: "trainer27",
-    name: "Andrew Jackson",
-    description: "An experienced trainer with a team of powerful Pokémon.",
-  },
-  {
-    username: "trainer28",
-    name: "Melissa Sanchez",
-    description: "A young trainer with a dream to become a Pokémon Master.",
-  },
-  {
-    username: "trainer29",
-    name: "Joshua Price",
-    description: "A skilled trainer with a talent for battling.",
-  },
-  {
-    username: "trainer30",
-    name: "Lauren Lewis",
-    description: "A dedicated trainer with a love for Pokémon.",
-  },
-];
+import { ActivityIndicator, FlatList, View } from "react-native";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  HelperText,
+  List,
+  Portal,
+  Text,
+  useTheme,
+} from "react-native-paper";
+import { useShallow } from "zustand/react/shallow";
+import { NavigateNextIcon, PeopleIcon } from "../../../components/Icons";
+import Header from "../../../components/ui/Header";
+import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
 
 export default function TrainerOnboardingListPage() {
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data, isLoading, isSuccess, error } = useQuery({
+    queryKey: ["user", "trainer", "/user/trainer/search"],
+    queryFn: async () =>
+      await apiClient.get("/user/trainer/search", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
+
+  return (
+    <ThemedView className="flex-1">
+      <Header title="Choose your trainer" />
+
+      {error && <HelperText type="error">{error.message}</HelperText>}
+
+      {isLoading && <ActivityIndicator size="large" />}
+
+      {isSuccess && <TrainerList data={data} />}
+    </ThemedView>
+  );
+}
+
+const TrainerList = ({ data }: { data: any }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<string>("");
+  const navigationDisabled = selectedTrainer === "" || isLoading;
 
-  const navigationDisabled = selectedTrainer === "";
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setQueryError(null);
+    try {
+      await apiClient.post("/user/trainer/request", undefined, {
+        queries: { trainer_uuid: selectedTrainer },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
+      setDialogVisible(true);
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
+    }
+    setIsLoading(false);
+  };
 
-  const handleSubmit = () => {
+  const navigateHome = () => {
+    setDialogVisible(false);
     router.push("/");
   };
 
   return (
-    <View className="flex-1">
-      <Header title="Choose your trainer" />
-
+    <>
       <FlatList
-        data={SAMPLE_TRAINERS}
-        keyExtractor={(item) => item.username}
+        data={data}
+        keyExtractor={(item) => item.uuid}
         renderItem={({ item }) => (
           <List.Item
-            title={item.name}
-            description={item.description}
+            title={item.full_name}
+            description={item.biography}
             left={() => (
               <View className="pl-4">
-                {selectedTrainer === item.username ? (
-                  <Avatar.Icon size={48} icon="check"/>
+                {selectedTrainer === item.uuid ? (
+                  <Avatar.Icon size={48} icon="check" />
                 ) : (
-                  <Avatar.Text size={48} label={item.name.charAt(0)} />
+                  <Avatar.Text
+                    size={48}
+                    label={item.full_name.charAt(0).toUpperCase()}
+                  />
                 )}
               </View>
             )}
             onPress={() =>
-              selectedTrainer === item.username
+              selectedTrainer === item.uuid
                 ? setSelectedTrainer("")
-                : setSelectedTrainer(item.username)
+                : setSelectedTrainer(item.uuid)
             }
           />
         )}
+        ListEmptyComponent={TrainerListEmptyComponent}
       />
 
       <View className="p-4 gap-4">
         {navigationDisabled && <Text>Please select a trainer.</Text>}
+        {queryError && <HelperText type="error">{queryError}</HelperText>}
         <Button
           className="w-full"
           icon={({ color }) => <NavigateNextIcon color={color} />}
@@ -209,10 +128,36 @@ export default function TrainerOnboardingListPage() {
           Next
         </Button>
       </View>
+      <Portal>
+        <Dialog visible={dialogVisible}>
+          <Dialog.Title>Trainer requested</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              You have successfully requested a trainer's services! Now, the
+              trainer must review your request and accept it or deny it. You can
+              cancel it anytime in the settings page.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={navigateHome}>Ok</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
+  );
+};
+
+const TrainerListEmptyComponent = () => {
+  const theme = useTheme();
+
+  return (
+    <View className="flex-1 items-center gap-4 pt-16">
+      <PeopleIcon size={130} color={theme.colors.onSurface} />
+      <Text variant="headlineLarge">No trainers found...</Text>
+      <Text variant="bodyMedium" className="px-4">
+        Clould not find any trainers that adjust to your interests. Modify your
+        interests and try again.
+      </Text>
     </View>
   );
-}
-
-const TrainerCard = ({ trainer }: { trainer: trainer }) => {
-  return <List.Item title />;
 };

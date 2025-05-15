@@ -1,108 +1,144 @@
-import WorkoutEditor from "../../../components/pages/WorkoutEditor";
-import { View } from "react-native";
-import { Button } from "react-native-paper";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
+import { Button, HelperText } from "react-native-paper";
+import { useShallow } from "zustand/react/shallow";
+import WorkoutViewer from "../../../components/pages/WorkoutViewer";
 import Header from "../../../components/ui/Header";
+import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
 
-const SAMPLE_WORKOUT: workout = {
-  uuid: "c1be768f-4455-4b1d-ac6c-2ddf82e2a137",
-  title: "Full Body Strength Training",
-  timestamp: 1697001600,
-  duration: 90,
-  gym: "Planet Fitness",
-  creator: "John Doe",
-  description:
-    "A comprehensive full-body workout focusing on building strength and endurance",
-  exercises: [
-    {
-      exercise: {
-        name: "Bench Press",
-      },
-      sets: [
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Pull-ups",
-      },
-      sets: [
-        { reps: 10, weight: 0 },
-        { reps: 8, weight: 0 },
-        { reps: 6, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Dumbbell Squat",
-      },
-      sets: [
-        { reps: 12, weight: 40 },
-        { reps: 10, weight: 40 },
-        { reps: 8, weight: 40 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Deadlift",
-      },
-      sets: [
-        { reps: 6, weight: 185 },
-        { reps: 6, weight: 185 },
-        { reps: 4, weight: 185 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Bicep Curl",
-      },
-      sets: [
-        { reps: 12, weight: 20 },
-        { reps: 10, weight: 20 },
-        { reps: 8, weight: 20 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Tricep Dip",
-      },
-      sets: [
-        { reps: 15, weight: 0 },
-        { reps: 12, weight: 0 },
-        { reps: 10, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Plank",
-      },
-      sets: [
-        { reps: 60, weight: 0 },
-        { reps: 60, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Tricep Dip",
-      },
-      sets: [
-        { reps: 15, weight: 0 },
-        { reps: 12, weight: 0 },
-        { reps: 10, weight: 0 },
-      ],
-    },
-  ],
-};
 export default function ViewWorkoutPage() {
-  return (
-    <View className="flex-1">
-      <Header title="View Workout" />
-      <WorkoutEditor workout={SAMPLE_WORKOUT} />
+  const { uuid } = useLocalSearchParams();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data, isLoading, isSuccess, error } = useQuery({
+    queryKey: ["user", "/user/workouts", uuid],
+    queryFn: async () =>
+      await apiClient.get("/user/workouts/:workout_uuid", {
+        params: { workout_uuid: uuid.toString() },
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
 
-      <View className="p-4">
-        <Button mode="contained">Save as template</Button>
-      </View>
-    </View>
+  const workout = useMemo(
+    () =>
+      ({
+        uuid: data?.uuid,
+        title: data?.name,
+        description: data?.description,
+        timestamp: data?.instance?.timestamp_start || 0,
+        duration: data?.instance?.duration || 0,
+        exercises: data?.entries.map((entry) => ({
+          restCountdownDuration: entry.rest_countdown_duration,
+          weightUnit: entry.weight_unit,
+          exercise: {
+            uuid: entry.exercise.uuid,
+            name: entry.exercise.name,
+            description: entry.exercise.description,
+            bodyPart: entry.exercise.body_part,
+            type: entry.exercise.type,
+          },
+          sets: entry.sets.map((set) => ({
+            reps: set.reps,
+            weight: set.weight,
+            type: set.set_type,
+          })),
+        })),
+      }) as workout,
+    [data],
+  );
+
+  return (
+    <ThemedView className="flex-1">
+      <Header title="View Workout" />
+      {isLoading && (
+        <View className="flex-1 justify-center">
+          <ActivityIndicator size={"large"} />
+        </View>
+      )}
+      {error && <Text>{error.message}</Text>}
+      {isSuccess && (
+        <>
+          <WorkoutViewer workout={workout} />
+
+          <View className="p-4">
+            <SaveAsTemplateButton workout={workout} />
+          </View>
+        </>
+      )}
+    </ThemedView>
   );
 }
+
+const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
+
+  const saveAsTemplateHandler = async () => {
+    setIsLoading(true);
+    setQueryError(null);
+    try {
+      const response = await apiClient.post(
+        "/user/templates",
+        {
+          uuid: workout.uuid,
+          name: workout.title,
+          description: workout.description,
+          entries: workout.exercises.map((exercise) => ({
+            rest_countdown_duration: exercise.restCountdownDuration,
+            weight_unit: exercise.weightUnit,
+            exercise: {
+              uuid: exercise.exercise.uuid,
+              name: exercise.exercise.name,
+              description: exercise.exercise.description,
+              body_part: exercise.exercise.bodyPart,
+              type: exercise.exercise.type,
+            },
+            sets: exercise.sets.map((set) => ({
+              reps: set.reps,
+              weight: set.weight,
+              set_type: set.type,
+            })),
+          })),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
+      router.push(`/workout/template-view/${response.uuid}`);
+    } catch (error: unknown) {
+      setQueryError(handleError(error));
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      <HelperText type="error">{queryError}</HelperText>
+      <Button
+        mode="contained"
+        disabled={isLoading}
+        onPress={saveAsTemplateHandler}
+      >
+        Save as template
+      </Button>
+    </>
+  );
+};

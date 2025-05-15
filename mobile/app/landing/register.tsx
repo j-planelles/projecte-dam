@@ -1,28 +1,37 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
-import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
-import { monocromePaperTheme } from "../../lib/paperThemes";
-import { useUserRegistrationStore } from "../../store/registration-store";
 import { useShallow } from "zustand/react/shallow";
+import { NavigateNextIcon, PersonAddIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { monocromePaperTheme } from "../../lib/paperThemes";
+import { useAuthStore } from "../../store/auth-store";
+import * as SecureStorage from "expo-secure-store";
+import { encodePassword } from "../../lib/crypto";
+import { handleError } from "../../lib/errorHandler";
 
-const schema = z.object({
-  username: z.string(),
-  password: z.string().min(8),
-  confirmPassword: z.string()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match.",
-  path: ["confirmPassword"]
-});
+const schema = z
+  .object({
+    username: z.string(),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
 
 type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const apiClient = useAuthStore((store) => store.apiClient);
   const {
     control,
     handleSubmit,
@@ -30,20 +39,52 @@ export default function LandingRegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
-  const { setUsername, hashPassword } = useUserRegistrationStore(
+  const { setUsername, setToken, serverIp } = useAuthStore(
     useShallow((state) => ({
       setUsername: state.setUsername,
-      hashPassword: state.hashPassword,
+      setToken: state.setToken,
+      serverIp: state.serverIp,
     })),
   );
 
-  const submitHandler = ({username, password}: FormSchemaType) => {
-    setUsername(username)
-    hashPassword(password)
+  const submitHandler = async ({ username, password }: FormSchemaType) => {
+    try {
+      setUsername(username);
 
-    // TODO: Check if username is already taken
+      await SecureStorage.setItemAsync("username", username);
 
-    router.push("/landing/register-profile");
+      const encryptedPassword = await encodePassword(password, serverIp);
+
+      await apiClient.post("/auth/register", undefined, {
+        queries: { username: username, password: encryptedPassword },
+      });
+
+      const response = await apiClient.post("/auth/token", {
+        username: username,
+        password: encryptedPassword,
+      });
+      setToken(response.access_token);
+
+      if (response.access_token) {
+        await SecureStorage.setItemAsync("token", response.access_token);
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+
+      router.push("/landing/register-profile");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error?.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "Username already taken.",
+        });
+      } else {
+        setError("root", {
+          type: "manual",
+          message: handleError(error),
+        });
+      }
+    }
   };
 
   return (
@@ -122,10 +163,12 @@ export default function LandingRegisterPage() {
           </Text>
         )}
 
+        {errors.root && (
+          <Text className="font-bold text-red-500">{errors.root.message}</Text>
+        )}
+
         <Button
-          icon={({color}) => (
-            <NavigateNextIcon color={color} />
-          )}
+          icon={({ color }) => <NavigateNextIcon color={color} />}
           mode="contained"
           loading={isSubmitting}
           disabled={isSubmitting}
@@ -138,13 +181,11 @@ export default function LandingRegisterPage() {
         <Text className="text-white text-center text-gray-300">or</Text>
 
         <Button
-          icon={({color}) => (
-            <PersonAddIcon color={color} />
-          )}
+          icon={({ color }) => <PersonAddIcon color={color} />}
           mode="outlined"
           disabled={isSubmitting}
           onPress={() => {
-            router.back()
+            router.back();
           }}
           theme={monocromePaperTheme}
         >

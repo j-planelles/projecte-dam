@@ -1,120 +1,106 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Appbar } from "react-native-paper";
+import { useShallow } from "zustand/react/shallow";
+import { SaveIcon } from "../../../components/Icons";
 import WorkoutEditor from "../../../components/pages/WorkoutEditor";
-import { View } from "react-native";
-import { Appbar, Button } from "react-native-paper";
 import Header from "../../../components/ui/Header";
-import { EditIcon, SaveIcon, SearchIcon } from "../../../components/Icons";
-import { useState } from "react";
+import { ThemedView } from "../../../components/ui/screen/Screen";
+import { handleError } from "../../../lib/errorHandler";
+import { useAuthStore } from "../../../store/auth-store";
+import { useWorkoutStore } from "../../../store/workout-store";
 
-const SAMPLE_WORKOUT: workout = {
-  uuid: "c1be768f-4455-4b1d-ac6c-2ddf82e2a137",
-  title: "Full Body Strength Training",
-  timestamp: 1697001600,
-  duration: 90,
-  gym: "Planet Fitness",
-  creator: "John Doe",
-  description:
-    "A comprehensive full-body workout focusing on building strength and endurance",
-  exercises: [
-    {
-      exercise: {
-        name: "Bench Press",
-      },
-      sets: [
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-        { reps: 8, weight: 135 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Pull-ups",
-      },
-      sets: [
-        { reps: 10, weight: 0 },
-        { reps: 8, weight: 0 },
-        { reps: 6, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Dumbbell Squat",
-      },
-      sets: [
-        { reps: 12, weight: 40 },
-        { reps: 10, weight: 40 },
-        { reps: 8, weight: 40 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Deadlift",
-      },
-      sets: [
-        { reps: 6, weight: 185 },
-        { reps: 6, weight: 185 },
-        { reps: 4, weight: 185 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Bicep Curl",
-      },
-      sets: [
-        { reps: 12, weight: 20 },
-        { reps: 10, weight: 20 },
-        { reps: 8, weight: 20 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Tricep Dip",
-      },
-      sets: [
-        { reps: 15, weight: 0 },
-        { reps: 12, weight: 0 },
-        { reps: 10, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Plank",
-      },
-      sets: [
-        { reps: 60, weight: 0 },
-        { reps: 60, weight: 0 },
-      ],
-    },
-    {
-      exercise: {
-        name: "Tricep Dip",
-      },
-      sets: [
-        { reps: 15, weight: 0 },
-        { reps: 12, weight: 0 },
-        { reps: 10, weight: 0 },
-      ],
-    },
-  ],
-};
 export default function CreateTemplatePage() {
   return (
-    <View className="flex-1">
+    <ThemedView className="flex-1" avoidKeyboard={false}>
       <Header title="Create Template">
-        <Appbar.Action
-          icon={({ color }) =>
-            <SaveIcon color={color} />
-          }
-          onPress={() => {}}
-        />
+        <SaveButton />
       </Header>
-      <WorkoutEditor
-        workout={SAMPLE_WORKOUT}
-        editable={true}
-        timestamp={false}
-        location={false}
-        creator={false}
-        completable={false}
-      />
-    </View>
+
+      <WorkoutEditorComponent />
+    </ThemedView>
   );
 }
+
+const SaveButton = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const workoutStore = useWorkoutStore(
+    useShallow((state) => ({
+      uuid: state.uuid,
+      title: state.title,
+      timestamp: state.timestamp,
+      description: state.description,
+      exercises: state.exercises,
+    })),
+  );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      queryClient.invalidateQueries({
+        queryKey: ["user", "/user/templates"],
+      });
+      const response = await apiClient.post(
+        "/user/templates",
+        {
+          uuid: workoutStore.uuid,
+          name: workoutStore.title,
+          description: workoutStore.description,
+          entries: workoutStore.exercises.map((exercise) => ({
+            rest_countdown_duration: exercise.restCountdownDuration,
+            weight_unit: exercise.weightUnit,
+            exercise: {
+              uuid: exercise.exercise.uuid,
+              name: exercise.exercise.name,
+              description: exercise.exercise.description,
+              body_part: exercise.exercise.bodyPart,
+              type: exercise.exercise.type,
+            },
+            sets: exercise.sets.map((set) => ({
+              reps: set.reps,
+              weight: set.weight,
+              set_type: set.type,
+            })),
+          })),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      router.replace(`/workout/template-view/${response.uuid}`);
+    } catch (error: unknown) {
+      console.error(handleError(error));
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <Appbar.Action
+      icon={(props) => <SaveIcon {...props} />}
+      onPress={handleSubmit}
+      loading={isLoading}
+      animated={false}
+    />
+  );
+};
+
+const WorkoutEditorComponent = () => {
+  const loadEmptyWorkout = useWorkoutStore((state) => state.loadEmptyWorkout);
+
+  useEffect(() => {
+    loadEmptyWorkout();
+  }, [loadEmptyWorkout]);
+
+  return <WorkoutEditor showTimer={false} showCheckboxes={false} />;
+};

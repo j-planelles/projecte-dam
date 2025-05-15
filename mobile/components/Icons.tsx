@@ -88,7 +88,6 @@ export const PeopleIcon = ({
   />
 );
 
-
 export const CheckIcon = ({
   size = 24,
   color = "black",
@@ -96,7 +95,6 @@ export const CheckIcon = ({
 }: IconProps) => (
   <MaterialIcons name="check" size={size} color={color} className={className} />
 );
-
 
 export const SettingsIcon = ({
   size = 24,
@@ -278,12 +276,7 @@ export const TimerIcon = ({
   color = "black",
   className,
 }: IconProps) => (
-  <MaterialIcons
-    name="timer"
-    size={size}
-    color={color}
-    className={className}
-  />
+  <MaterialIcons name="timer" size={size} color={color} className={className} />
 );
 
 export const LogOutIcon = ({
@@ -304,12 +297,7 @@ export const MessagesIcon = ({
   color = "black",
   className,
 }: IconProps) => (
-  <MaterialIcons
-    name="chat"
-    size={size}
-    color={color}
-    className={className}
-  />
+  <MaterialIcons name="chat" size={size} color={color} className={className} />
 );
 
 export const SendIcon = ({
@@ -317,12 +305,7 @@ export const SendIcon = ({
   color = "black",
   className,
 }: IconProps) => (
-  <MaterialIcons
-    name="send"
-    size={size}
-    color={color}
-    className={className}
-  />
+  <MaterialIcons name="send" size={size} color={color} className={className} />
 );
 
 export const FilterIcon = ({
@@ -336,4 +319,77 @@ export const FilterIcon = ({
     color={color}
     className={className}
   />
+);
+
+export const TrashCanIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialCommunityIcons
+    name="trash-can-outline"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
+
+export const ArrowDownIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialIcons
+    name="arrow-downward"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
+
+export const ArrowUpIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialIcons
+    name="arrow-upward"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
+
+export const RefreshIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialIcons
+    name="refresh"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
+
+export const DnsOutlineIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialCommunityIcons
+    name="dns-outline"
+    size={size}
+    color={color}
+    className={className}
+  />
+);
+
+export const ChatIcon = ({
+  size = 24,
+  color = "black",
+  className,
+}: IconProps) => (
+  <MaterialIcons name="chat" size={size} color={color} className={className} />
 );

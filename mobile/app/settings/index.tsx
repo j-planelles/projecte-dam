@@ -1,21 +1,23 @@
-import { ScrollView, View } from "react-native";
-import Header from "../../components/ui/Header";
-import { List, Text } from "react-native-paper";
-import { DumbellIcon, ImportExportIcon, LanguageIcon, PersonIcon, SettingsIcon } from "../../components/Icons";
 import { useRouter } from "expo-router";
+import { ScrollView, View } from "react-native";
+import { List, Text, useTheme } from "react-native-paper";
+import { DumbellIcon, PersonIcon, SettingsIcon } from "../../components/Icons";
+import Header from "../../components/ui/Header";
+import UltraLogoText from "../../components/ui/logo-text";
+import { ThemedView } from "../../components/ui/screen/Screen";
 
 export default function SettingsPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
-    <View>
+    <ThemedView>
       <Header title="Settings" />
       <ScrollView>
         <View className="">
           <List.Section>
             <List.Item
               title="General"
-              description="Theme, aphlication behaviour..."
+              description="Application behaviour..."
               left={(props) => (
                 <List.Icon
                   {...props}
@@ -38,18 +40,6 @@ export default function SettingsPage() {
             />
 
             <List.Item
-              title="Units & Localization"
-              description="Change the weight units and language"
-              left={(props) => (
-                <List.Icon
-                  {...props}
-                  icon={({ color }) => <LanguageIcon color={color} />}
-                />
-              )}
-              onPress={() => router.push("/settings/units")}
-            />
-
-            <List.Item
               title="Personal Trainer"
               description="Manage your personal trainer"
               left={(props) => (
@@ -60,32 +50,31 @@ export default function SettingsPage() {
               )}
               onPress={() => router.push("/settings/trainer")}
             />
-
-            <List.Item
-              title="Import/Export data"
-              description="Manage your application data"
-              left={(props) => (
-                <List.Icon
-                  {...props}
-                  icon={({ color }) => <ImportExportIcon color={color} />}
-                />
-              )}
-              onPress={() => router.push("/settings/data")}
-            />
           </List.Section>
 
           <ApplicationVersionFooter />
         </View>
       </ScrollView>
-    </View>
+    </ThemedView>
   );
 }
 const ApplicationVersionFooter = () => {
+  const theme = useTheme();
+
   return (
-    <View className="items-center">
-      <Text variant="titleMedium" className="text-center">Ultra Workout Manager</Text>
-      <Text variant="bodyMedium" className="text-center">Jordi Planelles Perez</Text>
-      <Text variant="bodyMedium" className="text-center">Projecte DAM Institut de Palamós</Text>
+    <View className="items-center gap-2">
+      <UltraLogoText fill={theme.colors.onSurface} />
+      <View className="items-center">
+        <Text variant="titleMedium" className="text-center">
+          Ultra Workout Manager
+        </Text>
+        <Text variant="bodyMedium" className="text-center">
+          Jordi Planelles Perez
+        </Text>
+        <Text variant="bodyMedium" className="text-center">
+          Projecte DAM Institut de Palamós
+        </Text>
+      </View>
     </View>
   );
 };

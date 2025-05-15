@@ -1,14 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { Text } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { z } from "zod";
-import LandingWrapper from "../../components/ui/screen/LandingWrapper";
-import { NavigateNextIcon } from "../../components/Icons";
-import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useShallow } from "zustand/react/shallow";
-import { useUserRegistrationStore } from "../../store/registration-store";
+import { NavigateNextIcon } from "../../components/Icons";
+import LandingWrapper from "../../components/ui/screen/LandingWrapper";
+import { handleError } from "../../lib/errorHandler";
+import { monocromePaperTheme } from "../../lib/paperThemes";
+import { useAuthStore } from "../../store/auth-store";
 
 const schema = z.object({
   name: z.string(),
@@ -18,23 +20,37 @@ type FormSchemaType = z.infer<typeof schema>;
 
 export default function LandingRegisterProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
-  const {setName, setBiography} = useUserRegistrationStore(
-    useShallow((state) => ({
-      setName: state.setName,
-      setBiography: state.setBiography
-    })),
-  );
+  const submitHandler = async ({ name, bio }: FormSchemaType) => {
+    try {
+      await apiClient.post(
+        "/auth/profile",
+        {
+          biography: bio,
+          full_name: name,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
 
-  const submitHandler = ({name, bio}: FormSchemaType) => {
-    setName(name)
-    bio !== undefined && setBiography(bio)
+      queryClient.invalidateQueries({ queryKey: ["user"] });
 
-    router.push("/landing/register-gym");
+      router.dismissAll();
+      router.replace("/");
+    } catch (error: unknown) {
+      setError("root", { type: "manual", message: handleError(error) });
+    }
   };
 
   return (
@@ -47,16 +63,16 @@ export default function LandingRegisterProfilePage() {
           name="name"
           rules={{ required: true }}
           render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                label="Name"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                placeholder="John Doe"
-                mode="outlined"
-                theme={monocromePaperTheme}
-                error={errors.name != undefined}
-              />
+            <TextInput
+              label="Name"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              placeholder="John Doe"
+              mode="outlined"
+              theme={monocromePaperTheme}
+              error={errors.name != undefined}
+            />
           )}
         />
         {errors.name && (
@@ -85,10 +101,12 @@ export default function LandingRegisterProfilePage() {
           <Text className="font-bold text-red-500">{errors.bio.message}</Text>
         )}
 
+        {errors.root && (
+          <Text className="font-bold text-red-500">{errors.root.message}</Text>
+        )}
+
         <Button
-          icon={({color}) => (
-            <NavigateNextIcon color={color} />
-          )}
+          icon={({ color }) => <NavigateNextIcon color={color} />}
           mode="contained"
           loading={isSubmitting}
           disabled={isSubmitting}
