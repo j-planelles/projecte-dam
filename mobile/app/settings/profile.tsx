@@ -34,8 +34,6 @@ export default function ProfileSettingsPage() {
 
           <ChangePasswordForm />
 
-          <AboutYouPart />
-
           <DangerZone />
         </View>
       </ScrollView>
@@ -313,22 +311,6 @@ function ChangePasswordForm() {
       {isSubmitSuccessful && (
         <HelperText type="info">Password changed.</HelperText>
       )}
-    </View>
-  );
-}
-
-function AboutYouPart() {
-  return (
-    <View className="mx-4 gap-2">
-      <Text variant="titleSmall">About you</Text>
-      <Text>
-        We use your likes to better pair you with a personal trainer.{" "}
-      </Text>
-      <Button mode="outlined">Review my likes</Button>
-      <Text>
-        Your usual gym will be used to set the location field in new workouts.
-      </Text>
-      <Button mode="outlined">Change my usual gym</Button>
     </View>
   );
 }
