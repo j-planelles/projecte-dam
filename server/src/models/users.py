@@ -1,0 +1,64 @@
+from typing import List, Optional
+from uuid import UUID as UUID_TYPE
+from uuid import uuid4
+
+from schemas.user_schema import UserSchema
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+
+class UserModel(UserSchema, table=True):
+    __tablename__ = "users"  # pyright: ignore[]
+    uuid: UUID_TYPE = Field(
+        sa_column=Column(
+            PG_UUID(as_uuid=True),
+            primary_key=True,
+            default=uuid4,
+            index=True,
+            nullable=False,
+        )
+    )
+
+    username: str = Field(unique=True, default="")
+    full_name: str = ""
+    biography: str | None = None
+
+    trainer_uuid: UUID_TYPE | None = Field(
+        foreign_key="trainer.user_uuid", default=None
+    )
+    trainer: Optional["TrainerModel"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[UserModel.trainer_uuid]"},
+    )
+
+    config: "UserConfig" = Relationship(back_populates="user")
+
+
+class TrainerModel(SQLModel, table=True):
+    __tablename__ = "trainer"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: "UserModel" = Relationship(
+        sa_relationship_kwargs={
+            "uselist": False,
+            "overlaps": "trainer",
+            "foreign_keys": "[UserModel.trainer_uuid]",
+        }
+    )
+
+
+class AdminModel(SQLModel, table=True):
+    __tablename__ = "admin"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(sa_relationship_kwargs={"uselist": False})
+
+
+class UserConfig(SQLModel, table=True):
+    __tablename__ = "user_config"  # pyright: ignore[]
+    user_uuid: UUID_TYPE = Field(foreign_key="users.uuid", primary_key=True)
+
+    user: UserModel = Relationship(back_populates="config")
+
+    hashed_password: str
+
+    is_disabled: bool = Field(default=False)

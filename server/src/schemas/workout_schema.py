@@ -1,0 +1,45 @@
+from typing import List
+from uuid import UUID as UUID_TYPE
+
+from sqlmodel import BigInteger, Column, Field, SQLModel
+
+from schemas.exercise_schema import ExerciseInputSchema
+from schemas.types.enums import SetType, WeightUnit
+
+
+class WorkoutSetSchema(SQLModel):
+    reps: int | None = None
+    weight: float
+    set_type: SetType
+
+
+class WorkoutEntrySchema(SQLModel):
+    rest_countdown_duration: int | None = None
+    weight_unit: WeightUnit | None = None
+
+    exercise: ExerciseInputSchema
+    sets: List[WorkoutSetSchema]
+
+
+class WorkoutInstanceSchema(SQLModel):
+    timestamp_start: int = Field(sa_column=Column(BigInteger()))
+    duration: int
+
+
+class WorkoutContentSchema(SQLModel):
+    uuid: UUID_TYPE | None = None
+    name: str
+    description: str | None = None
+
+    instance: WorkoutInstanceSchema | None = None
+    entries: list[WorkoutEntrySchema]
+
+
+class WorkoutTemplateSchema(WorkoutContentSchema):
+    instance: None = None
+
+
+class WorkoutStatsSchema(SQLModel):
+    workouts: int
+    workouts_last_week: int
+    workouts_per_week: list[int]
