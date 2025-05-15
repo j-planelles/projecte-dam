@@ -39,7 +39,6 @@ export default function RegisterPage() {
   const {
     username: storeUsername,
     setUsername,
-    hashPassword,
     setToken,
     apiClient,
     serverIp,
@@ -47,7 +46,6 @@ export default function RegisterPage() {
     useShallow((state) => ({
       username: state.username,
       setUsername: state.setUsername,
-      hashPassword: state.hashPassword,
       setToken: state.setToken,
       apiClient: state.apiClient,
       serverIp: state.serverIp,
@@ -61,7 +59,6 @@ export default function RegisterPage() {
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
-      hashPassword(password);
 
       await updateAuthConfig({ username: username });
 

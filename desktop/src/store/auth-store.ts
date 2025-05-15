@@ -9,16 +9,13 @@ type AuthStoreType = {
 
   username: string;
   setUsername: (username: string) => void;
-  passwordHash: string;
-  setPasswordHash: (passwordHash: string) => void;
-  hashPassword: (password: string) => void;
 
   token: string | null;
   setToken: (token: string | null) => void;
 };
 
 export const useAuthStore = create<AuthStoreType>((set) => ({
-  serverIp: "http://127.0.0.1:8002",
+  serverIp: "https://ultra.jplanelles.cat",
   serverName: "Ultra Server",
   apiClient: api,
   setServerIp: (serverIp: string, serverName: string) =>
@@ -29,12 +26,6 @@ export const useAuthStore = create<AuthStoreType>((set) => ({
     }),
   username: "",
   setUsername: (username: string) => set({ username: username }),
-  passwordHash: "",
-  setPasswordHash: (passwordHash: string) =>
-    set({ passwordHash: passwordHash }),
-  hashPassword: (password: string) => {
-    set({ passwordHash: password }); // TODO: Implement hashing
-  },
   token: null,
   setToken: (token: string | null) => set({ token: token }),
 }));

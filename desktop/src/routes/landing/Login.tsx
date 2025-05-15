@@ -34,7 +34,6 @@ export default function LoginPage() {
   const {
     username: storeUsername,
     setUsername,
-    hashPassword,
     setToken,
     apiClient,
     serverName,
@@ -43,7 +42,6 @@ export default function LoginPage() {
     useShallow((state) => ({
       username: state.username,
       setUsername: state.setUsername,
-      hashPassword: state.hashPassword,
       setToken: state.setToken,
       apiClient: state.apiClient,
       serverName: state.serverName,
@@ -58,7 +56,6 @@ export default function LoginPage() {
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
-      hashPassword(password);
 
       await updateAuthConfig({ username: username });
 
