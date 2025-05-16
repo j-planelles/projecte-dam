@@ -54,7 +54,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
 
   startEmptyWorkout: () =>
     set({
-      uuid: "497dcba3-ecbf-4587-a2dd-5eb0665e6880",
+      uuid: v4(),
       title: "New workout",
       timestamp: Date.now(),
       duration: 0,
@@ -64,7 +64,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
     }),
   loadEmptyWorkout: () =>
     set({
-      uuid: "497dcba3-ecbf-4587-a2dd-5eb0665e6880",
+      uuid: v4(),
       title: "New template",
       description: "",
       exercises: [],
@@ -73,7 +73,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
   startWorkout: (workout: workout) =>
     set({
       ...workout,
-      uuid: "497dcba3-ecbf-4587-a2dd-5eb0665e6880",
+      uuid: v4(),
       timestamp: Date.now(),
       duration: 0,
       isOngoingWorkout: true,
@@ -81,7 +81,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
   loadWorkout: (workout: workout) =>
     set({
       ...workout,
-      uuid: "497dcba3-ecbf-4587-a2dd-5eb0665e6880",
+      uuid: v4(),
       timestamp: Date.now(),
       duration: 0,
       isOngoingWorkout: false,

@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
