@@ -2,9 +2,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Appbar, Text } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Dialog,
+  Portal,
+  Snackbar,
+  Text,
+} from "react-native-paper";
 import { useShallow } from "zustand/react/shallow";
-import { SaveIcon } from "../../../../components/Icons";
+import { SaveIcon, TrashCanIcon } from "../../../../components/Icons";
 import WorkoutEditor from "../../../../components/pages/WorkoutEditor";
 import Header from "../../../../components/ui/Header";
 import { ThemedView } from "../../../../components/ui/screen/Screen";
@@ -16,6 +23,7 @@ export default function EditTemplatePage() {
   return (
     <ThemedView className="flex-1" avoidKeyboard={false}>
       <Header title="Edit Template">
+        <DeleteButton />
         <SaveButton />
       </Header>
 
@@ -95,6 +103,69 @@ const SaveButton = () => {
       onPress={handleSubmit}
       loading={isLoading}
     />
+  );
+};
+
+const DeleteButton = () => {
+  const { uuid } = useLocalSearchParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [visible, setVisible] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      queryClient.invalidateQueries({
+        queryKey: ["user", "/user/templates"],
+      });
+      await apiClient.delete("/user/templates/:template_uuid", undefined, {
+        params: { template_uuid: uuid.toString() },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      router.replace("/");
+    } catch (error: unknown) {
+      console.error(handleError(error));
+    }
+    setIsLoading(false);
+  };
+
+  return (
+    <>
+      <Appbar.Action
+        animated={false}
+        icon={(props) => <TrashCanIcon {...props} />}
+        onPress={() => setVisible(true)}
+        loading={isLoading}
+      />
+      <Portal>
+        <Dialog visible={visible} onDismiss={() => setVisible(false)}>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Do you wish to delete this template?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setVisible(false)}>No</Button>
+            <Button onPress={handleSubmit}>Yes</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+      <Portal>
+        <Snackbar visible={!!queryError} onDismiss={() => setQueryError(null)}>
+          Failed to remove template. Please remove any recommendations to users
+          in the desktop app and try again. {queryError}
+        </Snackbar>
+      </Portal>
+    </>
   );
 };
 
