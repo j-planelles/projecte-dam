@@ -321,35 +321,53 @@ function ChangePasswordForm() {
 }
 
 function UserDataPart() {
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+  const { data } = useQuery({
+    queryKey: ["user", "/auth/profile"],
+    queryFn: async () =>
+      await apiClient.get("/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  });
+
   const [showLikesDialog, setShowLikesDialog] = useState<boolean>(false);
 
   return (
-    <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box>
-        <Typography variant="subtitle1">About you</Typography>
-        <Typography variant="body2">
-          We use your likes to better pair you with users.
-        </Typography>
-      </Box>
-      <Button
-        variant="outlined"
-        onClick={() => {
-          setShowLikesDialog(true);
-        }}
-      >
-        Review my interests
-      </Button>
+    data?.is_trainer && (
+      <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box>
+          <Typography variant="subtitle1">Personal Trainer</Typography>
+          <Typography variant="body2">
+            We use your interests to better pair you with users.
+          </Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setShowLikesDialog(true);
+          }}
+        >
+          Review my interests
+        </Button>
 
-      <LikesDialog
-        open={showLikesDialog}
-        onClose={() => {
-          setShowLikesDialog(false);
-        }}
-        onSuccess={() => {
-          setShowLikesDialog(false);
-        }}
-      />
-    </Box>
+        <LikesDialog
+          open={showLikesDialog}
+          onClose={() => {
+            setShowLikesDialog(false);
+          }}
+          onSuccess={() => {
+            setShowLikesDialog(false);
+          }}
+        />
+
+        <UnenrollAsTrainerButton />
+      </Box>
+    )
   );
 }
 
@@ -380,7 +398,7 @@ const DeleteAccountButton = () => {
   const [queryError, setQueryError] = useState<string | null>(null);
 
   const deleteAccountHandler = async () => {
-    setQueryError(null)
+    setQueryError(null);
     try {
       await apiClient.post("/auth/delete", undefined, {
         headers: { Authorization: `Bearer ${token}` },
@@ -415,6 +433,66 @@ const DeleteAccountButton = () => {
         <DialogContent>
           <DialogContentText>
             Do you wish to delete your account?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setVisible(false)}>No</Button>
+          <Button onClick={deleteAccountHandler}>Yes</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+
+const UnenrollAsTrainerButton = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { apiClient, token } = useAuthStore(
+    useShallow((state) => ({
+      apiClient: state.apiClient,
+      token: state.token,
+    })),
+  );
+
+  const [visible, setVisible] = useState<boolean>(false);
+  const [queryError, setQueryError] = useState<string | null>(null);
+
+  const deleteAccountHandler = async () => {
+    setQueryError(null);
+    try {
+      await apiClient.post("/auth/unregister/trainer", undefined, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
+      queryClient.invalidateQueries({ queryKey: ["user", "/auth/profile"] });
+      setVisible(false);
+      navigate("/");
+    } catch (error) {
+      setQueryError(handleError(error));
+    }
+  };
+
+  return (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<PersonRemoveIcon />}
+        onClick={() => setVisible(true)}
+      >
+        Unenroll as trainer
+      </Button>
+
+      <Snackbar
+        open={!!queryError}
+        onClose={() => setQueryError(null)}
+        message={queryError}
+      />
+
+      <Dialog open={visible} onClose={() => setVisible(false)}>
+        <DialogContent>
+          <DialogContentText>
+            Do you wish to unenroll as trainer?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -410,6 +410,60 @@ async def register_as_trainer(
     session.add(new_trainer)
     session.commit()
 
+@router.post(
+    "/unregister/trainer",
+    name="Unregister as a trainer",
+    tags=["Authentication", "Trainer"],
+)
+async def unregister_as_trainer(
+    session: Session = Depends(get_session),
+    current_user: UserModel = Depends(get_current_active_user),
+):
+    # Eliminar usuaris associats
+    query = select(UserModel).where(UserModel.trainer_uuid == current_user.uuid)
+    associated_users = session.exec(query).all()
+
+    for user_mod in associated_users:
+        user_mod.trainer_uuid = None
+        session.add(user_mod)
+
+    # Eliminar MessageModel
+    messages = session.exec(
+        select(MessageModel).where(
+            (MessageModel.user_uuid == current_user.uuid) | 
+            (MessageModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for message in messages:
+        session.delete(message)
+
+    # Eliminar TrainerRecommendationModel
+    recommendations = session.exec(
+        select(TrainerRecommendationModel).where(
+            (TrainerRecommendationModel.user_uuid == current_user.uuid) | 
+            (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for recommendation in recommendations:
+        session.delete(recommendation)
+    
+    # Eliminar TrainerRequestModel
+    requests = session.exec(
+        select(TrainerRequestModel).where(
+            (TrainerRequestModel.user_uuid == current_user.uuid) | 
+            (TrainerRequestModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for request in requests:
+        session.delete(request)
+
+    # Eliminar TrainerModel if applicable
+    trainer = session.get(TrainerModel, current_user.uuid)
+    if trainer:
+        session.delete(trainer)
+
+    session.commit()
+
 
 @router.get(
     "/publickey", name="Get public key", tags=["Authentication"], response_model=str

@@ -377,6 +377,13 @@ const endpoints = makeApi([
     ],
   },
   {
+    method: "post",
+    path: "/auth/unregister/trainer",
+    alias: "Unregister_as_a_trainer_auth_unregister_trainer_post",
+    requestFormat: "json",
+    response: z.unknown(),
+  },
+  {
     method: "get",
     path: "/default-exercises",
     alias: "Get_default_exercises_default_exercises_get",
