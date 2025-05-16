@@ -36,7 +36,7 @@ const WorkoutLastSetOption = () => {
     setEnableLastLest(!enableLastSet);
     await AsyncStorage.setItem(
       "enableLastSet",
-      enableLastSet ? "true" : "false",
+      !enableLastSet ? "true" : "false",
     );
   };
   return (
