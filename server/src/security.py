@@ -6,7 +6,11 @@ from encryption import decrypt_message, export_public_key
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from models.users import TrainerModel, UserConfig, UserModel
+from models.users import TrainerModel, UserConfig, UserModel, AdminModel
+from models.chat import MessageModel
+from models.exercise import ExerciseModel
+from models.trainer import TrainerRecommendationModel, TrainerRequestModel, UserInterestLinkModel
+from models.workout import WorkoutContentModel, WorkoutEntryModel, WorkoutInstanceModel, WorkoutSetModel
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from schemas.config_schema import MobileAppConfigSchema
@@ -182,7 +186,6 @@ async def create_user(
 
     new_user_config = UserConfig(
         user_uuid=new_user.uuid,
-        mobile_app_config=MobileAppConfigSchema().model_dump(),
         hashed_password=_get_password_hash(password=plain_password),
     )
     session.add(new_user_config)
@@ -254,6 +257,122 @@ async def disable_user(
 
     current_user_settings.is_disabled = True
     session.add(current_user_settings)
+
+    session.commit()
+
+
+@router.post("/delete", name="Delete a user account", tags=["Authentication"])
+async def delete_user(
+    current_user: UserModel = Depends(get_current_active_user),
+    current_user_settings: UserConfig = Depends(get_current_user_settings),
+    session: Session = Depends(get_session),
+):
+    # Eliminar usuaris associats
+    query = select(UserModel).where(UserModel.trainer_uuid == current_user.uuid)
+    associated_users = session.exec(query).all()
+
+    for user_mod in associated_users:
+        user_mod.trainer_uuid = None
+        session.add(user_mod)
+
+    # First get all workouts created by the user
+    workouts = session.exec(
+        select(WorkoutContentModel).where(
+            WorkoutContentModel.creator_uuid == current_user.uuid
+        )
+    ).all()
+    
+    for workout in workouts:
+        # Delete workout sets and entries
+        entries = session.exec(
+            select(WorkoutEntryModel).where(
+                WorkoutEntryModel.workout_uuid == workout.uuid
+            )
+        ).all()
+        
+        for entry in entries:
+            # Delete sets for this entry
+            sets = session.exec(
+                select(WorkoutSetModel).where(
+                    (WorkoutSetModel.workout_uuid == entry.workout_uuid) &
+                    (WorkoutSetModel.entry_index == entry.index)
+                )
+            ).all()
+            
+            for set_item in sets:
+                session.delete(set_item)
+            
+            session.delete(entry)
+        
+        # Delete workout instance
+        instance = session.get(WorkoutInstanceModel, workout.uuid)
+        if instance:
+            session.delete(instance)
+        
+        # Delete workout content
+        session.delete(workout)
+    
+    # Eliminar ExerciseModel
+    exercises = session.exec(
+        select(ExerciseModel).where(
+            ExerciseModel.creator_uuid == current_user.uuid
+        )
+    ).all()
+    for exercise in exercises:
+        session.delete(exercise)
+    
+    # Eliminar MessageModel
+    messages = session.exec(
+        select(MessageModel).where(
+            (MessageModel.user_uuid == current_user.uuid) | 
+            (MessageModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for message in messages:
+        session.delete(message)
+    
+    # Eliminar TrainerRecommendationModel
+    recommendations = session.exec(
+        select(TrainerRecommendationModel).where(
+            (TrainerRecommendationModel.user_uuid == current_user.uuid) | 
+            (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for recommendation in recommendations:
+        session.delete(recommendation)
+    
+    # Eliminar TrainerRequestModel
+    requests = session.exec(
+        select(TrainerRequestModel).where(
+            (TrainerRequestModel.user_uuid == current_user.uuid) | 
+            (TrainerRequestModel.trainer_uuid == current_user.uuid)
+        )
+    ).all()
+    for request in requests:
+        session.delete(request)
+    
+    # Eliminar UserInterestLinkModel
+    interests = session.exec(
+        select(UserInterestLinkModel).where(
+            UserInterestLinkModel.user_uuid == current_user.uuid
+        )
+    ).all()
+    for interest in interests:
+        session.delete(interest)
+    
+    # Eliminar TrainerModel if applicable
+    trainer = session.get(TrainerModel, current_user.uuid)
+    if trainer:
+        session.delete(trainer)
+    
+    # Eliminar AdminModel if applicable
+    admin = session.get(AdminModel, current_user.uuid)
+    if admin:
+        session.delete(admin)
+    
+    # Eliminar UserConfig, UserModel
+    session.delete(current_user_settings)
+    session.delete(current_user)
 
     session.commit()
 

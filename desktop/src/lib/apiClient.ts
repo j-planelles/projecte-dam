@@ -275,6 +275,13 @@ const endpoints = makeApi([
   },
   {
     method: "post",
+    path: "/auth/delete",
+    alias: "Delete_a_user_account_auth_delete_post",
+    requestFormat: "json",
+    response: z.unknown(),
+  },
+  {
+    method: "post",
     path: "/auth/disable",
     alias: "Disable_a_user_account_auth_disable_post",
     requestFormat: "json",

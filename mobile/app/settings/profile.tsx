@@ -393,7 +393,7 @@ const DeleteAccountButton = () => {
   const deleteAccountHandler = async () => {
     setQueryError(null);
     try {
-      await apiClient.post("/auth/disable", undefined, {
+      await apiClient.post("/auth/delete", undefined, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
