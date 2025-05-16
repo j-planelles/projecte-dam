@@ -316,6 +316,7 @@ async def search_trainers(
         )
         .where(UserConfig.is_disabled == False)
         .where(UserModel.uuid.in_(users_query))  # pyright: ignore[]
+        .where(UserModel.uuid != current_user.uuid)
     )
 
     users = session.exec(query).all()
