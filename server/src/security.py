@@ -1,24 +1,32 @@
 from uuid import uuid4
 
 import jwt
+from config import OAUTH2_SECRET_KEY
 from db import get_session, session_generator
 from encryption import decrypt_message, export_public_key
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from models.users import TrainerModel, UserConfig, UserModel, AdminModel
 from models.chat import MessageModel
 from models.exercise import ExerciseModel
-from models.trainer import TrainerRecommendationModel, TrainerRequestModel, UserInterestLinkModel
-from models.workout import WorkoutContentModel, WorkoutEntryModel, WorkoutInstanceModel, WorkoutSetModel
+from models.trainer import (
+    TrainerRecommendationModel,
+    TrainerRequestModel,
+    UserInterestLinkModel,
+)
+from models.users import AdminModel, TrainerModel, UserConfig, UserModel
+from models.workout import (
+    WorkoutContentModel,
+    WorkoutEntryModel,
+    WorkoutInstanceModel,
+    WorkoutSetModel,
+)
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from schemas.config_schema import MobileAppConfigSchema
 from schemas.user_schema import UserInfoSchema, UserInputSchema, UserSchema
 from sqlmodel import Session, select
 
 ALGORITHM = "HS256"
-OAUTH2_SECRET_KEY = "jordiplanellesperez"
 
 
 class Token(BaseModel):
@@ -281,7 +289,7 @@ async def delete_user(
             WorkoutContentModel.creator_uuid == current_user.uuid
         )
     ).all()
-    
+
     for workout in workouts:
         # Delete workout sets and entries
         entries = session.exec(
@@ -289,68 +297,66 @@ async def delete_user(
                 WorkoutEntryModel.workout_uuid == workout.uuid
             )
         ).all()
-        
+
         for entry in entries:
             # Delete sets for this entry
             sets = session.exec(
                 select(WorkoutSetModel).where(
-                    (WorkoutSetModel.workout_uuid == entry.workout_uuid) &
-                    (WorkoutSetModel.entry_index == entry.index)
+                    (WorkoutSetModel.workout_uuid == entry.workout_uuid)
+                    & (WorkoutSetModel.entry_index == entry.index)
                 )
             ).all()
-            
+
             for set_item in sets:
                 session.delete(set_item)
-            
+
             session.delete(entry)
-        
+
         # Delete workout instance
         instance = session.get(WorkoutInstanceModel, workout.uuid)
         if instance:
             session.delete(instance)
-        
+
         # Delete workout content
         session.delete(workout)
-    
+
     # Eliminar ExerciseModel
     exercises = session.exec(
-        select(ExerciseModel).where(
-            ExerciseModel.creator_uuid == current_user.uuid
-        )
+        select(ExerciseModel).where(ExerciseModel.creator_uuid == current_user.uuid)
     ).all()
     for exercise in exercises:
         session.delete(exercise)
-    
+
     # Eliminar MessageModel
     messages = session.exec(
         select(MessageModel).where(
-            (MessageModel.user_uuid == current_user.uuid) | 
-            (MessageModel.trainer_uuid == current_user.uuid)
+            (MessageModel.user_uuid == current_user.uuid)
+            | (MessageModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for message in messages:
         session.delete(message)
-    
+
     # Eliminar TrainerRecommendationModel
     recommendations = session.exec(
         select(TrainerRecommendationModel).where(
-            (TrainerRecommendationModel.user_uuid == current_user.uuid) | 
-            (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
+            (TrainerRecommendationModel.user_uuid == current_user.uuid)
+            | (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for recommendation in recommendations:
         session.delete(recommendation)
-    
+
     # Eliminar TrainerRequestModel
     requests = session.exec(
         select(TrainerRequestModel).where(
-            (TrainerRequestModel.user_uuid == current_user.uuid) | 
-            (TrainerRequestModel.trainer_uuid == current_user.uuid)
+            (TrainerRequestModel.user_uuid == current_user.uuid)
+            | (TrainerRequestModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for request in requests:
         session.delete(request)
-    
+
     # Eliminar UserInterestLinkModel
     interests = session.exec(
         select(UserInterestLinkModel).where(
@@ -359,17 +365,17 @@ async def delete_user(
     ).all()
     for interest in interests:
         session.delete(interest)
-    
+
     # Eliminar TrainerModel if applicable
     trainer = session.get(TrainerModel, current_user.uuid)
     if trainer:
         session.delete(trainer)
-    
+
     # Eliminar AdminModel if applicable
     admin = session.get(AdminModel, current_user.uuid)
     if admin:
         session.delete(admin)
-    
+
     # Eliminar UserConfig, UserModel
     session.delete(current_user_settings)
     session.delete(current_user)
@@ -410,6 +416,7 @@ async def register_as_trainer(
     session.add(new_trainer)
     session.commit()
 
+
 @router.post(
     "/unregister/trainer",
     name="Unregister as a trainer",
@@ -430,8 +437,8 @@ async def unregister_as_trainer(
     # Eliminar MessageModel
     messages = session.exec(
         select(MessageModel).where(
-            (MessageModel.user_uuid == current_user.uuid) | 
-            (MessageModel.trainer_uuid == current_user.uuid)
+            (MessageModel.user_uuid == current_user.uuid)
+            | (MessageModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for message in messages:
@@ -440,18 +447,18 @@ async def unregister_as_trainer(
     # Eliminar TrainerRecommendationModel
     recommendations = session.exec(
         select(TrainerRecommendationModel).where(
-            (TrainerRecommendationModel.user_uuid == current_user.uuid) | 
-            (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
+            (TrainerRecommendationModel.user_uuid == current_user.uuid)
+            | (TrainerRecommendationModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for recommendation in recommendations:
         session.delete(recommendation)
-    
+
     # Eliminar TrainerRequestModel
     requests = session.exec(
         select(TrainerRequestModel).where(
-            (TrainerRequestModel.user_uuid == current_user.uuid) | 
-            (TrainerRequestModel.trainer_uuid == current_user.uuid)
+            (TrainerRequestModel.user_uuid == current_user.uuid)
+            | (TrainerRequestModel.trainer_uuid == current_user.uuid)
         )
     ).all()
     for request in requests:
