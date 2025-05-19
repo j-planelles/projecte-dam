@@ -1,8 +1,4 @@
 services:
-  # Executar per produccio: docker compose up --build
-  # Executar per desenvolupament: docker compose up <- Sense --build!
-  # Recorda crear un venv i instalar els programes per l'autocompletat de l'editor!
-
   app:
     image: jplanelles-ultra-server:v1
     build:
@@ -12,19 +8,7 @@ services:
       - .env
     ports:
       - "${PORT:-8002}:8002"
-    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
-    volumes:
-      - ./src:/app:rw
-    develop:
-      watch:
-        - action: rebuild
-          path: Dockerfile
-        - action: rebuild
-          path: requirements.txt
-        - action: rebuild
-          path: docker-compose.yaml
-        - action: rebuild
-          path: .env
+    user: "1000:1000"
 
   postgres:
     image: postgres:17
