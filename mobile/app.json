@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jplanelles.ultramobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,6 +35,14 @@
           "android": {
             "parentTheme": "Default",
             "enforceNavigationBarContrast": false
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
           }
         }
       ]

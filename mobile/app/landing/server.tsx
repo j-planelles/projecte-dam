@@ -12,6 +12,7 @@ import LandingWrapper from "../../components/ui/screen/LandingWrapper";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 import * as SecureStorage from "expo-secure-store";
+import { handleError } from "../../lib/errorHandler";
 
 const schema = z.object({
   ip: z.string().url(),
@@ -48,7 +49,7 @@ export default function LandingServerPage() {
     } catch (error: unknown) {
       setError("root", {
         type: "manual",
-        message: "Failed to connect to server.",
+        message: `Failed to connect to server. ${handleError(error)}`,
       });
     }
   };

@@ -288,7 +288,7 @@ const WorkoutsList = () => {
                 />
               ))}
 
-            {data.length > 15 && (
+            {data.length > 5 && (
               <Link href="/workout/history-list" asChild>
                 <Button mode="text">View all</Button>
               </Link>
