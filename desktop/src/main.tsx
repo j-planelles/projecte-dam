@@ -26,18 +26,30 @@ import RegisterProfilePage from "./routes/landing/RegisterProfile";
 import SettingsPage from "./routes/app/Settings";
 import TrainerMessageBoardPage from "./routes/app/trainer/MessageBoard";
 
+/**
+ * Definició de la jerarquia de rutes de l'aplicació web amb React Router.
+ * Inclou rutes per a l'app principal, gestió d'entrenaments, plantilles, exercicis,
+ * entrenador, configuració i el procés de landing/login/registre.
+ */
+
 const router = createBrowserRouter([
   {
     path: "/",
     errorElement: <ErrorElement />,
     element: <RootLayout />,
     children: [
+      // Redirecció inicial segons l'estat de l'usuari
       { index: true, element: <RootRedirector /> },
+
+      // Rutes de l'aplicació principal
       {
         path: "app",
         element: <AppLayout />,
         children: [
+          // Dashboard principal
           { path: "dashboard", element: <DashboardPage /> },
+
+          // Entrenaments
           {
             path: "workouts",
             children: [
@@ -45,6 +57,8 @@ const router = createBrowserRouter([
               { path: ":workout-uuid", element: <ViewWorkoutPage /> },
             ],
           },
+
+          // Plantilles d'entrenament
           {
             path: "templates",
             children: [
@@ -59,6 +73,8 @@ const router = createBrowserRouter([
               },
             ],
           },
+
+          // Exercicis
           {
             path: "exercises",
             children: [
@@ -70,6 +86,8 @@ const router = createBrowserRouter([
               },
             ],
           },
+
+          // Gestió d'entrenador i usuaris
           {
             path: "trainer",
             children: [
@@ -93,10 +111,14 @@ const router = createBrowserRouter([
               { path: "requests", element: <TrainerRequestsPage /> },
             ],
           },
+
+          // Configuració general
           { path: "settings", element: <SettingsPage /> },
         ],
         errorElement: <ErrorElement />,
       },
+
+      // Rutes de landing, login i registre
       {
         path: "landing",
         element: <LandingLayout />,
@@ -111,6 +133,9 @@ const router = createBrowserRouter([
   },
 ]);
 
+/**
+ * Renderitza l'aplicació React amb el proveïdor de rutes i el reset de CSS.
+ */
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <>
     <CssBaseline />

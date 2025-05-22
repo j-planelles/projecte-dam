@@ -6,14 +6,25 @@ import { useShallow } from "zustand/react/shallow";
 import WorkoutViewer from "../../../components/WorkoutViewer";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de visualització d'un entrenament concret.
+ * Carrega les dades de l'entrenament a partir de l'UUID de la ruta i mostra el seu detall.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i el detall si la consulta té èxit.
+ * @returns {JSX.Element} El component de la pàgina de detall d'un entrenament.
+ */
 export default function ViewWorkoutPage() {
+  // Obté l'UUID de l'entrenament des dels paràmetres de la ruta
   const { "workout-uuid": workoutUuid } = useParams();
+
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Consulta les dades de l'entrenament concret
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/workouts", workoutUuid],
     queryFn: async () =>
@@ -23,6 +34,10 @@ export default function ViewWorkoutPage() {
       }),
   });
 
+  /**
+   * Construeix l'objecte workout a partir de les dades rebudes de l'API.
+   * Utilitza useMemo per evitar càlculs innecessaris.
+   */
   const workout = useMemo(
     () =>
       ({
@@ -53,12 +68,15 @@ export default function ViewWorkoutPage() {
 
   return (
     <Container>
+      {/* Loader mentre es carrega la informació */}
       {isLoading && (
         <Box className="flex items-center justify-center">
           <CircularProgress />
         </Box>
       )}
+      {/* Missatge d'error si la consulta falla */}
       {error && <Typography color="error">{error.message}</Typography>}
+      {/* Mostra el detall de l'entrenament si la consulta té èxit */}
       {isSuccess && <WorkoutViewer workout={workout} />}
     </Container>
   );

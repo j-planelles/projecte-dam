@@ -17,14 +17,25 @@ import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
+/**
+ * Pàgina per crear o editar una plantilla d'entrenament.
+ * Si es passa un UUID per la ruta, carrega la plantilla per editar-la; si no, crea una plantilla buida.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i l'editor de plantilles.
+ * @returns {JSX.Element} El component de la pàgina d'edició/creació de plantilles.
+ */
 export default function TemplateEditPage() {
+  // Obté l'UUID de la plantilla des dels paràmetres de la ruta
   const { "template-uuid": templateUuid } = useParams();
+
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Accions per inicialitzar l'editor d'entrenament
   const { startWorkout, startEmptyWorkout } = useWorkoutStore(
     useShallow((state) => ({
       startWorkout: state.startWorkout,
@@ -32,6 +43,7 @@ export default function TemplateEditPage() {
     })),
   );
 
+  // Consulta les dades de la plantilla si s'està editant
   const { data, isLoading, error } = useQuery({
     queryKey: ["user", "/user/templates", templateUuid],
     queryFn: async () =>
@@ -42,6 +54,9 @@ export default function TemplateEditPage() {
     enabled: !!templateUuid,
   });
 
+  /**
+   * Inicialitza l'editor amb una plantilla buida o amb la plantilla carregada.
+   */
   useEffect(() => {
     if (!templateUuid) {
       startEmptyWorkout();
@@ -77,7 +92,9 @@ export default function TemplateEditPage() {
 
   return (
     <Container>
+      {/* Missatge d'error si la consulta falla */}
       {error && <Typography color="error">{error.message}</Typography>}
+      {/* Loader mentre es carrega la informació */}
       {isLoading || error ? (
         <Box className="flex items-center justify-center">
           <CircularProgress />
@@ -97,6 +114,11 @@ export default function TemplateEditPage() {
   );
 }
 
+/**
+ * Botó per desar o actualitzar la plantilla.
+ * Gestiona la petició POST/PUT segons si s'està creant o editant.
+ * Mostra un Snackbar en cas d'error.
+ */
 const SaveTemplateButton = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -108,6 +130,7 @@ const SaveTemplateButton = () => {
     })),
   );
 
+  // Obté les dades de la plantilla des de l'store d'entrenament
   const workoutStore = useWorkoutStore(
     useShallow((state) => ({
       uuid: state.uuid,
@@ -121,6 +144,11 @@ const SaveTemplateButton = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per desar o actualitzar la plantilla.
+   * Fa POST si és nova, PUT si s'està editant.
+   * Invalida la cache i navega a la plantilla guardada.
+   */
   const handleSubmit = async () => {
     setIsLoading(true);
     setQueryError(null);

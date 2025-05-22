@@ -15,6 +15,12 @@ import {
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 
+/**
+ * Component principal de la pestanya "Trainer".
+ * Mostra informació sobre l'entrenador personal, l'estat de la sol·licitud d'entrenador,
+ * i les plantilles d'entrenament suggerides per l'entrenador.
+ * @returns {JSX.Element} El component de la pestanya Entrenador.
+ */
 export default function TrainerTab() {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -24,6 +30,7 @@ export default function TrainerTab() {
     })),
   );
 
+  // Consulta per obtenir l'estat de la sol·licitud d'entrenador de l'usuari
   const requestQuery = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/status"],
     queryFn: async () =>
@@ -32,6 +39,8 @@ export default function TrainerTab() {
       }),
     retry: false,
   });
+
+  // Consulta per obtenir la informació de l'entrenador assignat (si n'hi ha)
   const infoQuery = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/info"],
     queryFn: async () =>
@@ -41,12 +50,17 @@ export default function TrainerTab() {
     retry: false,
   });
 
+  // Indica si alguna de les consultes principals està carregant
   const isLoading = infoQuery.isLoading || requestQuery.isLoading;
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
+  /**
+   * Gestiona l'acció de refrescar la pantalla.
+   * Invalida les consultes relacionades amb l'entrenador per recarregar les dades.
+   */
   const refreshControlHandler = () => {
     setRefreshing(true);
-    queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
+    queryClient.invalidateQueries({ queryKey: ["user", "trainer"] }); // Invalida totes les consultes de l'entrenador
 
     setTimeout(() => {
       setRefreshing(false);
@@ -62,13 +76,13 @@ export default function TrainerTab() {
         />
       }
     >
-      {isLoading ? (
+      {isLoading ? ( // Mostra un indicador de càrrega si les dades s'estan obtenint
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
         </View>
-      ) : infoQuery.isSuccess ? (
+      ) : infoQuery.isSuccess ? ( // Si la consulta d'informació de l'entrenador té èxit (l'usuari té un entrenador)
         <>
-          <Text variant="headlineLarge">Personal Trianer</Text>
+          <Text variant="headlineLarge">Personal Trainer</Text>
           <ProfilePictureHeader fullName={infoQuery.data.full_name} />
           <View className="flex-1 flex-row items-center">
             <Link href="/trainer/chat" asChild>
@@ -84,8 +98,9 @@ export default function TrainerTab() {
           <TrainerTemplatesList />
         </>
       ) : (
+        // Si l'usuari no té un entrenador assignat o la sol·licitud està pendent
         <>
-          <Text variant="headlineLarge">Personal Trianer</Text>
+          <Text variant="headlineLarge">Personal Trainer</Text>
           <Image
             source={TrainerImage}
             className="flex-1 w-full h-full rounded-[24px]"
@@ -98,7 +113,7 @@ export default function TrainerTab() {
             personalized fitness journey guided by our expert gym trainer
             service.
           </Text>
-          {requestQuery.isSuccess ? (
+          {requestQuery.isSuccess ? ( // Si la consulta d'estat de la sol·licitud té èxit (sol·licitud enviada)
             <>
               <ProfilePictureHeader fullName={requestQuery.data.full_name} />
               <View className="flex-row items-center gap-4 justify-center">
@@ -110,6 +125,7 @@ export default function TrainerTab() {
               </View>
             </>
           ) : (
+            // Si no hi ha sol·licitud enviada, mostra el botó per inscriure's
             <Link asChild href="/trainer/onboarding/likes">
               <Button
                 mode="contained"
@@ -125,6 +141,10 @@ export default function TrainerTab() {
   );
 }
 
+/**
+ * Component que mostra una llista de plantilles d'entrenament suggerides per l'entrenador.
+ * @returns {JSX.Element} El component de la llista de plantilles de l'entrenador.
+ */
 const TrainerTemplatesList = () => {
   const theme = useTheme();
   const router = useRouter();
@@ -134,6 +154,8 @@ const TrainerTemplatesList = () => {
       token: state.token,
     })),
   );
+
+  // Consulta per obtenir les recomanacions de plantilles de l'entrenador
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/recommendation"],
     queryFn: async () =>
@@ -146,18 +168,18 @@ const TrainerTemplatesList = () => {
     <>
       <Text className="flex-1 text-lg font-bold">Suggested by trainer</Text>
 
-      {isLoading && (
+      {isLoading && ( // Mostra un indicador de càrrega mentre s'obtenen les dades
         <View>
           <ActivityIndicator size={"large"} />
         </View>
       )}
-      {error && (
+      {error && ( // Mostra un missatge d'error si la càrrega falla
         <View>
           <Text>{error.message}</Text>
         </View>
       )}
-      {isSuccess &&
-        (data.length > 0 ? (
+      {isSuccess && // Si la càrrega és exitosa
+        (data.length > 0 ? ( // Si hi ha plantilles per mostrar
           data
             .map(
               (data) =>
@@ -196,6 +218,7 @@ const TrainerTemplatesList = () => {
               />
             ))
         ) : (
+          // Si no hi ha plantilles, mostra un missatge informatiu
           <View className="flex-1 items-center gap-8 pt-16">
             <DumbellIcon size={130} color={theme.colors.onSurface} />
             <View className="gap-4 items-center">
@@ -210,7 +233,14 @@ const TrainerTemplatesList = () => {
   );
 };
 
+/**
+ * Component que mostra la capçalera amb l'avatar i el nom de l'entrenador.
+ * @param {object} props - Propietats del component.
+ * @param {string} props.fullName - Nom complet de l'entrenador.
+ * @returns {JSX.Element} El component de la capçalera del perfil de l'entrenador.
+ */
 const ProfilePictureHeader = ({ fullName }: { fullName: string }) => {
+  // Obté la inicial del nom per a l'avatar
   const profilePicturePlaceholder = fullName.charAt(0).toUpperCase();
 
   return (
@@ -219,6 +249,7 @@ const ProfilePictureHeader = ({ fullName }: { fullName: string }) => {
       <View className="flex-1">
         <Text className="text-xl font-bold">{fullName}</Text>
       </View>
+      {/* Enllaç a la configuració relacionada amb l'entrenador */}
       <Link asChild href="/settings/trainer">
         <IconButton
           icon={(props) => <MoreVerticalIcon {...props} />}

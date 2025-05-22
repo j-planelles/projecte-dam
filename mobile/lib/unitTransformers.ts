@@ -1,35 +1,47 @@
 /**
- * Converts kilograms to pounds
- * @param {number} kg - Weight in kilograms
- * @return {number} Weight in pounds
+ * Converteix quilograms a lliures.
+ * @param {number} kg - El pes en quilograms. Ha de ser un valor numèric.
+ * @returns {number} El pes equivalent en lliures.
+ * @example
+ * kgToLbs(10) // Retorna aproximadament 22.0462
  */
-export function kgToLbs(kg: number) {
+export function kgToLbs(kg: number): number {
+  // Factor de conversió de quilograms a lliures
   return kg * 2.20462;
 }
 
 /**
- * Converts pounds to kilograms
- * @param {number} lbs - Weight in pounds
- * @return {number} Weight in kilograms
+ * Converteix lliures a quilograms.
+ * @param {number} lbs - El pes en lliures. Ha de ser un valor numèric.
+ * @returns {number} El pes equivalent en quilograms.
+ * @example
+ * lbsToKg(22.0462) // Retorna aproximadament 10
  */
-export function lbsToKg(lbs: number) {
+export function lbsToKg(lbs: number): number {
+  // Factor de conversió de lliures a quilograms
   return lbs / 2.20462;
 }
 
 /**
- * Converts miles to kilometers
- * @param {number} miles - Distance in miles
- * @return {number} Distance in kilometers
+ * Converteix milles a quilòmetres.
+ * @param {number} miles - La distància en milles. Ha de ser un valor numèric.
+ * @returns {number} La distància equivalent en quilòmetres.
+ * @example
+ * milesToKm(10) // Retorna aproximadament 16.0934
  */
-export function milesToKm(miles: number) {
+export function milesToKm(miles: number): number {
+  // Factor de conversió de milles a quilòmetres
   return miles * 1.60934;
 }
 
 /**
- * Converts kilometers to miles
- * @param {number} km - Distance in kilometers
- * @return {number} Distance in miles
+ * Converteix quilòmetres a milles.
+ * @param {number} km - La distància en quilòmetres. Ha de ser un valor numèric.
+ * @returns {number} La distància equivalent en milles.
+ * @example
+ * kmToMiles(16.0934) // Retorna aproximadament 10
  */
-export function kmToMiles(km: number) {
+export function kmToMiles(km: number): number {
+  // Factor de conversió de quilòmetres a milles
   return km / 1.60934;
 }

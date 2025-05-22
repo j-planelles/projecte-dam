@@ -10,6 +10,11 @@ import { ThemedView } from "../../../components/ui/screen/Screen";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
+/**
+ * Pàgina per visualitzar una plantilla d'entrenament de la comunitat.
+ * Mostra la informació de la plantilla i permet iniciar un entrenament a partir d'aquesta.
+ * @returns {JSX.Element} El component de la pàgina de visualització de plantilles comunitàries.
+ */
 export default function ViewCommunityTemplatePage() {
   const { uuid } = useLocalSearchParams();
   const { apiClient, token } = useAuthStore(
@@ -18,6 +23,8 @@ export default function ViewCommunityTemplatePage() {
       token: state.token,
     })),
   );
+
+  // Consulta la plantilla recomanada per l'entrenador a l'API
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/recommendation", uuid],
     queryFn: async () =>
@@ -27,6 +34,10 @@ export default function ViewCommunityTemplatePage() {
       }),
   });
 
+  /**
+   * Construeix l'objecte workout a partir de les dades rebudes de l'API.
+   * Utilitza useMemo per evitar càlculs innecessaris.
+   */
   const workout = useMemo(
     () =>
       ({
@@ -60,19 +71,20 @@ export default function ViewCommunityTemplatePage() {
     <ThemedView className="flex-1">
       <Header title="View Community Template" />
 
+      {/* Mostra un indicador de càrrega mentre es carrega la plantilla */}
       {isLoading && (
         <View className="flex-1 justify-center">
           <ActivityIndicator size={"large"} />
         </View>
       )}
+      {/* Mostra un missatge d'error si la consulta falla */}
       {error && <Text>{error.message}</Text>}
+      {/* Mostra la plantilla i el botó per començar l'entrenament si la consulta té èxit */}
       {isSuccess && (
         <>
           <WorkoutViewer
             workout={workout}
-            creator={false}
             timestamp={false}
-            location={false}
           />
 
           <View className="p-4">
@@ -84,6 +96,12 @@ export default function ViewCommunityTemplatePage() {
   );
 }
 
+/**
+ * Botó per iniciar un entrenament a partir de la plantilla visualitzada.
+ * Si ja hi ha un entrenament en curs, mostra un missatge informatiu i desactiva el botó.
+ * @param workout L'entrenament a iniciar.
+ * @returns {JSX.Element} El component del botó per començar l'entrenament.
+ */
 const StartWorkoutButton = ({ workout }: { workout: workout }) => {
   const router = useRouter();
   const { startWorkout, isOngoingWorkout } = useWorkoutStore(
@@ -93,6 +111,7 @@ const StartWorkoutButton = ({ workout }: { workout: workout }) => {
     })),
   );
 
+  // Handler per iniciar l'entrenament i navegar a la vista d'entrenament en curs
   const startWorkoutHandler = () => {
     startWorkout(workout);
     router.replace("/workout/ongoing/");

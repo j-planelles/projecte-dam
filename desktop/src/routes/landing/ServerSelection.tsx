@@ -10,12 +10,19 @@ import { handleError } from "../../lib/errorHandler";
 import { useAuthStore } from "../../store/auth-store";
 import { updateAuthConfig } from "../../lib/authConfig";
 
+// Esquema de validació Zod pel formulari
 const schema = z.object({
   ip: z.string().url(),
 });
 
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina per seleccionar i connectar-se a un servidor.
+ * Permet a l'usuari introduir la URL del servidor, la valida i comprova la connexió.
+ * Desa la IP del servidor a l'store global i a la configuració persistent.
+ * @returns {JSX.Element} El component de la pàgina de selecció de servidor.
+ */
 export default function ServerSelectionPage() {
   const navigate = useNavigate();
   const { serverIp, setServerIp } = useAuthStore(
@@ -24,6 +31,8 @@ export default function ServerSelectionPage() {
       setServerIp: state.setServerIp,
     })),
   );
+
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
@@ -32,6 +41,11 @@ export default function ServerSelectionPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
+  /**
+   * Handler per connectar-se al servidor.
+   * Comprova la connexió, desa la IP a l'store i a la configuració persistent,
+   * i navega a la pantalla de login si té èxit.
+   */
   const submitHandler = async ({ ip }: FormSchemaType) => {
     try {
       const response = await axios.get(`${ip}/`);
@@ -48,6 +62,7 @@ export default function ServerSelectionPage() {
     }
   };
 
+  // Inicialitza el valor del formulari amb la IP guardada
   useEffect(() => {
     setValue("ip", serverIp);
   }, [serverIp]);
@@ -75,6 +90,7 @@ export default function ServerSelectionPage() {
           width: "100%",
         }}
       >
+        {/* Input per la IP/URL del servidor */}
         <Controller
           control={control}
           name="ip"
@@ -95,12 +111,14 @@ export default function ServerSelectionPage() {
           )}
         />
 
+        {/* Missatge d'error global de connexió */}
         {errors.root && (
           <Typography variant="body2" color="error">
             {errors.root.message}
           </Typography>
         )}
 
+        {/* Botó per connectar-se al servidor */}
         <Button
           fullWidth
           variant="filled"

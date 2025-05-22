@@ -8,6 +8,11 @@ import WorkoutCard from "../../components/ui/WorkoutCard";
 import { useAuthStore } from "../../store/auth-store";
 import { useMemo } from "react";
 
+/**
+ * Component de pàgina que mostra una llista de l'historial d'entrenaments de l'usuari.
+ * Obté les dades dels entrenaments des de l'API i les mostra en una llista.
+ * @returns {JSX.Element} El component de la pàgina de llista d'historial d'entrenaments.
+ */
 export default function TemplatesListPage() {
   const router = useRouter();
   const { apiClient, token } = useAuthStore(
@@ -16,6 +21,8 @@ export default function TemplatesListPage() {
       token: state.token,
     })),
   );
+
+  // Consulta per obtenir l'historial d'entrenaments de l'usuari
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/workouts"],
     queryFn: async () =>
@@ -25,6 +32,7 @@ export default function TemplatesListPage() {
       }),
   });
 
+  // Memoritza i transforma les dades dels entrenaments per a la llista
   const workouts = useMemo(
     () =>
       data?.map(
@@ -52,31 +60,35 @@ export default function TemplatesListPage() {
             })),
           }) as workout,
       ),
-    [data],
+    [data], // Es recalcula quan canvien les dades de la consulta
   );
 
   return (
     <ThemedView className="flex-1">
       <Header title="Workout History" />
 
-      {isLoading && (
-        <View>
+      {isLoading && ( // Mostra un indicador de càrrega mentre s'obtenen les dades
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size={"large"} />
         </View>
       )}
-      {error && (
-        <View>
-          <Text>{error.message}</Text>
+      {error && ( // Mostra un missatge d'error si la càrrega falla
+        <View className="flex-1 justify-center items-center p-4">
+          <Text className="text-center">
+            Failed to load workout history: {error.message}
+          </Text>
         </View>
       )}
-      {isSuccess && (
+      {isSuccess && ( // Si la càrrega és exitosa
         <FlatList
           className="p-2"
           data={workouts}
           keyExtractor={(item) =>
+            // Extreu una clau única per a cada element
             item.uuid ? item.uuid : Math.random().toString()
           }
           renderItem={({ item }) => (
+            // Renderitza una WorkoutCard per a cada entrenament
             <WorkoutCard
               workout={item}
               className="mb-2"

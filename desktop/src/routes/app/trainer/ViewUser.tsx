@@ -36,6 +36,11 @@ import WorkoutViewer from "../../../components/WorkoutViewer";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de visualització d'un usuari des del punt de vista de l'entrenador.
+ * Mostra la informació bàsica de l'usuari i les plantilles recomanades.
+ * @returns {JSX.Element} El component de la pàgina de detall d'usuari per a l'entrenador.
+ */
 export default function TrainerViewUserPage() {
   return (
     <Container>
@@ -45,6 +50,10 @@ export default function TrainerViewUserPage() {
   );
 }
 
+/**
+ * Mostra la informació bàsica de l'usuari seleccionat.
+ * Inclou avatar, nom, usuari, biografia i menú d'accions.
+ */
 const UserInfo = () => {
   const { "user-uuid": userUuid } = useParams();
   const { apiClient, token } = useAuthStore(
@@ -89,6 +98,10 @@ const UserInfo = () => {
   );
 };
 
+/**
+ * Menú d'accions per a l'usuari seleccionat.
+ * Permet accedir al xat o desvincular l'usuari.
+ */
 const UserMenu = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -114,6 +127,10 @@ const UserMenu = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per desvincular l'usuari seleccionat.
+   * Invalida la cache i redirigeix a la llista d'usuaris.
+   */
   const unlinkUserHandler = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -202,6 +219,9 @@ const UserMenu = () => {
   );
 };
 
+/**
+ * Mostra la llista de plantilles recomanades a l'usuari i permet afegir-ne o veure'n el detall.
+ */
 const RecommendedWorkouts = () => {
   const [workoutModalUUID, setWorkoutModalUUID] = useState<string | null>(null);
   const [showWorkoutAddModal, setShowWorkoutAddModal] =
@@ -242,6 +262,10 @@ const RecommendedWorkouts = () => {
   );
 };
 
+/**
+ * Llista de plantilles recomanades a l'usuari.
+ * Permet obrir el detall de cada plantilla.
+ */
 const RecommendedWorkoutsList = ({
   setWorkoutModalUUID,
 }: {
@@ -303,7 +327,7 @@ const RecommendedWorkoutsList = ({
               workout={workout}
               showTimestamp={false}
               onClick={() => {
-                setWorkoutModalUUID(workout.uuid);
+                setWorkoutModalUUID(workout.uuid ? workout.uuid : "");
               }}
             />
           ))
@@ -321,6 +345,9 @@ const RecommendedWorkoutsList = ({
   );
 };
 
+/**
+ * Diàleg/modal per veure el detall d'una plantilla recomanada i permetre editar-la o eliminar-la.
+ */
 const WorkoutInfoModal = ({
   workoutUUID,
   onClose,
@@ -348,6 +375,10 @@ const WorkoutInfoModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per eliminar la recomanació d'una plantilla a l'usuari.
+   * Invalida la cache i tanca el diàleg.
+   */
   const unrecommendHandler = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -375,29 +406,31 @@ const WorkoutInfoModal = ({
 
   const workout = useMemo(
     () =>
-      ({
-        uuid: data?.uuid,
-        title: data?.name,
-        description: data?.description,
-        timestamp: data?.instance?.timestamp_start || 0,
-        duration: data?.instance?.duration || 0,
-        exercises: data?.entries.map((entry) => ({
-          restCountdownDuration: entry.rest_countdown_duration,
-          weightUnit: entry.weight_unit,
-          exercise: {
-            uuid: entry.exercise.uuid,
-            name: entry.exercise.name,
-            description: entry.exercise.description,
-            bodyPart: entry.exercise.body_part,
-            type: entry.exercise.type,
-          },
-          sets: entry.sets.map((set) => ({
-            reps: set.reps,
-            weight: set.weight,
-            type: set.set_type,
-          })),
-        })),
-      }) as workout,
+      (data
+        ? {
+            uuid: data?.uuid,
+            title: data?.name,
+            description: data?.description,
+            timestamp: data?.instance?.timestamp_start || 0,
+            duration: data?.instance?.duration || 0,
+            exercises: data?.entries.map((entry) => ({
+              restCountdownDuration: entry.rest_countdown_duration,
+              weightUnit: entry.weight_unit,
+              exercise: {
+                uuid: entry.exercise.uuid,
+                name: entry.exercise.name,
+                description: entry.exercise.description,
+                bodyPart: entry.exercise.body_part,
+                type: entry.exercise.type,
+              },
+              sets: entry.sets.map((set) => ({
+                reps: set.reps,
+                weight: set.weight,
+                type: set.set_type,
+              })),
+            })),
+          }
+        : null) as workout | null,
     [data],
   );
 
@@ -440,6 +473,10 @@ const WorkoutInfoModal = ({
   );
 };
 
+/**
+ * Diàleg/modal per afegir una plantilla recomanada a l'usuari.
+ * Mostra la llista de plantilles disponibles i permet assignar-ne una.
+ */
 const WorkoutAddModal = ({
   show,
   onClose,
@@ -471,6 +508,10 @@ const WorkoutAddModal = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per assignar una plantilla recomanada a l'usuari.
+   * Invalida la cache i tanca el diàleg.
+   */
   const addHandler = async (selectedWorkoutUUID: string) => {
     setIsLoading(true);
     setQueryError(null);
@@ -557,7 +598,9 @@ const WorkoutAddModal = ({
                       key={workout.uuid}
                       workout={workout}
                       showTimestamp={false}
-                      onClick={() => addHandler(workout.uuid)}
+                      onClick={() =>
+                        addHandler(workout.uuid ? workout.uuid : "")
+                      }
                     />
                   ))}
               </>

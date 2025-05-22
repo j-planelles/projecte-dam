@@ -22,6 +22,11 @@ import { ThemedView } from "../../components/ui/screen/Screen";
 import { handleError } from "../../lib/errorHandler";
 import { useAuthStore } from "../../store/auth-store";
 
+/**
+ * Pàgina de configuració del perfil per gestionar la relació amb l'entrenador.
+ * Permet veure l'estat de la sol·licitud, desvincular-se o iniciar el procés d'enllaç amb un entrenador.
+ * @returns {JSX.Element} El component de la pàgina de configuració del perfil.
+ */
 export default function ProfileSettingsPage() {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -31,6 +36,7 @@ export default function ProfileSettingsPage() {
     })),
   );
 
+  // Consulta l'estat de la sol·licitud d'entrenador (pendent, acceptada, etc.)
   const requestQuery = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/status"],
     queryFn: async () =>
@@ -39,6 +45,8 @@ export default function ProfileSettingsPage() {
       }),
     retry: false,
   });
+
+  // Consulta la informació de l'entrenador si ja està enllaçat
   const infoQuery = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/info"],
     queryFn: async () =>
@@ -48,9 +56,11 @@ export default function ProfileSettingsPage() {
     retry: false,
   });
 
+  // Estat de càrrega combinat de les dues consultes
   const isLoading = infoQuery.isLoading || requestQuery.isLoading;
   const isFetching = infoQuery.isFetching || requestQuery.isFetching;
 
+  // Handler per refrescar les dades de l'entrenador
   const refreshHandler = () => {
     queryClient.invalidateQueries({ queryKey: ["user", "trainer"] });
   };
@@ -58,6 +68,7 @@ export default function ProfileSettingsPage() {
   return (
     <ThemedView className="flex-1">
       <Header title="Manage your trainer">
+        {/* Botó per refrescar les dades si no està carregant */}
         {!isLoading && (
           <Appbar.Action
             animated={false}
@@ -73,6 +84,7 @@ export default function ProfileSettingsPage() {
         <ScrollView>
           <View className="pt-4 gap-4">
             <View className="mx-4 gap-4">
+              {/* Mostra la capçalera amb el nom de l'entrenador si hi ha dades */}
               {requestQuery.isSuccess ||
                 (infoQuery.isSuccess && (
                   <ProfilePictureHeader
@@ -88,6 +100,7 @@ export default function ProfileSettingsPage() {
                 setting boundaries for what trainers can suggest or adjust—from
                 workout plans and intensity levels to communication preferences.
               </Text>
+              {/* Mostra el contingut segons l'estat de la relació amb l'entrenador */}
               {requestQuery.isSuccess ? (
                 <ReviewingContent fullName={requestQuery.data.full_name} />
               ) : infoQuery.isSuccess ? (
@@ -103,6 +116,10 @@ export default function ProfileSettingsPage() {
   );
 }
 
+/**
+ * Component per mostrar el botó d'enllaçar-se amb un entrenador si l'usuari no en té cap.
+ * @returns {JSX.Element} El component per iniciar l'onboarding amb entrenador.
+ */
 const UnenrolledContent = () => {
   return (
     <Link asChild href="/trainer/onboarding/likes">
@@ -116,6 +133,11 @@ const UnenrolledContent = () => {
   );
 };
 
+/**
+ * Component per mostrar el botó de desvincular-se de l'entrenador si ja està enllaçat.
+ * Mostra un diàleg de confirmació abans de fer l'acció.
+ * @returns {JSX.Element} El component per desvincular-se de l'entrenador.
+ */
 const EnrolledContent = () => {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -134,6 +156,10 @@ const EnrolledContent = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per desvincular-se de l'entrenador.
+   * Invalida la cache després de l'acció.
+   */
   const unenrollHandler = async () => {
     handleDialogClose();
     setIsLoading(true);
@@ -180,6 +206,12 @@ const EnrolledContent = () => {
   );
 };
 
+/**
+ * Component per mostrar l'estat de sol·licitud pendent amb l'entrenador.
+ * Permet cancel·lar la sol·licitud mentre està en revisió.
+ * @param fullName Nom complet de l'entrenador.
+ * @returns {JSX.Element} El component per gestionar la sol·licitud pendent.
+ */
 const ReviewingContent = ({ fullName }: { fullName: string }) => {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -198,6 +230,10 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per cancel·lar la sol·licitud d'enllaç amb l'entrenador.
+   * Invalida la cache després de l'acció.
+   */
   const unenrollHandler = async () => {
     handleDialogClose();
     setIsLoading(true);
@@ -226,12 +262,12 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
         disabled={isLoading}
         onPress={() => setDialogVisible(true)}
       >
-        Cancel enrollment applicaiton
+        Cancel enrollment application
       </Button>
       {queryError && <HelperText type="error">{queryError}</HelperText>}
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={handleDialogClose}>
-          <Dialog.Title>Cancel enrollment applicaiton</Dialog.Title>
+          <Dialog.Title>Cancel enrollment application</Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium">
               Are you sure you want to cancel the enrollment request?
@@ -247,10 +283,11 @@ const ReviewingContent = ({ fullName }: { fullName: string }) => {
   );
 };
 
-const CancelEnrollmentApplicaitonButton = () => {
-  return;
-};
-
+/**
+ * Capçalera amb la inicial del nom de l'entrenador i el nom complet.
+ * @param fullName Nom complet de l'entrenador.
+ * @returns {JSX.Element} El component de la capçalera de perfil.
+ */
 const ProfilePictureHeader = ({ fullName }: { fullName: string }) => {
   const profilePicturePlaceholder = fullName.charAt(0).toUpperCase();
 

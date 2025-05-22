@@ -3,7 +3,9 @@ from uuid import UUID
 from db import session_generator
 from models.trainer import UserInterestModel
 
-
+# Llista predefinida d'interessos per defecte.
+# Cada element és una instància de UserInterestModel amb un UUID específic i un nom.
+# Aquests UUIDs són fixos per evitar conflictes.
 DEFAULT_INTERESTS = [
     UserInterestModel(
         uuid=UUID("f83e330c-92f5-4374-8666-15318e438589"), name="Bodybuilding"
@@ -93,10 +95,25 @@ DEFAULT_INTERESTS = [
 
 
 def add_default_interests():
+    """
+    Afegeix la llista `DEFAULT_INTERESTS` a la base de dades.
+    Aquesta funció s'executa durant l'inicialització de la base de dades.
+
+    Gestiona possibles errors durant la inserció a la base de dades
+    i imprimeix un missatge d'èxit o de fallada.
+    """
     try:
+        # Utilitza el generador de sessions per obtenir una sessió de base de dades.
+        # El context manager `with` assegura que la sessió es tanqui correctament.
         with session_generator as session:
+            # Afegeix tots els objectes UserInterestModel de la llista a la sessió.
+            # Això els marca per a la inserció.
             session.add_all(DEFAULT_INTERESTS)
+            # Confirma la transacció, guardant els canvis a la base de dades.
             session.commit()
-        print("Added default interests")
-    except:
-        print("Failed to add default interests")
+        # Imprimeix un missatge si els interessos s'han afegit correctament.
+        print("Default interests added successfully to the database.")
+    except Exception as e: # Captura qualsevol excepció que pugui ocórrer durant el procés.
+        # Imprimeix un missatge d'error si falla l'addició dels interessos.
+        # Inclou l'excepció per a més detalls de depuració.
+        print(f"Failed to add default interests: {e}")

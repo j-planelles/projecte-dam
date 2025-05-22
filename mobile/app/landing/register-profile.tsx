@@ -12,27 +12,42 @@ import { handleError } from "../../lib/errorHandler";
 import { monocromePaperTheme } from "../../lib/paperThemes";
 import { useAuthStore } from "../../store/auth-store";
 
+// Esquema de Zod per la validació del formulari
 const schema = z.object({
   name: z.string(),
   bio: z.string().optional(),
 });
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina per completar el perfil d'usuari durant el registre.
+ * Permet introduir el nom complet i la biografia, i desa la informació al servidor.
+ * @returns {JSX.Element} El component de la pàgina de configuració de perfil.
+ */
 export default function LandingRegisterProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
+
+  /**
+   * Handler per desar el perfil de l'usuari.
+   * Desa el nom i la biografia a l'API i navega a la pantalla principal si té èxit.
+   */
   const submitHandler = async ({ name, bio }: FormSchemaType) => {
     try {
       await apiClient.post(
@@ -58,6 +73,7 @@ export default function LandingRegisterProfilePage() {
       <>
         <Text className="text-white text-4xl">Set up your profile</Text>
 
+        {/* Input per al nom complet */}
         <Controller
           control={control}
           name="name"
@@ -71,7 +87,7 @@ export default function LandingRegisterProfilePage() {
               placeholder="John Doe"
               mode="outlined"
               theme={monocromePaperTheme}
-              error={errors.name != undefined}
+              error={errors.name !== undefined}
             />
           )}
         />
@@ -79,6 +95,7 @@ export default function LandingRegisterProfilePage() {
           <Text className="font-bold text-red-500">{errors.name.message}</Text>
         )}
 
+        {/* Input per a la biografia */}
         <Controller
           control={control}
           name="bio"
@@ -92,7 +109,7 @@ export default function LandingRegisterProfilePage() {
               mode="outlined"
               placeholder="We go gym!"
               theme={monocromePaperTheme}
-              error={errors.bio != undefined}
+              error={errors.bio !== undefined}
               multiline
             />
           )}
@@ -101,10 +118,12 @@ export default function LandingRegisterProfilePage() {
           <Text className="font-bold text-red-500">{errors.bio.message}</Text>
         )}
 
+        {/* Missatge d'error global */}
         {errors.root && (
           <Text className="font-bold text-red-500">{errors.root.message}</Text>
         )}
 
+        {/* Botó per continuar amb el registre */}
         <Button
           icon={({ color }) => <NavigateNextIcon color={color} />}
           mode="contained"

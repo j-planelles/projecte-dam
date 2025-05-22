@@ -7,6 +7,11 @@ import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
 import { useSettingsStore } from "../../store/settings-store";
 
+/**
+ * Pàgina de configuració general de l'aplicació.
+ * Permet modificar el comportament general, com la visualització de la darrera sèrie realitzada.
+ * @returns {JSX.Element} El component de la pàgina de configuració general.
+ */
 export default function SettingsPage() {
   return (
     <ThemedView className="flex-1">
@@ -17,6 +22,7 @@ export default function SettingsPage() {
             <Text variant="titleSmall">Application behaviour</Text>
           </View>
 
+          {/* Opció per mostrar l'última sèrie realitzada a l'editor d'entrenaments */}
           <WorkoutLastSetOption />
         </View>
       </ScrollView>
@@ -24,7 +30,13 @@ export default function SettingsPage() {
   );
 }
 
+/**
+ * Opció per activar o desactivar la visualització de la darrera sèrie realitzada a l'editor d'entrenaments.
+ * Desa la preferència a l'store i a AsyncStorage.
+ * @returns {JSX.Element} El component de l'opció de configuració.
+ */
 const WorkoutLastSetOption = () => {
+  // Obté l'estat i l'actualitzador de la preferència des de l'store
   const { enableLastSet, setEnableLastLest } = useSettingsStore(
     useShallow((state) => ({
       enableLastSet: state.enableLastSet,
@@ -32,6 +44,7 @@ const WorkoutLastSetOption = () => {
     })),
   );
 
+  // Handler per canviar l'estat de la preferència i desar-la a AsyncStorage
   const changeHandler = async () => {
     setEnableLastLest(!enableLastSet);
     await AsyncStorage.setItem(
@@ -39,6 +52,7 @@ const WorkoutLastSetOption = () => {
       !enableLastSet ? "true" : "false",
     );
   };
+
   return (
     <List.Item
       title="Show last set in workout editor"

@@ -19,6 +19,11 @@ import { ThemedView } from "../../../components/ui/screen/Screen";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina per seleccionar un entrenador durant l'onboarding.
+ * Mostra una llista d'entrenadors disponibles i permet sol·licitar-ne un.
+ * @returns {JSX.Element} El component de la pàgina de selecció d'entrenador.
+ */
 export default function TrainerOnboardingListPage() {
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
@@ -26,6 +31,8 @@ export default function TrainerOnboardingListPage() {
       token: state.token,
     })),
   );
+
+  // Consulta la llista d'entrenadors disponibles
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/search"],
     queryFn: async () =>
@@ -38,15 +45,24 @@ export default function TrainerOnboardingListPage() {
     <ThemedView className="flex-1">
       <Header title="Choose your trainer" />
 
+      {/* Mostra un missatge d'error si la consulta falla */}
       {error && <HelperText type="error">{error.message}</HelperText>}
 
+      {/* Mostra un indicador de càrrega mentre es carrega la llista */}
       {isLoading && <ActivityIndicator size="large" />}
 
+      {/* Mostra la llista d'entrenadors si la consulta té èxit */}
       {isSuccess && <TrainerList data={data} />}
     </ThemedView>
   );
 }
 
+/**
+ * Component que mostra la llista d'entrenadors i permet seleccionar-ne un.
+ * Permet enviar una sol·licitud per connectar amb l'entrenador seleccionat.
+ * @param data Llista d'entrenadors disponibles.
+ * @returns {JSX.Element} El component de la llista d'entrenadors.
+ */
 const TrainerList = ({ data }: { data: any }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -57,12 +73,17 @@ const TrainerList = ({ data }: { data: any }) => {
     })),
   );
 
+  // Estat per controlar el diàleg de confirmació, càrrega, errors i entrenador seleccionat
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<string>("");
   const navigationDisabled = selectedTrainer === "" || isLoading;
 
+  /**
+   * Handler per enviar la sol·licitud a l'entrenador seleccionat.
+   * Mostra un diàleg de confirmació si té èxit.
+   */
   const handleSubmit = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -79,6 +100,9 @@ const TrainerList = ({ data }: { data: any }) => {
     setIsLoading(false);
   };
 
+  /**
+   * Handler per tancar el diàleg i navegar a la pàgina principal.
+   */
   const navigateHome = () => {
     setDialogVisible(false);
     router.push("/");
@@ -86,6 +110,7 @@ const TrainerList = ({ data }: { data: any }) => {
 
   return (
     <>
+      {/* Llista d'entrenadors */}
       <FlatList
         data={data}
         keyExtractor={(item) => item.uuid}
@@ -115,6 +140,7 @@ const TrainerList = ({ data }: { data: any }) => {
         ListEmptyComponent={TrainerListEmptyComponent}
       />
 
+      {/* Controls per continuar o mostrar errors */}
       <View className="p-4 gap-4">
         {navigationDisabled && <Text>Please select a trainer.</Text>}
         {queryError && <HelperText type="error">{queryError}</HelperText>}
@@ -128,6 +154,7 @@ const TrainerList = ({ data }: { data: any }) => {
           Next
         </Button>
       </View>
+      {/* Diàleg de confirmació de sol·licitud */}
       <Portal>
         <Dialog visible={dialogVisible}>
           <Dialog.Title>Trainer requested</Dialog.Title>
@@ -147,6 +174,10 @@ const TrainerList = ({ data }: { data: any }) => {
   );
 };
 
+/**
+ * Component que es mostra quan no hi ha entrenadors disponibles.
+ * @returns {JSX.Element} El component de llista buida.
+ */
 const TrainerListEmptyComponent = () => {
   const theme = useTheme();
 
@@ -155,7 +186,7 @@ const TrainerListEmptyComponent = () => {
       <PeopleIcon size={130} color={theme.colors.onSurface} />
       <Text variant="headlineLarge">No trainers found...</Text>
       <Text variant="bodyMedium" className="px-4">
-        Clould not find any trainers that adjust to your interests. Modify your
+        Could not find any trainers that adjust to your interests. Modify your
         interests and try again.
       </Text>
     </View>

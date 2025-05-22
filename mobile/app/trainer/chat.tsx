@@ -11,10 +11,14 @@ import { useShallow } from "zustand/react/shallow";
 import { ChatIcon, PersonIcon, SendIcon } from "../../components/Icons";
 import Header from "../../components/ui/Header";
 import { ThemedView } from "../../components/ui/screen/Screen";
-import { useAuthStore } from "../../store/auth-store";
-import { unknown } from "zod";
 import { handleError } from "../../lib/errorHandler";
+import { useAuthStore } from "../../store/auth-store";
 
+/**
+ * Pàgina de xat amb l'entrenador.
+ * Mostra el tauler de missatges, permet enviar missatges i refrescar la conversa.
+ * @returns {JSX.Element} El component de la pàgina de xat amb l'entrenador.
+ */
 export default function TrainerChatPage() {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -23,6 +27,8 @@ export default function TrainerChatPage() {
       token: state.token,
     })),
   );
+
+  // Consulta la llista de missatges amb l'entrenador
   const { data } = useQuery({
     queryKey: ["user", "trainer", "/user/trainer/messages"],
     queryFn: async () =>
@@ -30,18 +36,24 @@ export default function TrainerChatPage() {
         headers: { Authorization: `Bearer ${token}` },
       }),
   });
+
+  // Referència per fer scroll automàtic al final de la llista
   const flatListRef = useRef<null | FlatList>(null);
+
+  // Estat per controlar el missatge a enviar, la llista de missatges, la càrrega i errors
   const [messageInput, setMessageInput] = useState<string>("");
   const [messages, setMessages] = useState<message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  // Funció per fer scroll al final de la llista de missatges
   const scrollToEnd = () => {
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
   };
 
+  // Estat i handler per refrescar la llista de missatges manualment
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const refreshControlHandler = () => {
@@ -55,8 +67,12 @@ export default function TrainerChatPage() {
     }, 1000);
   };
 
+  /**
+   * Handler per enviar un missatge al xat.
+   * Desa el missatge a l'API i l'afegeix a la llista local.
+   */
   const handleSubmit = async () => {
-    setQueryError(null)
+    setQueryError(null);
     if (messageInput) {
       setIsLoading(true);
       try {
@@ -77,12 +93,15 @@ export default function TrainerChatPage() {
         setTimeout(scrollToEnd, 100);
         setMessageInput("");
       } catch (error: unknown) {
-        setQueryError(handleError(unknown));
+        setQueryError(handleError(error));
       }
       setIsLoading(false);
     }
   };
 
+  /**
+   * Actualitza la llista de missatges quan arriben dades noves de l'API.
+   */
   useEffect(() => {
     if (data) {
       setMessages(
@@ -102,10 +121,12 @@ export default function TrainerChatPage() {
     <ThemedView className="flex-1">
       <Header title="Message Board" />
       <View className="flex-1">
+        {/* Mostra un indicador de càrrega si no hi ha dades */}
         {!data ? (
           <ActivityIndicator />
         ) : (
           <>
+            {/* Llista de missatges */}
             <FlatList
               data={messages}
               keyExtractor={(item) => item.timestamp}
@@ -120,6 +141,7 @@ export default function TrainerChatPage() {
                 />
               }
             />
+            {/* Input per escriure i enviar missatges */}
             <View className="px-4 py-4">
               <Searchbar
                 placeholder="Type your message..."
@@ -139,6 +161,7 @@ export default function TrainerChatPage() {
           </>
         )}
       </View>
+      {/* Snackbar per mostrar errors d'enviament */}
       <Portal>
         <Snackbar visible={!!queryError} onDismiss={() => setQueryError(null)}>
           {queryError}
@@ -148,6 +171,12 @@ export default function TrainerChatPage() {
   );
 }
 
+/**
+ * Bombolla de missatge individual.
+ * Mostra el missatge alineat a la dreta o esquerra segons qui l'ha enviat.
+ * @param message Missatge a mostrar.
+ * @returns {JSX.Element} El component de bombolla de missatge.
+ */
 const MessageBubble = ({ message }: { message: message }) => {
   const theme = useTheme();
   return (
@@ -178,6 +207,10 @@ const MessageBubble = ({ message }: { message: message }) => {
   );
 };
 
+/**
+ * Component que es mostra quan no hi ha missatges al xat.
+ * @returns {JSX.Element} El component de llista buida.
+ */
 const MessagesListEmptyComponent = () => {
   const theme = useTheme();
 

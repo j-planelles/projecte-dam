@@ -20,9 +20,17 @@ const schema = z.object({
 
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina de login d'usuari.
+ * Permet iniciar sessió, valida les dades, encripta la contrasenya i desa el token.
+ * Desa la informació a la configuració persistent.
+ * @returns {JSX.Element} El component de la pàgina de login.
+ */
 export default function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
@@ -31,6 +39,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
+  // Obté i actualitza dades d'usuari i servidor des de l'store global
   const {
     username: storeUsername,
     setUsername,
@@ -49,18 +58,26 @@ export default function LoginPage() {
     })),
   );
 
+  // Inicialitza el valor del formulari amb el nom d'usuari guardat
   useEffect(() => {
     setValue("username", storeUsername);
   }, [storeUsername]);
 
+  /**
+   * Handler per iniciar sessió.
+   * Desa el nom d'usuari, encripta la contrasenya, obté el token i el desa.
+   * Navega a la pantalla principal si té èxit.
+   */
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
 
       await updateAuthConfig({ username: username });
 
+      // Encripta la contrasenya abans d'enviar-la
       const encodedPassword = await encodePassword(password, serverIp);
 
+      // Obté el token d'accés
       const response = await apiClient.post("/auth/token", {
         username: username,
         password: encodedPassword,
@@ -101,6 +118,7 @@ export default function LoginPage() {
         Login to Ultra
       </Typography>
 
+      {/* Botó per canviar el servidor de connexió */}
       <Link to="/landing/server">
         <Button
           className="w-full"
@@ -112,6 +130,7 @@ export default function LoginPage() {
       </Link>
 
       <Box className="flex flex-col w-full">
+        {/* Input per al nom d'usuari */}
         <Controller
           control={control}
           name="username"
@@ -133,6 +152,7 @@ export default function LoginPage() {
           )}
         />
 
+        {/* Input per a la contrasenya */}
         <Controller
           control={control}
           name="password"
@@ -153,12 +173,14 @@ export default function LoginPage() {
           )}
         />
 
+        {/* Missatge d'error global */}
         {errors.root && (
           <Typography variant="body2" color="error">
             {errors.root.message}
           </Typography>
         )}
 
+        {/* Botó per iniciar sessió */}
         <Button
           fullWidth
           variant="filled"
@@ -173,6 +195,7 @@ export default function LoginPage() {
           or
         </Typography>
 
+        {/* Botó per anar a la pantalla de registre */}
         <Link to="/landing/register" replace>
           <Button
             fullWidth

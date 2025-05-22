@@ -54,6 +54,7 @@ const bodyParts = {
   other: "Other",
 } as const;
 
+// Esquema de Zod per validar els camps
 const schema = z.object({
   name: z.string().min(1, { message: "Exercise name is required" }),
   type: z.enum(Object.keys(exerciseTypes) as [string, ...string[]], {
@@ -67,6 +68,13 @@ const schema = z.object({
 
 type ExerciseFormData = z.infer<typeof schema>;
 
+/**
+ * Pàgina per crear, editar o duplicar un exercici.
+ * Si es passa un UUID per la ruta, carrega l'exercici per editar-lo.
+ * Si es passa un defaultExerciseUuid, carrega l'exercici per defecte per duplicar-lo.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i el formulari d'edició.
+ * @returns {JSX.Element} El component de la pàgina d'edició/creació d'exercicis.
+ */
 export default function ExerciseEditPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -76,6 +84,7 @@ export default function ExerciseEditPage() {
 
   const [updated, setUpdated] = useState<number>(0);
 
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -83,6 +92,7 @@ export default function ExerciseEditPage() {
     })),
   );
 
+  // Consulta l'exercici de l'usuari si s'ha passat exerciseUuid
   const exerciseQuery = useQuery({
     queryKey: ["user", "/user/exercises/", exerciseUuid?.toString()],
     queryFn: async () =>
@@ -92,6 +102,8 @@ export default function ExerciseEditPage() {
       }),
     enabled: exerciseUuid !== undefined && defaultExerciseUuid === null,
   });
+
+  // Consulta l'exercici per defecte si s'ha passat defaultExerciseUuid
   const defaultExerciseQuery = useQuery({
     queryKey: ["user", "/default-exercises", defaultExerciseUuid?.toString()],
     queryFn: async () =>
@@ -104,6 +116,7 @@ export default function ExerciseEditPage() {
     enabled: exerciseUuid === undefined && defaultExerciseUuid !== null,
   });
 
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     register,
@@ -115,6 +128,10 @@ export default function ExerciseEditPage() {
     resolver: zodResolver(schema),
   });
 
+  /**
+   * Quan es carreguen les dades de l'exercici (usuari o per defecte),
+   * inicialitza els valors del formulari.
+   */
   useEffect(() => {
     if (exerciseQuery.isSuccess) {
       setValue("name", exerciseQuery.data.name);
@@ -137,12 +154,18 @@ export default function ExerciseEditPage() {
     defaultExerciseQuery.isSuccess,
   ]);
 
+  // Estat de càrrega global
   const isLoading =
     exerciseQuery.isLoading || defaultExerciseQuery.isLoading || isSubmitting;
 
+  /**
+   * Handler per desar l'exercici (creació, duplicació o modificació).
+   * Invalida la cache i torna enrere després de desar.
+   */
   const submitHandler = async (data: ExerciseFormData) => {
     try {
       if (!exerciseUuid) {
+        // Creació d'un nou exercici (pot ser còpia d'un per defecte)
         await apiClient.post(
           "/user/exercises",
           {
@@ -158,6 +181,7 @@ export default function ExerciseEditPage() {
           },
         );
       } else {
+        // Modificació d'un exercici existent
         await apiClient.put(
           "/user/exercises/:exercise_uuid",
           {
@@ -200,6 +224,7 @@ export default function ExerciseEditPage() {
             : "Create exercise"}
       </Typography>
 
+      {/* Nom de l'exercici */}
       <TextField
         key={`exercise-name-label-${updated}`}
         label="Name"
@@ -211,6 +236,7 @@ export default function ExerciseEditPage() {
         disabled={isLoading}
       />
 
+      {/* Tipus d'exercici (no editable si ja existeix) */}
       <FormControl fullWidth error={!!errors.type}>
         <InputLabel id="exercise-type-label">Type</InputLabel>
         <Controller
@@ -241,6 +267,7 @@ export default function ExerciseEditPage() {
         {errors.type && <FormHelperText>{errors.type.message}</FormHelperText>}
       </FormControl>
 
+      {/* Part del cos */}
       <FormControl fullWidth error={!!errors.bodyPart}>
         <InputLabel id="body-part-label">Body Part</InputLabel>
         <Controller
@@ -268,6 +295,7 @@ export default function ExerciseEditPage() {
         )}
       </FormControl>
 
+      {/* Descripció */}
       <TextField
         key={`exercise-description-label-${updated}`}
         label="Description"
@@ -281,6 +309,7 @@ export default function ExerciseEditPage() {
         disabled={isLoading}
       />
 
+      {/* Botó per desar l'exercici */}
       <Button
         variant="outlined"
         color="primary"
@@ -295,6 +324,7 @@ export default function ExerciseEditPage() {
             : "Create exercise"}
       </Button>
 
+      {/* Missatge informatiu si s'està modificant un exercici per defecte */}
       {defaultExerciseUuid && (
         <FormHelperText>
           You are now modifying a default exercise. When you save it, a copy
@@ -303,11 +333,16 @@ export default function ExerciseEditPage() {
         </FormHelperText>
       )}
 
+      {/* Botó per eliminar l'exercici (només si ja existeix) */}
       {exerciseUuid && <DeleteExerciseButton isLoading={isLoading} />}
     </Container>
   );
 }
 
+/**
+ * Botó per eliminar l'exercici actual.
+ * Mostra un diàleg de confirmació abans d'eliminar.
+ */
 const DeleteExerciseButton = ({ isLoading }: { isLoading: boolean }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -329,6 +364,10 @@ const DeleteExerciseButton = ({ isLoading }: { isLoading: boolean }) => {
     setOpen(false);
   };
 
+  /**
+   * Handler per eliminar l'exercici actual.
+   * Invalida la cache i torna enrere després d'eliminar.
+   */
   const deleteExerciseHandler = async () => {
     handleClose();
 

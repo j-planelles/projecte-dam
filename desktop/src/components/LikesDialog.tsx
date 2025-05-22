@@ -18,6 +18,16 @@ import { useShallow } from "zustand/react/shallow";
 import { handleError } from "../lib/errorHandler";
 import { useAuthStore } from "../store/auth-store";
 
+/**
+ * Diàleg per revisar i seleccionar interessos.
+ * Permet seleccionar interessos que ajudaran els usuaris a trobar el perfil del trainer.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i permet desar la selecció.
+ * @param open Si el diàleg està obert.
+ * @param onClose Handler per tancar el diàleg.
+ * @param onSuccess Handler que s'executa quan es desa correctament.
+ * @param dismissable Si es pot tancar el diàleg sense desar (per defecte true).
+ * @returns {JSX.Element} El component del diàleg d'interessos.
+ */
 export default function LikesDialog({
   open,
   onClose,
@@ -29,12 +39,15 @@ export default function LikesDialog({
   onSuccess: () => void;
   dismissable?: boolean;
 }) {
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Consulta la llista d'interessos disponibles per a l'usuari
   const { data, isSuccess } = useQuery({
     queryKey: ["user", "/user/trainer/interests"],
     queryFn: async () =>
@@ -43,23 +56,26 @@ export default function LikesDialog({
       }),
   });
 
+  // Estat per controlar els interessos seleccionats
   const [likes, setLikes] = useState<string[]>([]);
   const navigationDisabled = likes.length < 1;
 
+  // Afegeix o elimina un interès de la llista de seleccionats
   const addLike = (newItem: string) => {
     setLikes((state) => [...state, newItem]);
   };
-
   const removeLike = (newItem: string) => {
     setLikes((state) => state.filter((item) => item !== newItem));
   };
 
+  // Inicialitza els interessos seleccionats segons els que ja estiguin marcats a l'API
   useEffect(() => {
     if (data) {
       setLikes(data.filter((item) => item.selected).map((item) => item.uuid));
     }
   }, [data]);
 
+  // Handler per alternar la selecció d'un interès
   const checkClickHandler = (newItem: string) => {
     if (likes.includes(newItem)) {
       removeLike(newItem);
@@ -68,9 +84,14 @@ export default function LikesDialog({
     }
   };
 
+  // Estat per controlar la càrrega i errors de la petició
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per desar els interessos seleccionats a l'API.
+   * Executa onSuccess si té èxit.
+   */
   const handleSubmit = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -85,6 +106,7 @@ export default function LikesDialog({
     }
     setIsLoading(false);
   };
+
   return (
     <Dialog
       open={open}

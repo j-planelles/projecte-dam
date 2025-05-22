@@ -20,12 +20,19 @@ import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
+/**
+ * Pàgina per afegir exercicis a un entrenament en curs.
+ * Permet seleccionar exercicis propis o per defecte, cercar-los i afegir-los a l'entrenament.
+ * @returns {JSX.Element} El component de la pàgina d'afegir exercicis.
+ */
 export default function OngoingWorkoutAddExercisePage() {
   const theme = useTheme();
   const router = useRouter();
 
+  // Acció per afegir exercicis a l'entrenament des de l'store
   const addExercises = useWorkoutStore((state) => state.addExercises);
 
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -33,6 +40,7 @@ export default function OngoingWorkoutAddExercisePage() {
     })),
   );
 
+  // Consulta d'exercicis de l'usuari
   const userExercisesQuery = useQuery({
     queryKey: ["user", "/user/exercises"],
     queryFn: async () =>
@@ -40,6 +48,8 @@ export default function OngoingWorkoutAddExercisePage() {
         headers: { Authorization: `Bearer ${token}` },
       }),
   });
+
+  // Consulta d'exercicis per defecte (amb cache de 2 hores)
   const defaultExercisesQuery = useQuery({
     queryKey: ["user", "/default-exercises"],
     queryFn: async () =>
@@ -49,6 +59,10 @@ export default function OngoingWorkoutAddExercisePage() {
     staleTime: 2 * 60 * 60 * 1000, // 2 hores
   });
 
+  /**
+   * Combina i ordena els exercicis de l'usuari i per defecte.
+   * Els exercicis per defecte que ja han estat afegits per l'usuari no es mostren dues vegades.
+   */
   const sortedExercises = useMemo(() => {
     const defaultExercisesFilter: string[] = [];
     const userExercises: exerciseList[] =
@@ -86,6 +100,7 @@ export default function OngoingWorkoutAddExercisePage() {
             )
             .filter((item) => defaultExercisesFilter.indexOf(item.uuid) === -1)
         : [];
+    // Ordena alfabèticament pel nom
     return [...userExercises, ...defaultExercises].sort((a, b) =>
       a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
     );
@@ -96,28 +111,38 @@ export default function OngoingWorkoutAddExercisePage() {
     userExercisesQuery.isSuccess,
   ]);
 
+  // Estat per controlar la selecció, càrrega, errors i cerca
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  // Desactiva els controls si hi ha càrrega o les consultes no han acabat
   const disableControls =
     isLoading ||
     userExercisesQuery.isLoading ||
     defaultExercisesQuery.isLoading;
 
+  /**
+   * Handler per afegir els exercicis seleccionats a l'entrenament.
+   * Si l'exercici és per defecte, primer el crea com a exercici d'usuari.
+   * Després afegeix tots els seleccionats a l'store de l'entrenament.
+   */
   const addExerciseHandler = async () => {
     setIsLoading(true);
     setGlobalError(null);
     try {
+      // Exercicis de l'usuari seleccionats
       const userExercisesToAdd = sortedExercises.filter(
         (item) => selectedExercises.includes(item.uuid) && !item.isDefault,
       );
 
+      // Exercicis per defecte seleccionats
       const defaultExercisesToAdd = sortedExercises.filter(
         (item) => selectedExercises.includes(item.uuid) && item.isDefault,
       );
 
+      // Per cada exercici per defecte, crea una còpia com a exercici d'usuari
       for (const exercise of defaultExercisesToAdd) {
         const exerciseUUID = uuidv4();
         await apiClient.post(
@@ -138,6 +163,7 @@ export default function OngoingWorkoutAddExercisePage() {
         userExercisesToAdd.push({ ...exercise, uuid: exerciseUUID });
       }
 
+      // Prepara els exercicis per afegir-los a l'entrenament (amb una sèrie per defecte)
       const exercisesToAdd: workoutExercise[] = userExercisesToAdd.map(
         (item) => ({
           exercise: item,
@@ -147,7 +173,7 @@ export default function OngoingWorkoutAddExercisePage() {
 
       addExercises(exercisesToAdd);
 
-      router.back();
+      router.back(); // Torna enrere després d'afegir
     } catch (error: unknown) {
       setGlobalError(handleError(error));
     }
@@ -158,6 +184,7 @@ export default function OngoingWorkoutAddExercisePage() {
     <ThemedView className="flex-1">
       <Header title="Add exercise" />
 
+      {/* Barra de cerca d'exercicis */}
       <View className="px-4 py-2">
         <Searchbar
           value={searchTerm}
@@ -166,6 +193,7 @@ export default function OngoingWorkoutAddExercisePage() {
         />
       </View>
 
+      {/* Mostra indicador de càrrega o la llista d'exercicis */}
       {disableControls ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" />
@@ -211,6 +239,7 @@ export default function OngoingWorkoutAddExercisePage() {
         />
       )}
 
+      {/* Mostra els exercicis seleccionats i el botó per afegir-los */}
       {selectedExercises.length > 0 && (
         <View className="px-4 py-2 gap-2">
           <View className="flex-row gap-2 flex-wrap">
@@ -239,6 +268,10 @@ export default function OngoingWorkoutAddExercisePage() {
   );
 }
 
+/**
+ * Component que es mostra quan no hi ha exercicis disponibles.
+ * @returns {JSX.Element} El component de llista buida.
+ */
 const ExerciseListEmptyComponent = () => {
   const theme = useTheme();
 

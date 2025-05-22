@@ -6,6 +6,11 @@ import Header from "../../components/ui/Header";
 import UltraLogoText from "../../components/ui/logo-text";
 import { ThemedView } from "../../components/ui/screen/Screen";
 
+/**
+ * Pàgina principal de configuració de l'aplicació.
+ * Permet accedir a la configuració general, del perfil i de l'entrenador personal.
+ * @returns {JSX.Element} El component de la pàgina de configuració.
+ */
 export default function SettingsPage() {
   const router = useRouter();
 
@@ -15,6 +20,7 @@ export default function SettingsPage() {
       <ScrollView>
         <View className="">
           <List.Section>
+            {/* Opció per accedir a la configuració general */}
             <List.Item
               title="General"
               description="Application behaviour..."
@@ -27,6 +33,7 @@ export default function SettingsPage() {
               onPress={() => router.push("/settings/general")}
             />
 
+            {/* Opció per accedir a la configuració del perfil */}
             <List.Item
               title="Profile"
               description="Customize your profile, password, privacy..."
@@ -39,6 +46,7 @@ export default function SettingsPage() {
               onPress={() => router.push("/settings/profile")}
             />
 
+            {/* Opció per accedir a la gestió de l'entrenador personal */}
             <List.Item
               title="Personal Trainer"
               description="Manage your personal trainer"
@@ -52,12 +60,18 @@ export default function SettingsPage() {
             />
           </List.Section>
 
+          {/* Peu de pàgina amb informació de l'aplicació */}
           <ApplicationVersionFooter />
         </View>
       </ScrollView>
     </ThemedView>
   );
 }
+
+/**
+ * Peu de pàgina amb la informació de la versió i autoria de l'aplicació.
+ * @returns {JSX.Element} El component del peu de pàgina.
+ */
 const ApplicationVersionFooter = () => {
   const theme = useTheme();
 

@@ -14,14 +14,18 @@ use aes_gcm::{
     Aes256Gcm,
 };
 
-// CONFIGURATION:
+// CONFIGURACIÓ DE L'APLICACIÓ
 const APP_CONFIG_SUBDIR: &str = "ultra-workouts";
 const AUTH_CONFIG_FILENAME: &str = "auth_config.enc";
 
-// Executar: openssl rand -hex 16
+// Clau simètrica per a l'encriptació AES-256-GCM (32 bytes)
+// Genera una clau nova amb: openssl rand -hex 16
 const SYMMETRIC_KEY_BYTES: &[u8; 32] = b"4bbc3dcadddda036303ca137fb233962";
 const NONCE_SIZE: usize = 12;
 
+/// Obté la ruta completa del fitxer de configuració d'autenticació.
+/// Crea el directori si no existeix.
+///
 fn get_auth_config_file_path(
     app_handle: &AppHandle,
 ) -> Result<PathBuf, String> {
@@ -50,6 +54,9 @@ fn get_auth_config_file_path(
     Ok(app_specific_config_dir.join(AUTH_CONFIG_FILENAME))
 }
 
+/// Escriu la configuració d'autenticació encriptada al disc.
+/// Utilitza AES-256-GCM amb un nonce aleatori.
+///
 #[tauri::command]
 fn write_auth_config(
     app_handle: AppHandle,
@@ -60,12 +67,15 @@ fn write_auth_config(
     let key_material = GenericArray::from_slice(SYMMETRIC_KEY_BYTES);
     let cipher = Aes256Gcm::new(&key_material);
 
+    // Genera un nonce aleatori per a cada encriptació
     let nonce: AeadNonce<Aes256Gcm> = Aes256Gcm::generate_nonce(&mut OsRng);
 
+    // Encripta les dades
     let ciphertext = cipher
         .encrypt(&nonce, data.as_bytes())
         .map_err(|e| format!("Encryption failed: {}", e))?;
 
+    // Guarda el nonce al principi del fitxer, seguit del ciphertext
     let mut encrypted_data_with_nonce =
         Vec::with_capacity(NONCE_SIZE + ciphertext.len());
     encrypted_data_with_nonce.extend_from_slice(nonce.as_slice());
@@ -80,6 +90,9 @@ fn write_auth_config(
     })
 }
 
+/// Llegeix i desencripta la configuració d'autenticació del disc.
+/// Retorna la configuració com a String.
+///
 #[tauri::command]
 fn get_auth_config(app_handle: AppHandle) -> Result<String, String> {
     let file_path = get_auth_config_file_path(&app_handle)?;
@@ -105,6 +118,7 @@ fn get_auth_config(app_handle: AppHandle) -> Result<String, String> {
         ));
     }
 
+    // Separa el nonce i el ciphertext
     let (nonce_slice, ciphertext) =
         encrypted_data_with_nonce.split_at(NONCE_SIZE);
 
@@ -113,6 +127,7 @@ fn get_auth_config(app_handle: AppHandle) -> Result<String, String> {
     let key_material = GenericArray::from_slice(SYMMETRIC_KEY_BYTES);
     let cipher = Aes256Gcm::new(&key_material);
 
+    // Desencripta les dades
     let decrypted_bytes = cipher.decrypt(nonce, ciphertext).map_err(|e| {
         format!(
             "Decryption failed for {}: {}. (Possible reasons: wrong key, corrupted data).",
@@ -121,6 +136,7 @@ fn get_auth_config(app_handle: AppHandle) -> Result<String, String> {
         )
     })?;
 
+    // Converteix a String UTF-8
     String::from_utf8(decrypted_bytes).map_err(|e| {
         format!(
             "Failed to convert decrypted data from {} to UTF-8 string: {}",
@@ -130,6 +146,9 @@ fn get_auth_config(app_handle: AppHandle) -> Result<String, String> {
     })
 }
 
+/// Punt d'entrada de l'aplicació Tauri.
+/// Registra els comandos per llegir i escriure la configuració.
+///
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()

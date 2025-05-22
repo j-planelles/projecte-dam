@@ -16,13 +16,22 @@ import SearchField from "../../../components/SearchField";
 import WorkoutCard from "../../../components/WorkoutCard";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de llistat de plantilles d'entrenament de l'usuari.
+ * Permet buscar, crear i accedir a les plantilles existents.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i un missatge si no hi ha plantilles.
+ * @returns {JSX.Element} El component de la pàgina de llistat de plantilles.
+ */
 export default function TemplatesPage() {
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Consulta la llista de plantilles de l'usuari
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/templates"],
     queryFn: async () =>
@@ -31,22 +40,29 @@ export default function TemplatesPage() {
       }),
   });
 
+  // Estat per controlar la cerca i la visibilitat del quadre de cerca
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showSearchBox, setShowSearchBox] = useState<boolean>(false);
 
   return (
     <Container>
       <Box className="flex flex-1 flex-col gap-4 mb-2">
+        {/* Loader mentre es carrega la llista */}
         {isLoading && (
           <Box className="flex items-center justify-center">
             <CircularProgress />
           </Box>
         )}
+
+        {/* Missatge d'error si la consulta falla */}
         {error && <Typography color="error">{error.message}</Typography>}
+
+        {/* Llista de plantilles si la consulta té èxit */}
         {isSuccess &&
           !!data &&
           (data.length > 0 ? (
             <>
+              {/* Capçalera amb botons de cerca i creació */}
               <Box className="flex flex-row gap-4">
                 <Typography variant="h6" className="flex-grow">
                   My Templates
@@ -65,6 +81,7 @@ export default function TemplatesPage() {
                 </Link>
               </Box>
 
+              {/* Quadre de cerca */}
               {showSearchBox && (
                 <SearchField
                   value={searchTerm}
@@ -75,6 +92,7 @@ export default function TemplatesPage() {
                 />
               )}
 
+              {/* Llista de plantilles filtrada per la cerca */}
               {data
                 .map(
                   (data) =>
@@ -120,6 +138,7 @@ export default function TemplatesPage() {
                 ))}
             </>
           ) : (
+            // Missatge si no hi ha plantilles
             <Box className="flex flex-col items-center gap-2">
               <FitnessCenterIcon sx={{ width: 180, height: 180 }} />
               <Typography variant="h4">No templates found...</Typography>

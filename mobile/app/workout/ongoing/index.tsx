@@ -29,7 +29,14 @@ import {
 } from "../../../store/rest-timer-context";
 import { useWorkoutStore } from "../../../store/workout-store";
 
+/**
+ * Pàgina per gestionar un entrenament en curs.
+ * Mostra l'editor d'entrenament i els diàlegs per gestionar el temporitzador,
+ * cancel·lar o finalitzar l'entrenament.
+ * @returns {JSX.Element} El component de la pàgina d'entrenament en curs.
+ */
 export default function OngoingWorkoutPage() {
+  // Estat per controlar la visibilitat dels diferents diàlegs
   const [timerDialogVisible, setTimerDialogVisible] = useState<boolean>(false);
   const [cancelWorkoutDialogVisible, setCancelWorkoutDialogVisible] =
     useState<boolean>(false);
@@ -44,14 +51,17 @@ export default function OngoingWorkoutPage() {
         setFinishWorkoutDialogVisible={setFinishWorkoutDialogVisible}
       />
       <WorkoutEditor />
+      {/* Diàleg per gestionar el temporitzador de descans */}
       <TimerDialog
         visible={timerDialogVisible}
         setVisible={setTimerDialogVisible}
       />
+      {/* Diàleg per confirmar la cancel·lació de l'entrenament */}
       <CancelWorkoutDialog
         visible={cancelWorkoutDialogVisible}
         setVisible={setCancelWorkoutDialogVisible}
       />
+      {/* Diàleg per confirmar la finalització de l'entrenament */}
       <FinishWorkoutDialog
         visible={finishWorkoutDialogVisible}
         setVisible={setFinishWorkoutDialogVisible}
@@ -60,6 +70,15 @@ export default function OngoingWorkoutPage() {
   );
 }
 
+/**
+ * Capçalera de la pàgina d'entrenament en curs.
+ * Inclou accions per obrir el temporitzador, mostrar el temps de descans,
+ * i un menú amb opcions per finalitzar, cancel·lar o gestionar exercicis.
+ * @param setTimerDialogVisible Funció per mostrar el diàleg del temporitzador.
+ * @param setCancelWorkoutDialogVisible Funció per mostrar el diàleg de cancel·lació.
+ * @param setFinishWorkoutDialogVisible Funció per mostrar el diàleg de finalització.
+ * @returns {JSX.Element} El component de la capçalera.
+ */
 const HeaderComponent = ({
   setTimerDialogVisible,
   setCancelWorkoutDialogVisible,
@@ -83,6 +102,7 @@ const HeaderComponent = ({
         backgroundColor: isRunning && theme.colors.primaryContainer,
       }}
     >
+      {/* Botó per obrir el diàleg del temporitzador */}
       <Appbar.Action
         animated={false}
         icon={({ color }) => (
@@ -91,7 +111,9 @@ const HeaderComponent = ({
         onPress={() => setTimerDialogVisible(true)}
       />
 
+      {/* Mostra el temps restant del descans si està actiu */}
       <RestCountdownText />
+      {/* Menú amb opcions addicionals */}
       <Menu
         visible={menuVisible}
         onDismiss={() => setMenuVisible(false)}
@@ -134,6 +156,10 @@ const HeaderComponent = ({
   );
 };
 
+/**
+ * Mostra el temps restant del descans si el temporitzador està actiu.
+ * @returns {JSX.Element} El component amb el temps de descans.
+ */
 const RestCountdownText = () => {
   const theme = useTheme();
   const { isRunning, formattedTime } = useRestCountdown();
@@ -146,6 +172,13 @@ const RestCountdownText = () => {
   );
 };
 
+/**
+ * Diàleg per gestionar el temporitzador de descans.
+ * Permet iniciar, saltar o ajustar la durada del descans.
+ * @param visible Estat de visibilitat del diàleg.
+ * @param setVisible Funció per canviar la visibilitat del diàleg.
+ * @returns {JSX.Element} El component del diàleg del temporitzador.
+ */
 const TimerDialog = ({
   visible,
   setVisible,
@@ -164,6 +197,7 @@ const TimerDialog = ({
     setDuration,
   } = useRestCountdown();
 
+  // Handler per iniciar o saltar el temporitzador
   const startButtonHandler = () => {
     if (isRunning) {
       skip();
@@ -233,6 +267,13 @@ const TimerDialog = ({
   );
 };
 
+/**
+ * Diàleg de confirmació per cancel·lar l'entrenament en curs.
+ * Si es confirma, es descarten tots els canvis i es torna enrere.
+ * @param visible Estat de visibilitat del diàleg.
+ * @param setVisible Funció per canviar la visibilitat del diàleg.
+ * @returns {JSX.Element} El component del diàleg de cancel·lació.
+ */
 const CancelWorkoutDialog = ({
   visible,
   setVisible,
@@ -243,6 +284,7 @@ const CancelWorkoutDialog = ({
   const cancelWorkout = useWorkoutStore((state) => state.cancelWorkout);
   const router = useRouter();
 
+  // Handler per cancel·lar l'entrenament i tornar enrere
   const cancelWorkoutHandler = () => {
     cancelWorkout();
     setVisible(false);
@@ -255,7 +297,7 @@ const CancelWorkoutDialog = ({
         <Dialog.Title>Cancel workout</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">
-            Are you sure you want to cancel the current workout? All of it's
+            Are you sure you want to cancel the current workout? All of its
             contents will be discarded.
           </Text>
         </Dialog.Content>
@@ -268,6 +310,13 @@ const CancelWorkoutDialog = ({
   );
 };
 
+/**
+ * Diàleg de confirmació per finalitzar l'entrenament en curs.
+ * Si es confirma, es navega a la pantalla de finalització de l'entrenament.
+ * @param visible Estat de visibilitat del diàleg.
+ * @param setVisible Funció per canviar la visibilitat del diàleg.
+ * @returns {JSX.Element} El component del diàleg de finalització.
+ */
 const FinishWorkoutDialog = ({
   visible,
   setVisible,
@@ -277,6 +326,7 @@ const FinishWorkoutDialog = ({
 }) => {
   const router = useRouter();
 
+  // Handler per finalitzar l'entrenament i navegar a la pantalla de resum/finalització
   const cancelWorkoutHandler = () => {
     setVisible(false);
     router.replace("/workout/ongoing/finish");

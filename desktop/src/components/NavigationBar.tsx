@@ -23,6 +23,12 @@ export type NavigationBarSection = {
   items: NavigationBarItem[];
 };
 
+/**
+ * Barra de navegació lateral per a l'aplicació.
+ * Mostra seccions i ítems de navegació, amb selecció visual segons la ruta actual.
+ * @param items Llista de seccions i ítems de navegació.
+ * @returns {JSX.Element} El component de la barra de navegació.
+ */
 export default function NavigationBar({
   items,
 }: { items: NavigationBarSection[] }) {
@@ -41,6 +47,7 @@ export default function NavigationBar({
         },
       }}
     >
+      {/* Espai per la barra superior */}
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
         {items.map((section) => (

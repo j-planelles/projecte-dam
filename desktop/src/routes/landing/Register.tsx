@@ -12,12 +12,14 @@ import { useAuthStore } from "../../store/auth-store";
 import { encodePassword } from "../../lib/crypto";
 import { handleError } from "../../lib/errorHandler";
 
+// Esquema de Zod utilitzat per la validació del formulari
 const schema = z
   .object({
     username: z.string(),
     password: z.string().min(8),
     confirmPassword: z.string(),
   })
+  // Revisar que els dos camps de la contrasenya siguin iguals
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
     path: ["confirmPassword"],
@@ -25,9 +27,17 @@ const schema = z
 
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina de registre d'usuari.
+ * Permet crear un compte nou, valida les dades, encripta la contrasenya i inicia sessió automàticament.
+ * Desa la informació a la configuració persistent.
+ * @returns {JSX.Element} El component de la pàgina de registre.
+ */
 export default function RegisterPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
@@ -36,6 +46,7 @@ export default function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
+  // Obté i actualitza dades d'usuari i servidor des de l'store global
   const {
     username: storeUsername,
     setUsername,
@@ -52,30 +63,42 @@ export default function RegisterPage() {
     })),
   );
 
+  // Inicialitza el valor del formulari amb el nom d'usuari guardat
   useEffect(() => {
     setValue("username", storeUsername);
   }, [storeUsername]);
 
+  /**
+   * Handler per registrar l'usuari.
+   * Desa el nom d'usuari, encripta la contrasenya, registra l'usuari i inicia sessió automàticament.
+   * Desa el token a la configuració persistent i navega a la següent pantalla del registre.
+   */
   const submitHandler = async ({ username, password }: FormSchemaType) => {
     try {
       setUsername(username);
 
+      // Desa el nom d'usuari a la configuració encriptada
       await updateAuthConfig({ username: username });
 
+      // Encripta la contrasenya abans d'enviar-la
       const encodedPassword = await encodePassword(password, serverIp);
 
+      // Registra l'usuari
       await apiClient.post("/auth/register", undefined, {
         queries: { username: username, password: encodedPassword },
       });
 
+      // Obté el token d'accés i inicia sessió automàticament
       const response = await apiClient.post("/auth/token", {
         username: username,
         password: encodedPassword,
       });
       setToken(response.access_token);
 
+      // Desa el token a la configuració encriptada
       await updateAuthConfig({ token: response.access_token });
 
+      // Invalidar totes les queries que depenguin de l'usuari
       queryClient.invalidateQueries({ queryKey: ["user"] });
 
       navigate("/landing/register-profile");
@@ -113,6 +136,7 @@ export default function RegisterPage() {
       </Typography>
 
       <Box className="flex flex-col w-full">
+        {/* Input per al nom d'usuari */}
         <Controller
           control={control}
           name="username"
@@ -134,6 +158,7 @@ export default function RegisterPage() {
           )}
         />
 
+        {/* Input per a la contrasenya */}
         <Controller
           control={control}
           name="password"
@@ -154,6 +179,7 @@ export default function RegisterPage() {
           )}
         />
 
+        {/* Input per confirmar la contrasenya */}
         <Controller
           control={control}
           name="confirmPassword"
@@ -174,12 +200,14 @@ export default function RegisterPage() {
           )}
         />
 
+        {/* Missatge d'error global */}
         {errors.root && (
           <Typography variant="body2" color="error">
             {errors.root.message}
           </Typography>
         )}
 
+        {/* Botó per crear el compte */}
         <Button
           fullWidth
           variant="filled"
@@ -194,6 +222,7 @@ export default function RegisterPage() {
           or
         </Typography>
 
+        {/* Botó per tornar a la pantalla de login */}
         <Link to="/landing/login" replace>
           <Button
             fullWidth

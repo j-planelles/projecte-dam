@@ -38,15 +38,18 @@ type WorkoutStoreType = {
 } & workout;
 
 export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
-  // Workout types
-  uuid: "",
-  title: "",
-  timestamp: 0,
-  duration: 0,
-  description: "",
-  exercises: [],
+  // Valors del tipus workout
+  uuid: "", // UUID de l'entrenament
+  title: "", // Nom de l'entrenament
+  timestamp: 0, // Timestamp d'inici de l'entrenament
+  duration: 0, // Duració de l'entrenament
+  description: "", // Descripció de l'entrenament
+  exercises: [], // Exercicis de l'entrenament
+
+  // Valors propis de l'store
 
   startEmptyWorkout: () =>
+    // Iniciar un entrenament buit
     set({
       uuid: v4(),
       title: "New template",
@@ -56,6 +59,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       exercises: [],
     }),
   startWorkout: (workout: workout) =>
+    // Carregar un entrenament
     set({
       ...workout,
       uuid: v4(),

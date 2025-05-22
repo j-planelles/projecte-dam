@@ -1,9 +1,14 @@
 from uuid import UUID
+
 from db import session_generator
 from models.exercise import DefaultExerciseModel
 from schemas.types.enums import BodyPart, ExerciseType
 
 
+# Llista predefinida d'exercicis per defecte.
+# Cada element és una instància de DefaultExerciseModel amb un UUID específic, nom,
+# descripció, part del cos que treballa i tipus d'exercici.
+# Aquests UUIDs són fixos per evitar conflictes.
 DEFAULT_EXERCISES = [
     DefaultExerciseModel(
         uuid=UUID("0dec2aff-dd6e-4ab6-84e0-1b005fa9190d"),
@@ -149,10 +154,25 @@ DEFAULT_EXERCISES = [
 
 
 def add_default_exercises():
+    """
+    Afegeix la llista `DEFAULT_EXERCISES` a la base de dades.
+    Aquesta funció s'executa durant l'inicialització de la base de dades.
+
+    Gestiona possibles errors durant la inserció a la base de dades
+    i imprimeix un missatge d'èxit o de fallada.
+    """
     try:
+        # Utilitza el generador de sessions per obtenir una sessió de base de dades.
+        # El context manager `with` assegura que la sessió es tanqui correctament.
         with session_generator as session:
+            # Afegeix tots els objectes DefaultExerciseModel de la llista a la sessió.
+            # Això els marca per a la inserció.
             session.add_all(DEFAULT_EXERCISES)
+            # Confirma la transacció, guardant els canvis a la base de dades.
             session.commit()
-        print("Added default exercises")
-    except:
-        print("Failed to add default exercises")
+        # Imprimeix un missatge si els exercicis s'han afegit correctament.
+        print("Default exercises added successfully to the database.")
+    except Exception as e: # Captura qualsevol excepció que pugui ocórrer durant el procés.
+        # Imprimeix un missatge d'error si falla l'addició dels exercicis.
+        # Inclou l'excepció per a més detalls de depuració.
+        print(f"Failed to add default exercises: {e}")

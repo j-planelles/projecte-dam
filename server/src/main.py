@@ -17,30 +17,35 @@ from sqlmodel import SQLModel
 from fastapi.middleware.cors import CORSMiddleware
 
 
-# Aquesta funció gestiona la creació de la base de dades abans de que s'inicialitzi FastAPI
+# Aquesta funció gestiona el cicle de vida de l'aplicació.
+# Aquest s'executa abans d'inicar el servidor FastAPI per afegir dades d'exemple a la base de dades.
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Esperar a que la base de dades s'inicialitzi.
     print("Waiting for database to initialize...")
     sleep(2)
 
-    SQLModel.metadata.create_all(engine)
-    add_default_exercises()
-    add_default_interests()
+    SQLModel.metadata.create_all(
+        engine
+    )  # Crear totes les taues dels models definits amb SQLModel.
+    add_default_exercises()  # Afegir exercicis predeterminats
+    add_default_interests()  # Afegir interessos predeterminats
 
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)  # Objecte general de FastAPI
 
-# Fix CORS for Tauri app
+# Configurar el Cross-Origin Resource Sharing per l'aplicatiu Web.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # List of allowed origins
-    allow_credentials=True,  # Allow credentials (cookies, auth headers)
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+# Importar routers
 app.include_router(security_router)
 app.include_router(exercise_router)
 app.include_router(workout_router)
@@ -51,4 +56,7 @@ app.include_router(message_router)
 
 @app.get("/", response_model=HealthCheck, tags=["status"], description="Health check")
 async def health_check():
+    """
+    Aquesta funció retorna el nom del servidor per mostrar-lo a la pantalla de log-in dels clients.
+    """
     return {"name": SERVER_NAME}

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { api, createApiClient } from "../lib/apiClient";
 
+// Store de Zustand per desar l'informació d'autenticació amb el backend
+
 type AuthStoreType = {
   serverIp: string;
   serverName: string;
@@ -18,19 +20,22 @@ type AuthStoreType = {
 };
 
 export const useAuthStore = create<AuthStoreType>((set) => ({
-  serverIp: "https://ultra.jplanelles.cat",
-  serverName: "Ultra Server",
-  apiClient: api,
+  serverIp: "https://ultra.jplanelles.cat", // URL del servidor predeterminada
+  serverName: "Ultra Server", // Nom del servidor predeterminat
+  apiClient: api, // Objecte apiClient
+  // Canvia la URL del servidor
   setServerIp: (serverIp: string, serverName: string) =>
     set({
       serverIp: serverIp,
       serverName: serverName,
-      apiClient: createApiClient(serverIp),
+      apiClient: createApiClient(serverIp), // Torna a crear l'apiClient
     }),
-  username: "",
+  username: "", // Nom d'usuari de l'usuari actual
   setUsername: (username: string) => set({ username: username }),
-  token: null,
+  token: null, // Token JWT
   setToken: (token: string | null) => set({ token: token }),
-  connectionTested: false,
+  // En iniciar l'aplicació, es fa una prova de connexió amb l'últim servidor connectat.
+  connectionTested: false, // Aquí es desa l'estat de la prova
   setConnectionTest: (result: boolean) => set({ connectionTested: result }),
 }));
+

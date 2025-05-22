@@ -42,17 +42,21 @@ type WorkoutStoreType = {
 } & workout;
 
 export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
-  // Workout types
-  uuid: "",
-  title: "",
-  timestamp: 0,
-  duration: 0,
-  description: "",
-  exercises: [],
+  // Valors del tipus workout
+  uuid: "", // UUID de l'entrenament
+  title: "", // Nom de l'entrenament
+  timestamp: 0, // Timestamp d'inici de l'entrenament
+  duration: 0, // Duració de l'entrenament
+  description: "", // Descripció de l'entrenament
+  exercises: [], // Exercicis de l'entrenament
 
-  isOngoingWorkout: false,
+  // Valors propis de l'store
+
+  // Aquest store també s'utilitza per l'editor de plantilles 
+  isOngoingWorkout: false, // True si hi ha un entrenament en curs, False si hi ha una plantilla
 
   startEmptyWorkout: () =>
+    // Iniciar un entrenament buit
     set({
       uuid: v4(),
       title: "New workout",
@@ -63,6 +67,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       isOngoingWorkout: true,
     }),
   loadEmptyWorkout: () =>
+    // Carregar un entrenament buit
     set({
       uuid: v4(),
       title: "New template",
@@ -70,7 +75,9 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       exercises: [],
       isOngoingWorkout: false,
     }),
-  startWorkout: (workout: workout) =>
+  startWorkout: (
+    workout: workout, // Carregar i iniciar un entrenament
+  ) =>
     set({
       ...workout,
       uuid: v4(),
@@ -78,7 +85,9 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       duration: 0,
       isOngoingWorkout: true,
     }),
-  loadWorkout: (workout: workout) =>
+  loadWorkout: (
+    workout: workout, // Carregar un entrenament
+  ) =>
     set({
       ...workout,
       uuid: v4(),
@@ -86,7 +95,7 @@ export const useWorkoutStore = create<WorkoutStoreType>((set) => ({
       duration: 0,
       isOngoingWorkout: false,
     }),
-  cancelWorkout: () => set({ isOngoingWorkout: false }),
+  cancelWorkout: () => set({ isOngoingWorkout: false }), // Cancelar entrenament
   setName: (name: string) =>
     set({
       title: name,

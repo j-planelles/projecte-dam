@@ -10,6 +10,13 @@ import { ThemedView } from "../../../components/ui/screen/Screen";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Component de pàgina per visualitzar els detalls d'un entrenament específic.
+ * Obté l'UUID de l'entrenament dels paràmetres locals de la ruta,
+ * cerca les dades de l'entrenament i les mostra.
+ * També ofereix l'opció de desar l'entrenament com a plantilla.
+ * @returns {JSX.Element} El component de la pàgina de visualització d'entrenament.
+ */
 export default function ViewWorkoutPage() {
   const { uuid } = useLocalSearchParams();
   const { apiClient, token } = useAuthStore(
@@ -18,6 +25,8 @@ export default function ViewWorkoutPage() {
       token: state.token,
     })),
   );
+
+  // Consulta per obtenir les dades de l'entrenament específic
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/workouts", uuid],
     queryFn: async () =>
@@ -25,8 +34,10 @@ export default function ViewWorkoutPage() {
         params: { workout_uuid: uuid.toString() },
         headers: { Authorization: `Bearer ${token}` },
       }),
+    enabled: !!uuid, // La consulta només s'executa si l'UUID està present
   });
 
+  // Memoritza i transforma les dades de l'entrenament al format esperat
   const workout = useMemo(
     () =>
       ({
@@ -77,6 +88,13 @@ export default function ViewWorkoutPage() {
   );
 }
 
+/**
+ * Component de botó que permet a l'usuari desar l'entrenament actual com una nova plantilla.
+ * Realitza una petició POST a l'API per crear la plantilla.
+ * @param {object} props - Propietats del component.
+ * @param {workout} props.workout - L'objecte de l'entrenament que es desarà com a plantilla.
+ * @returns {JSX.Element} El component del botó per desar com a plantilla.
+ */
 const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -90,6 +108,11 @@ const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Gestiona l'acció de desar l'entrenament com a plantilla.
+   * Envia les dades de l'entrenament a l'API i, si té èxit,
+   * invalida la consulta de plantilles i navega a la vista de la nova plantilla.
+   */
   const saveAsTemplateHandler = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -118,12 +141,14 @@ const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
           })),
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }, // Capçalera d'autorització
         },
       );
+      // Invalida la consulta de plantilles per assegurar que la llista s'actualitza
       queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
       router.push(`/workout/template-view/${response.uuid}`);
     } catch (error: unknown) {
+      // Gestiona els errors de la petició i els mostra a l'usuari
       setQueryError(handleError(error));
     }
     setIsLoading(false);
@@ -131,7 +156,8 @@ const SaveAsTemplateButton = ({ workout }: { workout: workout }) => {
 
   return (
     <>
-      <HelperText type="error">{queryError}</HelperText>
+      {/* Mostra missatges d'error si n'hi ha */}
+      <HelperText type="error" visible={!!queryError}>{queryError}</HelperText>
       <Button
         mode="contained"
         disabled={isLoading}

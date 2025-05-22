@@ -15,7 +15,14 @@ import { Link } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de llistat d'usuaris enllaçats a l'entrenador.
+ * Mostra tots els usuaris gestionats per l'entrenador, amb accés directe al seu perfil.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i un missatge si no hi ha usuaris.
+ * @returns {JSX.Element} El component de la pàgina de llistat d'usuaris.
+ */
 export default function TrainerUsersPage() {
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -23,6 +30,7 @@ export default function TrainerUsersPage() {
     })),
   );
 
+  // Consulta la llista d'usuaris enllaçats a l'entrenador
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "trainer", "/trainer/users"],
     queryFn: async () =>
@@ -33,12 +41,17 @@ export default function TrainerUsersPage() {
 
   return (
     <Container>
+      {/* Loader mentre es carrega la llista */}
       {isLoading && (
         <Box className="flex items-center justify-center">
           <CircularProgress />
         </Box>
       )}
+
+      {/* Missatge d'error si la consulta falla */}
       {error && <Typography color="error">{error.message}</Typography>}
+
+      {/* Llista d'usuaris si la consulta té èxit */}
       {isSuccess &&
         !!data &&
         (data.length > 0 ? (
@@ -58,6 +71,7 @@ export default function TrainerUsersPage() {
             ))}
           </List>
         ) : (
+          // Missatge si no hi ha usuaris
           <Box className="flex flex-col items-center">
             <PersonOutlineOutlinedIcon sx={{ width: 180, height: 180 }} />
             <Typography variant="h4">No users found...</Typography>

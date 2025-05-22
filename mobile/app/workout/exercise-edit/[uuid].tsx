@@ -62,6 +62,12 @@ const schema = z.object({
 
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina per crear o modificar un exercici personalitzat.
+ * Permet editar el nom, tipus, part del cos i descripció, així com eliminar l'exercici.
+ * Si s'edita un exercici per defecte, es crea una còpia personalitzada.
+ * @returns {JSX.Element} El component de la pàgina d'edició d'exercicis.
+ */
 export default function ExerciseEditPage() {
   const params = useLocalSearchParams();
   const router = useRouter();
@@ -73,6 +79,7 @@ export default function ExerciseEditPage() {
     })),
   );
 
+  // Consulta l'exercici de l'usuari si s'ha passat uuid
   const exerciseQuery = useQuery({
     queryKey: ["user", "/user/exercises/", params.uuid?.toString()],
     queryFn: async () =>
@@ -83,6 +90,8 @@ export default function ExerciseEditPage() {
     enabled:
       params.uuid !== undefined && params.defaultExerciseUUID === undefined,
   });
+
+  // Consulta l'exercici per defecte si s'ha passat defaultExerciseUUID
   const defaultExerciseQuery = useQuery({
     queryKey: [
       "user",
@@ -98,6 +107,10 @@ export default function ExerciseEditPage() {
       params.uuid === undefined && params.defaultExerciseUUID !== undefined,
   });
 
+  /**
+   * Quan es carreguen les dades de l'exercici (usuari o per defecte),
+   * inicialitza els valors del formulari.
+   */
   useEffect(() => {
     if (exerciseQuery.isSuccess) {
       setValue("name", exerciseQuery.data.name);
@@ -134,6 +147,7 @@ export default function ExerciseEditPage() {
     defaultExerciseQuery.isSuccess,
   ]);
 
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
@@ -142,8 +156,15 @@ export default function ExerciseEditPage() {
     setValue,
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
+  /**
+   * Handler per desar l'exercici (creació o modificació).
+   * Si és un exercici per defecte, crea una còpia personalitzada.
+   * Si és un exercici de l'usuari, l'actualitza.
+   * Invalida la cache de la llista d'exercicis després de desar.
+   */
   const submitHandler = async (data: FormSchemaType) => {
     try {
+      // Funció auxiliar per obtenir la clau d'un valor d'un objecte
       function getKeyByValue<T extends Record<string, any>>(
         obj: T,
         value: any,
@@ -163,6 +184,7 @@ export default function ExerciseEditPage() {
       };
 
       if (params.uuid === undefined) {
+        // Creació d'un nou exercici (pot ser còpia d'un per defecte)
         await apiClient.post(
           "/user/exercises",
           {
@@ -178,6 +200,7 @@ export default function ExerciseEditPage() {
           },
         );
       } else {
+        // Modificació d'un exercici existent
         await apiClient.put(
           "/user/exercises/:exercise_uuid",
           {
@@ -199,6 +222,7 @@ export default function ExerciseEditPage() {
           queryKey: ["user", "/user/exercises/", params.uuid?.toString()],
         });
       }
+      // Invalida la llista d'exercicis per actualitzar la UI
       queryClient.invalidateQueries({ queryKey: ["user", "/user/exercises"] });
 
       router.back();
@@ -207,6 +231,11 @@ export default function ExerciseEditPage() {
     }
   };
 
+  /**
+   * Handler per eliminar l'exercici actual.
+   * Mostra un diàleg de confirmació abans d'eliminar.
+   * Invalida la cache després d'eliminar.
+   */
   const deleteExerciseHandler = async () => {
     setDeleteDialogVisible(false);
 
@@ -225,9 +254,11 @@ export default function ExerciseEditPage() {
     router.back();
   };
 
+  // Estat per mostrar/ocultar el diàleg d'eliminació
   const [deleteDialogVisible, setDeleteDialogVisible] =
     useState<boolean>(false);
 
+  // Desactiva els controls si s'està carregant o enviant dades
   const disableControls =
     isSubmitting || exerciseQuery.isLoading || defaultExerciseQuery.isLoading;
 
@@ -238,6 +269,7 @@ export default function ExerciseEditPage() {
           params.uuid === undefined ? "Create exercise" : "Modify exercise"
         }
       >
+        {/* Botó per desar l'exercici */}
         <Appbar.Action
           animated={false}
           icon={({ color }) => <SaveIcon color={color} />}
@@ -247,6 +279,7 @@ export default function ExerciseEditPage() {
       </Header>
 
       <View className="gap-4 px-2">
+        {/* Nom de l'exercici */}
         <Controller
           control={control}
           name="name"
@@ -259,7 +292,7 @@ export default function ExerciseEditPage() {
               onBlur={onBlur}
               placeholder="Bench Press"
               mode="outlined"
-              error={errors.name != undefined}
+              error={errors.name !== undefined}
               disabled={disableControls}
             />
           )}
@@ -269,6 +302,7 @@ export default function ExerciseEditPage() {
           <HelperText type="error">{errors.name?.message}</HelperText>
         )}
 
+        {/* Tipus d'exercici (no editable si ja existeix) */}
         <Controller
           control={control}
           name="type"
@@ -290,6 +324,7 @@ export default function ExerciseEditPage() {
           <HelperText type="error">{errors.type?.message}</HelperText>
         )}
 
+        {/* Missatge informatiu si no es pot canviar el tipus */}
         {params.uuid !== undefined && (
           <HelperText type="info">
             You cannot change an exercise's type once created. To do so, delete
@@ -297,6 +332,7 @@ export default function ExerciseEditPage() {
           </HelperText>
         )}
 
+        {/* Part del cos */}
         <Controller
           control={control}
           name="bodyPart"
@@ -318,6 +354,7 @@ export default function ExerciseEditPage() {
           <HelperText type="error">{errors.bodyPart?.message}</HelperText>
         )}
 
+        {/* Descripció */}
         <Controller
           control={control}
           name="description"
@@ -339,10 +376,12 @@ export default function ExerciseEditPage() {
           <HelperText type="error">{errors.description?.message}</HelperText>
         )}
 
+        {/* Error global del formulari */}
         {errors.root && (
           <HelperText type="error">{errors.root?.message}</HelperText>
         )}
 
+        {/* Missatge informatiu si s'està modificant un exercici per defecte */}
         {params.defaultExerciseUUID && (
           <HelperText type="info">
             You are now modifying a default exercise. When you save it, a copy
@@ -351,10 +390,12 @@ export default function ExerciseEditPage() {
           </HelperText>
         )}
 
+        {/* Missatge de càrrega */}
         {isSubmitting && (
           <HelperText type="info">Saving exercise...</HelperText>
         )}
 
+        {/* Botó per eliminar l'exercici (només si ja existeix) */}
         {params.uuid !== undefined && (
           <Button
             mode="outlined"
@@ -366,6 +407,7 @@ export default function ExerciseEditPage() {
           </Button>
         )}
 
+        {/* Diàleg de confirmació per eliminar l'exercici */}
         <Portal>
           <Dialog
             visible={deleteDialogVisible}

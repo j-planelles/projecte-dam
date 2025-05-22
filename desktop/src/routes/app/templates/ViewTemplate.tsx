@@ -15,14 +15,25 @@ import WorkoutViewer from "../../../components/WorkoutViewer";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de visualització d'una plantilla d'entrenament.
+ * Carrega les dades de la plantilla a partir de l'UUID de la ruta i mostra el seu detall.
+ * Permet editar o eliminar la plantilla.
+ * @returns {JSX.Element} El component de la pàgina de detall d'una plantilla.
+ */
 export default function ViewTemplatePage() {
+  // Obté l'UUID de la plantilla des dels paràmetres de la ruta
   const { "template-uuid": workoutUuid } = useParams();
+
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+
+  // Consulta les dades de la plantilla concreta
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/templates", workoutUuid],
     queryFn: async () =>
@@ -32,6 +43,10 @@ export default function ViewTemplatePage() {
       }),
   });
 
+  /**
+   * Construeix l'objecte workout a partir de les dades rebudes de l'API.
+   * Utilitza useMemo per evitar càlculs innecessaris.
+   */
   const workout = useMemo(
     () =>
       ({
@@ -62,12 +77,15 @@ export default function ViewTemplatePage() {
 
   return (
     <Container>
+      {/* Loader mentre es carrega la informació */}
       {isLoading && (
         <Box className="flex items-center justify-center">
           <CircularProgress />
         </Box>
       )}
+      {/* Missatge d'error si la consulta falla */}
       {error && <Typography color="error">{error.message}</Typography>}
+      {/* Mostra el detall de la plantilla i els botons d'acció si la consulta té èxit */}
       {isSuccess && (
         <>
           <ActionButtons />
@@ -78,6 +96,10 @@ export default function ViewTemplatePage() {
   );
 }
 
+/**
+ * Botons d'acció per editar o eliminar la plantilla.
+ * Gestiona la navegació i la petició d'eliminació.
+ */
 const ActionButtons = () => {
   const { "template-uuid": workoutUuid } = useParams();
   const navigate = useNavigate();
@@ -91,6 +113,10 @@ const ActionButtons = () => {
 
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per eliminar la plantilla.
+   * Invalida la cache i redirigeix a la llista de plantilles.
+   */
   const handleDelete = async () => {
     setQueryError(null);
     try {

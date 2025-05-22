@@ -20,7 +20,14 @@ import { useShallow } from "zustand/react/shallow";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de gestió de sol·licituds d'usuaris a l'entrenador.
+ * Mostra totes les sol·licituds pendents, permet acceptar o denegar cada una.
+ * Mostra un loader mentre es carrega, errors si n'hi ha, i un missatge si no hi ha sol·licituds.
+ * @returns {JSX.Element} El component de la pàgina de sol·licituds d'entrenador.
+ */
 export default function TrainerRequestsPage() {
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -28,6 +35,7 @@ export default function TrainerRequestsPage() {
     })),
   );
 
+  // Consulta la llista de sol·licituds pendents
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "trainer", "/trainer/requests"],
     queryFn: async () =>
@@ -39,12 +47,17 @@ export default function TrainerRequestsPage() {
 
   return (
     <Container>
+      {/* Loader mentre es carrega la llista */}
       {isLoading && (
         <Box className="flex items-center justify-center">
           <CircularProgress />
         </Box>
       )}
+
+      {/* Missatge d'error si la consulta falla */}
       {error && <Typography color="error">{error.message}</Typography>}
+
+      {/* Llista de sol·licituds si la consulta té èxit */}
       {isSuccess &&
         !!data &&
         (data.length > 0 ? (
@@ -64,6 +77,7 @@ export default function TrainerRequestsPage() {
             ))}
           </List>
         ) : (
+          // Missatge si no hi ha sol·licituds
           <Box className="flex flex-col items-center">
             <GroupAddOutlinedIcon sx={{ width: 180, height: 180 }} />
             <Typography variant="h4">No requests found...</Typography>
@@ -73,6 +87,10 @@ export default function TrainerRequestsPage() {
   );
 }
 
+/**
+ * Element de la llista d'usuaris amb accions per acceptar o denegar la sol·licitud.
+ * @param user L'usuari que ha fet la sol·licitud.
+ */
 const UserListItem = ({ user }: { user: user }) => {
   return (
     <ListItem
@@ -81,15 +99,14 @@ const UserListItem = ({ user }: { user: user }) => {
       sx={{
         paddingY: 1,
         "& .MuiListItemSecondaryAction-root": {
-          opacity: 0, // Make it invisible by default
-          visibility: "hidden", // Hide it completely including from screen readers initially
+          opacity: 0, // Amaga per defecte
+          visibility: "hidden",
         },
-        // Apply styles when the ListItem itself is hovered
         "&:hover": {
           backgroundColor: "background.default",
           "& .MuiListItemSecondaryAction-root": {
-            opacity: 1, // Make it visible on hover
-            visibility: "visible", // Make it accessible
+            opacity: 1,
+            visibility: "visible",
           },
         },
       }}
@@ -102,6 +119,11 @@ const UserListItem = ({ user }: { user: user }) => {
   );
 };
 
+/**
+ * Accions per acceptar o denegar la sol·licitud d'un usuari.
+ * Mostra l'estat de la petició i missatges d'error si cal.
+ * @param userUUID UUID de l'usuari.
+ */
 const UserListItemActions = ({ userUUID }: { userUUID: string }) => {
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
@@ -114,6 +136,10 @@ const UserListItemActions = ({ userUUID }: { userUUID: string }) => {
   const [queryError, setQueryError] = useState<string | null>(null);
   const [input, setInput] = useState<null | "accept" | "deny">(null);
 
+  /**
+   * Handler per acceptar o denegar la sol·licitud.
+   * Actualitza l'estat i mostra el resultat.
+   */
   const handleSubmit = async (userInput: "accept" | "deny") => {
     setIsLoading(true);
     setQueryError(null);

@@ -26,20 +26,23 @@ import { updateAuthConfig } from "../../lib/authConfig";
 import LikesDialog from "../../components/LikesDialog";
 import { handleError } from "../../lib/errorHandler";
 
+/**
+ * Pàgina de configuració del perfil d'usuari.
+ * Permet editar les dades personals, canviar la contrasenya, gestionar el rol de trainer i accedir a accions crítiques.
+ * @returns {JSX.Element} El component de la pàgina de configuració del perfil.
+ */
 export default function SettingsPage() {
   return (
     <Container className="flex flex-col gap-2">
       <UserDataForm />
-
       <ChangePasswordForm />
-
       <UserDataPart />
-
       <DangerZone />
     </Container>
   );
 }
 
+// Esquema de validació per a les dades de l'usuari
 const userDataSchema = z.object({
   username: z.string().min(1, "Required"),
   name: z.string().min(1, "Required"),
@@ -48,6 +51,10 @@ const userDataSchema = z.object({
 
 type UserDataFormSchemaType = z.infer<typeof userDataSchema>;
 
+/**
+ * Formulari per editar les dades bàsiques de l'usuari (nom, usuari, biografia).
+ * Mostra errors de validació i missatges d'èxit.
+ */
 function UserDataForm() {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -64,6 +71,7 @@ function UserDataForm() {
       }),
   });
 
+  // Estat per forçar l'actualització dels camps
   const [updates, setUpdates] = useState<number>(0);
 
   const {
@@ -76,16 +84,20 @@ function UserDataForm() {
     resolver: zodResolver(userDataSchema),
   });
 
+  // Inicialitza el formulari amb les dades rebudes de l'API
   useEffect(() => {
     if (data && isSuccess) {
       setValue("username", data.username);
       setValue("name", data.full_name);
       setValue("bio", data?.biography || "");
-
       setUpdates((state) => state + 1);
     }
   }, [data, isSuccess, setValue]);
 
+  /**
+   * Handler per enviar les dades modificades a l'API.
+   * Mostra errors específics si el nom d'usuari ja existeix.
+   */
   const submitHandler = async ({
     username,
     name,
@@ -129,6 +141,7 @@ function UserDataForm() {
     <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle1">User data</Typography>
 
+      {/* Camp d'usuari */}
       <Controller
         control={control}
         name="username"
@@ -149,6 +162,7 @@ function UserDataForm() {
         )}
       />
 
+      {/* Camp de nom complet */}
       <Controller
         control={control}
         name="name"
@@ -169,6 +183,7 @@ function UserDataForm() {
         )}
       />
 
+      {/* Camp de biografia */}
       <Controller
         control={control}
         name="bio"
@@ -190,12 +205,13 @@ function UserDataForm() {
         )}
       />
 
+      {/* Errors globals i de l'API */}
       {errors.root && (
         <FormHelperText error>{errors.root.message}</FormHelperText>
       )}
-
       {error && <FormHelperText error>{error.message}</FormHelperText>}
 
+      {/* Botó per actualitzar les dades */}
       <Button
         variant="outlined"
         disabled={isLoading || isSubmitting}
@@ -204,6 +220,7 @@ function UserDataForm() {
         {isSubmitting || isLoading ? "Updating..." : "Update user data"}
       </Button>
 
+      {/* Missatge d'èxit */}
       {isSubmitSuccessful && (
         <FormHelperText sx={{ color: "success.main" }}>
           User data updated.
@@ -213,6 +230,7 @@ function UserDataForm() {
   );
 }
 
+// Esquema de validació per al canvi de contrasenya
 const changePasswordSchema = z
   .object({
     password: z.string().min(8),
@@ -225,6 +243,10 @@ const changePasswordSchema = z
 
 type ChangePasswordFormSchemaType = z.infer<typeof changePasswordSchema>;
 
+/**
+ * Formulari per canviar la contrasenya de l'usuari.
+ * Mostra errors de validació i missatges d'èxit.
+ */
 function ChangePasswordForm() {
   const { apiClient, token, serverIp } = useAuthStore(
     useShallow((state) => ({
@@ -243,6 +265,9 @@ function ChangePasswordForm() {
     resolver: zodResolver(changePasswordSchema),
   });
 
+  /**
+   * Handler per enviar la nova contrasenya a l'API (encriptada).
+   */
   const submitHandler = async ({ password }: ChangePasswordFormSchemaType) => {
     try {
       const encryptedPassword = await encodePassword(password, serverIp);
@@ -265,6 +290,7 @@ function ChangePasswordForm() {
     <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Typography variant="subtitle1">Change Password</Typography>
 
+      {/* Camp de nova contrasenya */}
       <Controller
         control={control}
         name="password"
@@ -282,6 +308,7 @@ function ChangePasswordForm() {
         )}
       />
 
+      {/* Camp de confirmació de contrasenya */}
       <Controller
         control={control}
         name="confirmPassword"
@@ -299,10 +326,12 @@ function ChangePasswordForm() {
         )}
       />
 
+      {/* Error global */}
       {errors.root && (
         <FormHelperText error>{errors.root.message}</FormHelperText>
       )}
 
+      {/* Botó per canviar la contrasenya */}
       <Button
         variant="outlined"
         disabled={isSubmitting}
@@ -311,6 +340,7 @@ function ChangePasswordForm() {
         {isSubmitting ? "Changing..." : "Change password"}
       </Button>
 
+      {/* Missatge d'èxit */}
       {isSubmitSuccessful && (
         <FormHelperText sx={{ color: "success.main" }}>
           Password changed.
@@ -320,6 +350,10 @@ function ChangePasswordForm() {
   );
 }
 
+/**
+ * Mostra opcions addicionals si l'usuari és entrenador (trainer).
+ * Permet revisar interessos i donar-se de baixa com a entrenador.
+ */
 function UserDataPart() {
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
@@ -371,6 +405,10 @@ function UserDataPart() {
   );
 }
 
+/**
+ * Zona de perill amb accions crítiques: eliminar el compte.
+ * @returns {JSX.Element} El component de la zona de perill.
+ */
 function DangerZone() {
   return (
     <Box sx={{ mx: 2, display: "flex", flexDirection: "column", gap: 2 }}>
@@ -380,6 +418,10 @@ function DangerZone() {
   );
 }
 
+/**
+ * Botó per eliminar el compte de l'usuari.
+ * Mostra un diàleg de confirmació i un Snackbar en cas d'error.
+ */
 const DeleteAccountButton = () => {
   const navigate = useNavigate();
   const { setToken } = useAuthStore(
@@ -397,6 +439,10 @@ const DeleteAccountButton = () => {
   const [visible, setVisible] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per eliminar el compte de l'usuari.
+   * Desa l'estat i redirigeix a la pantalla principal.
+   */
   const deleteAccountHandler = async () => {
     setQueryError(null);
     try {
@@ -444,6 +490,10 @@ const DeleteAccountButton = () => {
   );
 };
 
+/**
+ * Botó per donar-se de baixa com a entrenador.
+ * Mostra un diàleg de confirmació i un Snackbar en cas d'error.
+ */
 const UnenrollAsTrainerButton = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -457,6 +507,10 @@ const UnenrollAsTrainerButton = () => {
   const [visible, setVisible] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per donar-se de baixa com a entrenador.
+   * Invalida la cache i redirigeix a la pantalla principal.
+   */
   const deleteAccountHandler = async () => {
     setQueryError(null);
     try {

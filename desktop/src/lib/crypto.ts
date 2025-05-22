@@ -1,5 +1,10 @@
 import axios from "axios";
 
+/**
+ * Converteix un ArrayBuffer a una cadena Base64.
+ * @param buffer ArrayBuffer a convertir.
+ * @returns {string} Cadena codificada en Base64.
+ */
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
   const bytes = new Uint8Array(buffer);
@@ -10,22 +15,33 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return window.btoa(binary);
 }
 
+/**
+ * Converteix una clau pública en format PEM a una cadena binària.
+ * Elimina la capçalera i el peu PEM i decodifica el contingut Base64.
+ * @param pem Clau pública en format PEM.
+ * @returns {string} Cadena binària de la clau.
+ */
 function pemToBinary(pem: string) {
-  // Remove PEM header and footer
+  // Elimina la capçalera i el peu PEM
   const pemHeader = "-----BEGIN PUBLIC KEY-----";
   const pemFooter = "-----END PUBLIC KEY-----";
   const pemContents = pem
     .replace(pemHeader, "")
     .replace(pemFooter, "")
-    .replace(/\s+/g, ""); // Remove all whitespace, including newlines
+    .replace(/\s+/g, ""); // Elimina tots els espais i salts de línia
   try {
-    return window.atob(pemContents); // Base64 decode
+    return window.atob(pemContents); // Decodifica Base64
   } catch (e) {
     console.error("Base64 decoding failed:", e);
     throw new Error("Failed to decode PEM string (is it valid Base64?)");
   }
 }
 
+/**
+ * Converteix una cadena binària a ArrayBuffer.
+ * @param binaryString Cadena binària a convertir.
+ * @returns {ArrayBuffer} ArrayBuffer resultant.
+ */
 function binaryStringToArrayBuffer(binaryString: string) {
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -35,6 +51,12 @@ function binaryStringToArrayBuffer(binaryString: string) {
   return bytes.buffer;
 }
 
+/**
+ * Encripta un missatge utilitzant una clau pública RSA.
+ * @param message Missatge en text pla a encriptar.
+ * @param key Clau pública RSA (CryptoKey).
+ * @returns {Promise<string | undefined>} Missatge encriptat en Base64.
+ */
 async function encryptMessage(
   message: string,
   key: CryptoKey,
@@ -58,34 +80,48 @@ async function encryptMessage(
   }
 }
 
+/**
+ * Importa una clau pública RSA en format PEM i la converteix a CryptoKey.
+ * @param pemKey Clau pública en format PEM.
+ * @returns {Promise<CryptoKey>} Clau pública importada.
+ */
 async function importRsaPublicKey(pemKey: string) {
   try {
     const binaryDer = pemToBinary(pemKey);
     const arrayBufferDer = binaryStringToArrayBuffer(binaryDer);
 
     return await window.crypto.subtle.importKey(
-      "spki", // SubjectPublicKeyInfo format (standard for PEM public keys)
+      "spki", // Format SubjectPublicKeyInfo (estàndard per claus públiques PEM)
       arrayBufferDer,
       {
         name: "RSA-OAEP",
-        hash: "SHA-256", // Make sure this matches server-side if it decrypts
+        hash: "SHA-256", // Ha de coincidir amb el servidor
       },
-      true, // whether the key is extractable (true for public keys is fine)
-      ["encrypt"], // key usages
+      true, // La clau és extreïble (true per claus públiques)
+      ["encrypt"], // Ús de la clau
     );
   } catch (e) {
     console.error("Error importing public key:", e);
-    throw e; // Re-throw to be caught by caller
+    throw e; // Torna a llençar l'error per ser capturat pel caller
   }
 }
 
+/**
+ * Encripta una contrasenya utilitzant la clau pública RSA del servidor.
+ * Obté la clau pública del servidor, la importa i encripta la contrasenya.
+ * @param plaintext Contrasenya en text pla.
+ * @param serverIp IP o URL del servidor.
+ * @returns {Promise<string>} Contrasenya encriptada en Base64.
+ */
 export async function encodePassword(
   plaintext: string,
   serverIp: string,
 ): Promise<string> {
+  // Obté la clau pública del servidor
   const response = await axios.get(`${serverIp}/auth/publickey`);
   const key = await importRsaPublicKey(response.data);
 
+  // Encripta la contrasenya
   const cipherText = await encryptMessage(plaintext, key);
   if (!cipherText) {
     throw new Error("Failed to encode password.");

@@ -10,13 +10,22 @@ import { AddIcon, DumbellIcon } from "../../Icons";
 import WorkoutCard from "../../ui/WorkoutCard";
 import HomeTabsScreen from "../../ui/screen/HomeTabsScreen";
 
+/**
+ * Component principal de la pestanya "Entrenament".
+ * Mostra opcions per iniciar un entrenament, gestionar exercicis i veure plantilles d'entrenament.
+ * @returns {JSX.Element} El component de la pestanya Entrenament.
+ */
 export default function WorkoutTab() {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
+  /**
+   * Gestiona l'acció de refrescar la pantalla.
+   * Invalida les consultes de plantilles de l'usuari per recarregar les dades.
+   */
   const refreshControlHandler = () => {
     setRefreshing(true);
-    queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] });
+    queryClient.invalidateQueries({ queryKey: ["user", "/user/templates"] }); // Invalida les consultes de plantilles
 
     setTimeout(() => {
       setRefreshing(false);
@@ -50,6 +59,10 @@ export default function WorkoutTab() {
   );
 }
 
+/**
+ * Component que mostra una llista de les plantilles d'entrenament de l'usuari.
+ * @returns {JSX.Element} El component de la llista de plantilles.
+ */
 const TemplatesList = () => {
   const theme = useTheme();
   const router = useRouter();
@@ -59,6 +72,8 @@ const TemplatesList = () => {
       token: state.token,
     })),
   );
+
+  // Consulta per obtenir les plantilles d'entrenament de l'usuari
   const { data, isLoading, isSuccess, error } = useQuery({
     queryKey: ["user", "/user/templates"],
     queryFn: async () =>
@@ -74,18 +89,18 @@ const TemplatesList = () => {
         <CreateTemplateIcon />
       </View>
 
-      {isLoading && (
+      {isLoading && ( // Mostra un indicador de càrrega mentre s'obtenen les dades
         <View>
           <ActivityIndicator size={"large"} />
         </View>
       )}
-      {error && (
+      {error && ( // Mostra un missatge d'error si la càrrega falla
         <View>
           <Text>{error.message}</Text>
         </View>
       )}
-      {isSuccess &&
-        (data.length > 0 ? (
+      {isSuccess && // Si la càrrega és exitosa
+        (data.length > 0 ? ( // Si hi ha plantilles per mostrar
           data
             .map(
               (data) =>
@@ -124,6 +139,7 @@ const TemplatesList = () => {
               />
             ))
         ) : (
+          // Si no hi ha plantilles, mostra un missatge informatiu i un botó per crear-ne una
           <View className="flex-col items-center gap-2">
             <DumbellIcon size={130} color={theme.colors.onSurface} />
             <Text variant="headlineMedium">No templates found.</Text>
@@ -137,6 +153,10 @@ const TemplatesList = () => {
   );
 };
 
+/**
+ * Component de botó per iniciar un nou entrenament buit.
+ * @returns {JSX.Element} El component del botó.
+ */
 const StartWorkoutButton = () => {
   const router = useRouter();
   const { startEmptyWorkout, isOngoingWorkout } = useWorkoutStore(
@@ -146,6 +166,7 @@ const StartWorkoutButton = () => {
     })),
   );
 
+  /** Gestiona l'inici d'un nou entrenament. */
   const workoutStartHandler = () => {
     startEmptyWorkout();
     router.push("/workout/ongoing/");
@@ -163,10 +184,17 @@ const StartWorkoutButton = () => {
   );
 };
 
+/**
+ * Component d'icona per crear una nova plantilla.
+ * Es mostra al costat del títol de la llista de plantilles.
+ * @returns {JSX.Element} El component de la icona.
+ */
 const CreateTemplateIcon = () => {
+  // Comprova si hi ha un entrenament en curs per deshabilitar el botó
   const isOngoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
 
   return (
+    // Enllaç a la pantalla de creació/edició de plantilles
     <Link asChild href="/workout/template-view/">
       <IconButton
         icon={(props) => <AddIcon {...props} />}
@@ -177,10 +205,16 @@ const CreateTemplateIcon = () => {
   );
 };
 
+/**
+ * Component de botó per crear una nova plantilla.
+ * Es mostra quan la llista de plantilles és buida.
+ * @returns {JSX.Element} El component del botó.
+ */
 const CreateTemplateEmptyListIcon = () => {
   const isOngoingWorkout = useWorkoutStore((state) => state.isOngoingWorkout);
 
   return (
+    // Enllaç a la pantalla de creació/edició de plantilles
     <Link asChild href="/workout/template-view/">
       <Button
         icon={(props) => <AddIcon {...props} />}

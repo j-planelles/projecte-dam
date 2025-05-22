@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useAuthStore } from "../../store/auth-store";
 import { handleError } from "../../lib/errorHandler";
 
+// Esquema de validació de Zod pel formulari
 const schema = z.object({
   name: z.string(),
   bio: z.string().optional(),
@@ -14,8 +15,15 @@ const schema = z.object({
 
 type FormSchemaType = z.infer<typeof schema>;
 
+/**
+ * Pàgina per completar el perfil d'usuari durant el registre.
+ * Permet introduir el nom complet i la biografia, i desa la informació al servidor.
+ * @returns {JSX.Element} El component de la pàgina de configuració de perfil.
+ */
 export default function RegisterProfilePage() {
   const navigate = useNavigate();
+
+  // Inicialitza el formulari amb Zod i React Hook Form
   const {
     control,
     handleSubmit,
@@ -23,6 +31,7 @@ export default function RegisterProfilePage() {
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({ resolver: zodResolver(schema) });
 
+  // Obté l'apiClient i el token d'autenticació de l'store d'usuari
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
@@ -30,6 +39,10 @@ export default function RegisterProfilePage() {
     })),
   );
 
+  /**
+   * Handler per desar el perfil de l'usuari.
+   * Desa el nom i la biografia a l'API i navega a la pantalla principal si té èxit.
+   */
   const submitHandler = async ({ name, bio }: FormSchemaType) => {
     try {
       await apiClient.post(
@@ -66,6 +79,7 @@ export default function RegisterProfilePage() {
       </Typography>
 
       <Box className="flex flex-col w-full">
+        {/* Input per al nom complet */}
         <Controller
           control={control}
           name="name"
@@ -87,6 +101,7 @@ export default function RegisterProfilePage() {
           )}
         />
 
+        {/* Input per a la biografia */}
         <Controller
           control={control}
           name="bio"
@@ -109,12 +124,14 @@ export default function RegisterProfilePage() {
           )}
         />
 
+        {/* Missatge d'error global */}
         {errors.root && (
           <Typography variant="body2" color="error">
             {errors.root.message}
           </Typography>
         )}
 
+        {/* Botó per desar el perfil */}
         <Button
           fullWidth
           variant="filled"

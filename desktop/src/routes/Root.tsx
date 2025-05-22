@@ -8,6 +8,14 @@ import { useShallow } from "zustand/react/shallow";
 import axios from "axios";
 import { loadAuthConfig } from "../lib/authConfig";
 
+/**
+ * Component que redirigeix l'usuari a la ruta adequada segons l'estat d'autenticació i configuració.
+ * - Si hi ha token i servidor vàlid, navega al dashboard.
+ * - Si només hi ha servidor, navega a login.
+ * - Si no hi ha configuració, navega a la selecció de servidor.
+ * Mostra un loader mentre comprova l'estat.
+ * @returns {JSX.Element} El component de redirecció automàtica.
+ */
 export function RootRedirector() {
   const navigate = useNavigate();
   const {
@@ -27,6 +35,10 @@ export function RootRedirector() {
   );
   const [isLoading, setIsLoading] = useState(true);
 
+  /**
+   * Comprova la configuració local i l'estat del servidor.
+   * Redirigeix segons si hi ha token, servidor i connexió vàlida.
+   */
   const testServer = async () => {
     try {
       const configData = await loadAuthConfig();
@@ -43,6 +55,7 @@ export function RootRedirector() {
         setUsername(configData.username);
       }
 
+      // Comprova que el servidor respongui
       const response = await axios.get(`${serverIp}/`);
 
       setServerIp(serverIp, response.data.name);
@@ -53,16 +66,19 @@ export function RootRedirector() {
         navigate("/landing/login");
       }
     } catch (error: unknown) {
+      // Si falla la connexió, navega a la selecció de servidor
       navigate("/landing/server");
     }
   };
 
+  // Simula un petit delay per mostrar el loader
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
     }, 100);
   }, []);
 
+  // Un cop ha passat el delay, executa la comprovació
   useEffect(() => {
     if (!isLoading) {
       testServer();
@@ -78,6 +94,11 @@ export function RootRedirector() {
   );
 }
 
+/**
+ * Component arrel que proveeix el context de React Query
+ * Mostra el component fill corresponent segons la ruta.
+ * @returns {JSX.Element} El layout arrel de l'aplicació.
+ */
 const client = new QueryClient();
 
 export function RootLayout() {

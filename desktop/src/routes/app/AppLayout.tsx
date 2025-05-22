@@ -77,13 +77,21 @@ const NAV_ITEMS_TRAINER_ENROLLED: NavigationBarSection[] = [
   },
 ];
 
+/**
+ * Layout principal de l'aplicació.
+ * Mostra la barra superior, la barra de navegació lateral i el contingut principal.
+ * Adapta els ítems de navegació segons si l'usuari és entrenador o no.
+ * @returns {JSX.Element} El component de layout de l'app.
+ */
 export default function AppLayout() {
+  // Obté l'usuari i el token per consultar el perfil
   const { apiClient, token } = useAuthStore(
     useShallow((state) => ({
       apiClient: state.apiClient,
       token: state.token,
     })),
   );
+  // Consulta el perfil de l'usuari per saber si és entrenador
   const { data: userData, isSuccess } = useQuery({
     queryKey: ["user", "/auth/profile"],
     queryFn: async () =>
@@ -93,6 +101,7 @@ export default function AppLayout() {
     staleTime: 2 * 60 * 60 * 1000, // 2 hores
   });
 
+  // Decideix els ítems de navegació segons el rol de l'usuari
   const navItems = [
     ...NAV_ITEMS,
     ...(isSuccess && userData?.is_trainer
@@ -111,8 +120,10 @@ export default function AppLayout() {
           backgroundColor: "background.default",
         }}
       >
+        {/* Barra de navegació lateral */}
         {isSuccess && <NavigationBar items={navItems} />}
 
+        {/* Contingut principal */}
         <Box
           component="main"
           sx={{
@@ -135,6 +146,11 @@ export default function AppLayout() {
   );
 }
 
+/**
+ * Barra superior fixa amb el logo, botó de compte i botó de retrocés.
+ * @param username Nom d'usuari.
+ * @param fullName Nom complet de l'usuari.
+ */
 const TopBar = ({
   username,
   fullName,
@@ -162,6 +178,9 @@ const TopBar = ({
   );
 };
 
+/**
+ * Botó per tornar enrere a la navegació.
+ */
 const BackIcon = () => {
   const navigate = useNavigate();
 
@@ -176,6 +195,11 @@ const BackIcon = () => {
   );
 };
 
+/**
+ * Botó d'accés al compte d'usuari, amb menú per accedir a la configuració o tancar sessió.
+ * @param username Nom d'usuari.
+ * @param fullName Nom complet de l'usuari.
+ */
 const MyAccountButton = ({
   username = "user",
   fullName = "User",
@@ -184,6 +208,7 @@ const MyAccountButton = ({
   const setToken = useAuthStore((state) => state.setToken);
   const [isDialogShown, setIsDialogShown] = useState<boolean>(false);
 
+  // Handler per tancar sessió
   const handleLogout = async () => {
     await updateAuthConfig({ token: undefined });
     setIsDialogShown(false);
@@ -191,6 +216,7 @@ const MyAccountButton = ({
     navigate("/");
   };
 
+  // Handler per anar a la configuració
   const navigateToSettings = () => {
     setIsDialogShown(false);
     navigate("/app/settings");

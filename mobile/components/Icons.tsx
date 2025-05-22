@@ -1,17 +1,41 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
+// Fitxer per emmagetzemar components dels diferents icones utilitzats a l'aplicació.
+
+/**
+ * @interface IconProps
+ * @description Defineix les propietats que pot acceptar un component d'icona.
+ * @property {number} [size=24] - La mida de la icona en píxels. Per defecte és 24.
+ * @property {string} [color="black"] - El color de la icona. Per defecte és "black".
+ *                                     Pot ser qualsevol cadena de color CSS vàlida (ex: "red", "#FF0000").
+ * @property {string} [className] - Una cadena de classes CSS opcionals per aplicar a la icona.
+ *                                  Útil per a estils addicionals o per a biblioteques d'estils com Tailwind CSS.
+ */
 interface IconProps {
   size?: number;
   color?: string;
   className?: string;
 }
 
+/**
+ * @component HomeIcon
+ * @description Un component funcional de React que renderitza una icona de "casa" (home)
+ * utilitzant `MaterialIcons`.
+ *
+ * @param {IconProps} props - Les propietats per personalitzar la icona.
+ * @param {number} [props.size=24] - La mida de la icona.
+ * @param {string} [props.color="black"] - El color de la icona.
+ * @param {string} [props.className] - Classes CSS addicionals per a la icona.
+ * @returns {JSX.Element} L'element JSX que representa la icona de "home".
+ */
 export const HomeIcon = ({
-  size = 24,
-  color = "black",
-  className,
-}: IconProps) => (
+  size = 24, // Valor per defecte per a la mida si no es proporciona
+  color = "black", // Valor per defecte per al color si no es proporciona
+  className, // Classe CSS opcional
+}: IconProps): JSX.Element => (
+  // Renderitza la icona "home" del paquet MaterialIcons
+  // amb les propietats de mida, color i classe especificades.
   <MaterialIcons name="home" size={size} color={color} className={className} />
 );
 

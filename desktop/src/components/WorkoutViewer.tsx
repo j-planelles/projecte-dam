@@ -1,6 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { kgToLbs, kmToMiles } from "../lib/unitTransformers";
 
+/**
+ * Component per visualitzar la informació d'un entrenament.
+ * Mostra la informació bàsica, la llista d'exercicis i les sèries de cada exercici.
+ * @param workout L'entrenament a mostrar.
+ * @param timestamp Si es mostra la data i durada de l'entrenament (per defecte true).
+ * @returns {JSX.Element} El component de visualització d'entrenament.
+ */
 export default function WorkoutViewer({
   workout,
   timestamp = true,
@@ -16,6 +23,11 @@ export default function WorkoutViewer({
   );
 }
 
+/**
+ * Mostra la informació bàsica de l'entrenament (títol, descripció, data i durada).
+ * @param workout L'entrenament.
+ * @param timestamp Si es mostra la data i durada.
+ */
 const WorkoutInformation = ({
   workout,
   timestamp,
@@ -49,6 +61,10 @@ const WorkoutInformation = ({
   );
 };
 
+/**
+ * Mostra la llista d'exercicis de l'entrenament.
+ * @param exercises Llista d'exercicis de l'entrenament.
+ */
 const WorkoutExercises = ({
   exercises,
 }: {
@@ -57,12 +73,16 @@ const WorkoutExercises = ({
   return (
     <Box>
       {exercises.map((exercise, index) => (
-        <WorkoutExercise key={index} exercise={exercise} />
+        <WorkoutExercise key={`exercise-${index} - ${exercise.exercise.uuid}`} exercise={exercise} />
       ))}
     </Box>
   );
 };
 
+/**
+ * Mostra la informació d'un exercici i les seves sèries.
+ * @param exercise Exercici a mostrar.
+ */
 const WorkoutExercise = ({
   exercise,
 }: {
@@ -75,7 +95,7 @@ const WorkoutExercise = ({
       {exercise.sets.length > 0 ? (
         exercise.sets.map((set, index) => (
           <WorkoutSet
-            key={index}
+            key={`set-${index}-${exercise.exercise.uuid}}`}
             set={set}
             index={index}
             exerciseType={exercise.exercise.type}
@@ -95,6 +115,11 @@ const WorkoutExercise = ({
   );
 };
 
+/**
+ * Dona format a un valor numèric com a temps (mm:ss).
+ * @param externalValue Valor numèric a formatar.
+ * @returns {string} Temps en format mm:ss.
+ */
 const formatAsTime = (externalValue: number) => {
   const formattedValue = Math.floor(externalValue).toString();
   const minutesPart =
@@ -108,6 +133,14 @@ const formatAsTime = (externalValue: number) => {
   return `${minutesPart}:${secondsPart}`;
 };
 
+/**
+ * Mostra la informació d'una sèrie d'un exercici.
+ * Adapta la visualització segons el tipus d'exercici i unitat de pes.
+ * @param set Sèrie a mostrar.
+ * @param index Índex de la sèrie.
+ * @param exerciseType Tipus d'exercici.
+ * @param weightUnit Unitat de pes (per defecte "metric").
+ */
 const WorkoutSet = ({
   set,
   index,
@@ -141,8 +174,8 @@ const WorkoutSet = ({
         )}
       <Typography className="flex-1 px-2">
         {exerciseType === "cardio" ||
-        exerciseType === "duration" ||
-        exerciseType === "countdown"
+          exerciseType === "duration" ||
+          exerciseType === "countdown"
           ? formatAsTime(set.reps)
           : `${set.reps} reps`}
       </Typography>

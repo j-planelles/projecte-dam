@@ -16,6 +16,11 @@ import { useShallow } from "zustand/react/shallow";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina de xat entre entrenador i usuari.
+ * Mostra la llista de missatges i permet enviar-ne de nous.
+ * @returns {JSX.Element} El component de la pàgina de xat d'entrenador.
+ */
 export default function TrainerMessageBoardPage() {
   const { "user-uuid": userUuid } = useParams();
   const { apiClient, token } = useAuthStore(
@@ -24,6 +29,8 @@ export default function TrainerMessageBoardPage() {
       token: state.token,
     })),
   );
+
+  // Consulta la llista de missatges entre entrenador i usuari
   const { data } = useQuery({
     queryKey: [
       "user",
@@ -38,11 +45,13 @@ export default function TrainerMessageBoardPage() {
       }),
   });
 
+  // Estat local per gestionar missatges, input, càrrega i errors
   const [messages, setMessages] = useState<message[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  // Actualitza la llista de missatges quan arriben dades noves de l'API
   useEffect(() => {
     if (data) {
       setMessages(
@@ -58,6 +67,10 @@ export default function TrainerMessageBoardPage() {
     }
   }, [data]);
 
+  /**
+   * Handler per enviar un missatge al xat.
+   * Desa el missatge a l'API i l'afegeix a la llista local.
+   */
   const handleSubmit = async () => {
     setQueryError(null);
     if (messageInput) {
@@ -88,6 +101,7 @@ export default function TrainerMessageBoardPage() {
 
   return (
     <Container className="flex flex-1 flex-col h-full gap-2">
+      {/* Mostra la llista de missatges o un missatge si no n'hi ha */}
       {data ? (
         <>
           {messages.length > 0 ? (
@@ -97,6 +111,7 @@ export default function TrainerMessageBoardPage() {
               <Typography>No messages</Typography>
             </Box>
           )}
+          {/* Input per escriure i enviar missatges */}
           <Box className="flex-none">
             <Box
               className="flex flex-grow px-4 py-2 rounded-full items-center"
@@ -133,6 +148,7 @@ export default function TrainerMessageBoardPage() {
           <CircularProgress />
         </Box>
       )}
+      {/* Snackbar per mostrar errors d'enviament */}
       <Snackbar
         open={!!queryError}
         onClose={() => setQueryError(null)}
@@ -142,6 +158,11 @@ export default function TrainerMessageBoardPage() {
   );
 }
 
+/**
+ * Llista de missatges del xat.
+ * Fa scroll automàtic al final quan s'afegeix un missatge nou.
+ * @param messages Llista de missatges a mostrar.
+ */
 const MessageList = ({ messages }: { messages: message[] }) => {
   const messagesRef = useRef<null | HTMLDivElement>(null);
 
@@ -164,6 +185,11 @@ const MessageList = ({ messages }: { messages: message[] }) => {
   );
 };
 
+/**
+ * Bombolla de missatge individual.
+ * Mostra el missatge alineat a la dreta o esquerra segons qui l'ha enviat.
+ * @param message Missatge a mostrar.
+ */
 const MessageBubble = ({ message }: { message: message }) => {
   return (
     <Box

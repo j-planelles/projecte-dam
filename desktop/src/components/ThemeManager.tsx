@@ -2,6 +2,10 @@ import { type Theme, ThemeProvider } from "@mui/material";
 import { createMaterialYouTheme } from "mui-create-material-you-theme";
 import { type ReactNode, useState, useEffect } from "react";
 
+/**
+ * Definició dels esquemes de colors Material You (Material 3) per a mode clar i fosc.
+ * S'utilitzen per crear temes personalitzats amb createMaterialYouTheme.
+ */
 const material3Schemes = {
   light: {
     primary: "#415F91",
@@ -107,6 +111,9 @@ const material3Schemes = {
   },
 };
 
+/**
+ * Temes Material You generats a partir dels esquemes de colors.
+ */
 const materialYouLight: Theme = createMaterialYouTheme(
   "light",
   material3Schemes.light,
@@ -116,14 +123,24 @@ const materialYouDark: Theme = createMaterialYouTheme(
   material3Schemes.dark,
 );
 
+/**
+ * Component gestor del tema de l'aplicació.
+ * Aplica automàticament el mode clar o fosc segons la preferència del sistema.
+ * Actualitza el tema en temps real si l'usuari canvia la preferència del sistema.
+ * @param children Components fills que reben el tema.
+ * @returns {JSX.Element} El ThemeProvider amb el tema corresponent.
+ */
 export default function ThemeManager({ children }: { children: ReactNode }) {
+  // Detecta la preferència de mode fosc del sistema
   const prefersDarkMode = window.matchMedia(
     "(prefers-color-scheme: dark)",
   ).matches;
   const [mode, setMode] = useState(prefersDarkMode ? "dark" : "light");
 
+  // Selecciona el tema segons el mode
   const theme = mode === "dark" ? materialYouDark : materialYouLight;
 
+  // Escolta canvis en la preferència de color del sistema i actualitza el tema
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -133,7 +150,7 @@ export default function ThemeManager({ children }: { children: ReactNode }) {
 
     mediaQuery.addEventListener("change", handleChange);
 
-    // Clean up
+    // Neteja l'escoltador quan el component es desmunta
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };

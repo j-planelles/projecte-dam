@@ -41,19 +41,29 @@ import { useAuthStore } from "../store/auth-store";
 import { useWorkoutStore } from "../store/workout-store";
 import SearchField from "./SearchField";
 
+/**
+ * Editor visual d'entrenaments.
+ * Permet editar el nom, descripció, exercicis i sèries d'un entrenament.
+ * Inclou diàlegs per canviar la unitat de pes i afegir exercicis.
+ * @returns {JSX.Element} El component de l'editor d'entrenaments.
+ */
 export default function WorkoutEditor() {
+  // Estat per mostrar el diàleg de canvi de unitat de pes
   const [weightUnitDialogShown, setWeightUnitDialogShown] =
     useState<boolean>(false);
   const [weightUnitDialogIndex, setWeightUnitDialogIndex] = useState<number>(0);
 
+  // Handler per mostrar el diàleg de canvi de unitat de pes per a un exercici concret
   const showWeightUnitDialogHandler = (exerciseIndex: number) => () => {
     setWeightUnitDialogIndex(exerciseIndex);
     setWeightUnitDialogShown(true);
   };
 
+  // Estat per mostrar el diàleg d'afegir exercicis
   const [addExercisesDialogShown, setAddExercisesDialogShown] =
     useState<boolean>(false);
 
+  // Handler per mostrar el diàleg d'afegir exercicis
   const addExercisesDialogHandler = () => {
     setAddExercisesDialogShown(true);
   };
@@ -80,6 +90,9 @@ export default function WorkoutEditor() {
   );
 }
 
+/**
+ * Component per editar el nom i la descripció de l'entrenament.
+ */
 const WorkoutInformation = () => {
   const { title, description, setName, setDescription } = useWorkoutStore(
     useShallow((state) => ({
@@ -109,6 +122,10 @@ const WorkoutInformation = () => {
   );
 };
 
+/**
+ * Component que mostra la llista d'exercicis de l'entrenament.
+ * Permet afegir exercicis i mostrar el diàleg de canvi de unitat de pes.
+ */
 const WorkoutExercises = ({
   showWeightUnitDialog,
   showAddExercisesDialogHandler,
@@ -143,6 +160,10 @@ const WorkoutExercises = ({
   );
 };
 
+/**
+ * Component que mostra un exercici i les seves sèries.
+ * Permet accedir a accions com moure, eliminar o canviar la unitat de pes de l'exercici.
+ */
 const WorkoutExercise = ({
   index: exerciseIndex,
   isFirst = false,
@@ -176,19 +197,16 @@ const WorkoutExercise = ({
 
   const removeExerciseHandler = () => {
     setAnchorEl(null);
-
     removeExercise(exerciseIndex);
   };
 
   const moveExerciseUpHandler = () => {
     setAnchorEl(null);
-
     moveExercise(exerciseIndex, exerciseIndex - 1);
   };
 
   const moveExerciseDownHandler = () => {
     setAnchorEl(null);
-
     moveExercise(exerciseIndex, exerciseIndex + 1);
   };
 
@@ -266,6 +284,10 @@ const WorkoutExercise = ({
   );
 };
 
+/**
+ * Component que mostra una sèrie d'un exercici i permet editar-ne els valors.
+ * Permet canviar el tipus de sèrie, eliminar-la i editar pes/repeticions/temps.
+ */
 const WorkoutSet = ({
   index,
   exerciseIndex,
@@ -307,7 +329,6 @@ const WorkoutSet = ({
 
   const removeSetHandler = () => {
     setAnchorEl(null);
-
     removeSet(exerciseIndex, index);
   };
 
@@ -329,7 +350,6 @@ const WorkoutSet = ({
 
   const setTypeChangeFactory = (t: exerciseSet["type"]) => () => {
     setAnchorEl(null);
-
     updateSetType(exerciseIndex, index, t);
   };
 
@@ -412,6 +432,10 @@ const WorkoutSet = ({
   );
 };
 
+/**
+ * Input editable per a camps de sèrie (pes, repeticions, temps...).
+ * Mostra el valor i permet editar-lo en mode inline.
+ */
 type WorkoutFieldType =
   | "weight"
   | "assisted-weight"
@@ -435,6 +459,7 @@ const WorkoutSetTextField = ({
 
   const [internalValue, setInternalValue] = useState<string>("");
 
+  // Dona format a un valor numèric com a temps (mm:ss)
   const formatAsTime = () => {
     const formattedValue = Math.floor(externalValue).toString();
     const minutesPart =
@@ -448,6 +473,7 @@ const WorkoutSetTextField = ({
     return `${minutesPart}:${secondsPart}`;
   };
 
+  // Comprova que el valor de temps sigui vàlid (segons < 60)
   const isTimeCorrect = (value: string) => {
     if (value.length <= 2) {
       return Math.floor(Number(value)) < 60;
@@ -459,6 +485,7 @@ const WorkoutSetTextField = ({
     return Number(secondsPart) < 60;
   };
 
+  // Actualitza el valor intern i extern segons el tipus de camp
   const updateValues = (value: string) => {
     if (value === "" || Number.isNaN(Number(value))) {
       externalOnTextChange(0);
@@ -491,6 +518,7 @@ const WorkoutSetTextField = ({
     setEditing(false);
   };
 
+  // Decideix el text de la unitat i el format segons el tipus de camp
   const [unitText, displayAsTime, displayAsNegative] = useMemo(() => {
     if (unit === "weight") {
       return [weightUnit === "metric" ? "kg" : "lbs", false, false];
@@ -558,6 +586,9 @@ const WorkoutSetTextField = ({
   );
 };
 
+/**
+ * Diàleg per canviar la unitat de pes d'un exercici concret.
+ */
 const WeightUnitDialog = ({
   shown,
   exerciseIndex,
@@ -611,6 +642,10 @@ const WeightUnitDialog = ({
   );
 };
 
+/**
+ * Diàleg per afegir un exercici a l'entrenament.
+ * Mostra la llista d'exercicis disponibles i permet filtrar per nom.
+ */
 const AddExerciseDialog = ({
   shown,
   onDismiss,
@@ -638,6 +673,10 @@ const AddExerciseDialog = ({
     staleTime: 2 * 60 * 60 * 1000, // 2 hores
   });
 
+  /**
+   * Combina i ordena els exercicis de l'usuari i per defecte.
+   * Els exercicis per defecte que ja han estat afegits per l'usuari no es mostren dues vegades.
+   */
   const sortedExercises = useMemo(() => {
     const defaultExercisesFilter: string[] = [];
     const userExercises: exerciseList[] =
@@ -690,6 +729,10 @@ const AddExerciseDialog = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
 
+  /**
+   * Handler per afegir un exercici a l'entrenament.
+   * Si és per defecte, primer el crea com a exercici d'usuari.
+   */
   const confirmHandler = (exerciseUuid: string) => async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -715,7 +758,6 @@ const AddExerciseDialog = ({
           },
         );
 
-        // userExercisesToAdd.push({ ...exercise, uuid: exerciseUUID });
         addExercises([
           { exercise: { ...exercise, uuid: exerciseUUID }, sets: [] },
         ]);

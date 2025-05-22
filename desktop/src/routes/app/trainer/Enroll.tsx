@@ -8,9 +8,15 @@ import LikesDialog from "../../../components/LikesDialog";
 import { handleError } from "../../../lib/errorHandler";
 import { useAuthStore } from "../../../store/auth-store";
 
+/**
+ * Pàgina d'enrolament com a entrenador.
+ * Mostra informació sobre els avantatges de ser entrenador i permet iniciar el procés d'enrolament.
+ * @returns {JSX.Element} El component de la pàgina d'enrolament d'entrenador.
+ */
 export default function TrainerEnrollPage() {
   return (
     <>
+      {/* Imatge de capçalera amb crèdit */}
       <div
         className="h-96 flex items-end justify-end"
         style={{
@@ -54,6 +60,11 @@ export default function TrainerEnrollPage() {
   );
 }
 
+/**
+ * Botó per iniciar el procés d'enrolament com a entrenador.
+ * Mostra un diàleg per seleccionar interessos després d'enrolar-se.
+ * @returns {JSX.Element} El component del botó d'enrolament.
+ */
 const EnrollButton = () => {
   const queryClient = useQueryClient();
   const { apiClient, token } = useAuthStore(
@@ -68,6 +79,10 @@ const EnrollButton = () => {
   const [queryError, setQueryError] = useState<string | null>(null);
   const [showLikesDialog, setShowLikesDialog] = useState<boolean>(false);
 
+  /**
+   * Handler per enviar la sol·licitud d'enrolament com a entrenador.
+   * Mostra el diàleg d'interessos si té èxit.
+   */
   const handleSubmit = async () => {
     setIsLoading(true);
     setQueryError(null);
@@ -83,6 +98,7 @@ const EnrollButton = () => {
     }
     setIsLoading(false);
   };
+
   return (
     <>
       <Button
@@ -99,6 +115,7 @@ const EnrollButton = () => {
           {queryError}
         </Typography>
       )}
+      {/* Diàleg per seleccionar interessos després d'enrolar-se */}
       <LikesDialog
         open={showLikesDialog}
         onClose={() => {}}
