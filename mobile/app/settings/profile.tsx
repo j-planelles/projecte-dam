@@ -422,12 +422,14 @@ const DeleteAccountButton = () => {
     })),
   );
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [visible, setVisible] = useState<boolean>(false);
 
   // Handler per eliminar el compte de l'usuari
   const deleteAccountHandler = async () => {
     setQueryError(null);
+    setIsLoading(true);
     try {
       await apiClient.post("/auth/delete", undefined, {
         headers: { Authorization: `Bearer ${token}` },
@@ -442,6 +444,7 @@ const DeleteAccountButton = () => {
     } catch (error) {
       setQueryError(handleError(unknown));
     }
+    setIsLoading(false);
   };
 
   return (
@@ -466,8 +469,12 @@ const DeleteAccountButton = () => {
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setVisible(false)}>No</Button>
-            <Button onPress={deleteAccountHandler}>Yes</Button>
+            <Button onPress={() => setVisible(false)} disabled={isLoading}>
+              No
+            </Button>
+            <Button onPress={deleteAccountHandler} disabled={isLoading}>
+              Yes
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
