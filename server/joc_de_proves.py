@@ -70,27 +70,27 @@ DESCRIPCIONS_USUARIS = [
     "Expert en nutrició esportiva i plans personalitzats.",
     "Transforma el teu cos i la teva ment amb mi.",
     "Entrenaments funcionals per a totes les edats.",
-    "Més de 10 anys d’experiència en el món del fitness.",
+    "Més de 10 anys d'experiència en el món del fitness.",
     "Entrenador certificat en HIIT i cardio.",
     "Motivació, disciplina i resultats garantits.",
     "Entrenaments adaptats a cada nivell.",
     "Especialista en pèrdua de pes i definició muscular.",
     "Passió per ajudar-te a superar els teus límits.",
     "Entrenador de grups reduïts i sessions individuals.",
-    "T’acompanyo en el teu camí cap a una vida saludable.",
+    "T'acompanyo en el teu camí cap a una vida saludable.",
     "Entrenaments a domicili i online.",
     "Professional del fitness amb enfocament holístic.",
     "Entrenador de força, resistència i flexibilitat.",
-    "Plans d’entrenament personalitzats per a tu.",
+    "Plans d'entrenament personalitzats per a tu.",
     "Motivador i apassionat pel benestar físic.",
     "Entrenador de gimnàs i preparador físic.",
     "Especialista en recuperació de lesions esportives.",
     "Entrenaments per a millorar el teu rendiment esportiu.",
-    "T’ajudo a aconseguir la millor versió de tu mateix.",
+    "T'ajudo a aconseguir la millor versió de tu mateix.",
     "Entrenador de musculació i fitness general.",
     "Sessions dinàmiques i divertides per a tothom.",
     "Entrenador personal per a objectius específics.",
-    "M’agrada veure com els meus clients progressen.",
+    "M'agrada veure com els meus clients progressen.",
     "Entrenaments segurs i efectius per a adults i joves.",
     "Entrenador certificat en pilates i ioga.",
     "Passió pel fitness i la vida activa.",
@@ -104,7 +104,7 @@ DESCRIPCIONS_USUARIS = [
     "Ajudo a crear hàbits saludables i sostenibles.",
     "Entrenador de fitness per a totes les edats.",
     "Entrenaments per a preparar-te per a competicions.",
-    "Entrenador de gimnàs amb passió per l’esport.",
+    "Entrenador de gimnàs amb passió per l'esport.",
     "Especialista en entrenaments de resistència.",
     "Entrenador personal per a objectius de salut.",
     "Entrenaments adaptats a les teves necessitats.",
@@ -204,7 +204,7 @@ NOMS_RUTINES = [
     "Mobility for Runners",
     "Jump Rope Workout",
     "Sled Push & Pull",
-    "Farmer’s Walk",
+    "Farmer's Walk",
     "Battle Rope Session",
     "Medicine Ball Drills",
     "Sandbag Training",
@@ -353,7 +353,7 @@ def create_template(token, template_data):
     response = requests.post(
         f"{base_url}/user/templates", headers=headers, json=template_data
     )
-    if response.status_code == 200:
+    if response.status_code == 201:
         return response.json()
     return None
 
@@ -513,18 +513,19 @@ def main():
                     f"Usuari {username} registrat correctament amb UUID: {user_profile['uuid']}"
                 )
 
-                # Obtenir i establir interessos
+                # Obtenir i establir interessos de manera aleatòria
                 interests = get_interests(token)
                 if interests and len(interests) > 0:
-                    # Seleccionar el primer interès
-                    selected_interest_uuid = [interests[0]["uuid"]]
-                    if update_interests(token, selected_interest_uuid):
-                        # print(
-                        #     f"Interès '{interests[0]['name']}' establert per a {username}"
-                        # )
-                        pass
+                    # Seleccionar un nombre aleatori d'interessos (entre 1 i el total disponible)
+                    num_interests = random.randint(1, len(interests))
+                    selected_interests = random.sample(interests, num_interests)
+                    selected_interest_uuids = [interest["uuid"] for interest in selected_interests]
+                    
+                    if update_interests(token, selected_interest_uuids):
+                        interest_names = [interest["name"] for interest in selected_interests]
+                        print(f"Interessos establerts per a {username}: {', '.join(interest_names)}")
                     else:
-                        print(f"Error en establir l'interès per a {username}")
+                        print(f"Error en establir els interessos per a {username}")
             else:
                 print(f"Error en obtenir el token per a {username}")
         else:
