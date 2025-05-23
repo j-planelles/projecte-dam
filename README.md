@@ -117,10 +117,4 @@ pnpm install
 NO_STRIP=true pnpm tauri build
 ```
 
-Els fitxers de sortida es localitzaran al directori: `projecte-dam/desktop/src-tauri/target/release/bundle/`.ython.
-
-`pip install -r requirements.txt`
-
-Finalment, podem executar l'script `joc_de_proves.py`. Aquest rebrà com a argument la URL del servidor d'Ultra.
-
-`python3 joc_de_proves.py http://localhost:8002`
+Els fitxers de sortida es localitzaran al directori: `projecte-dam/desktop/src-tauri/target/release/bundle/`
